@@ -1,0 +1,3 @@
+[submodule "third-parties/ml-stable-diffusion"]
+	path = third-parties/ml-stable-diffusion
+	url = https://github.com/bladeart-ai/ml-stable-diffusion

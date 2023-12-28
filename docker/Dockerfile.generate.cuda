@@ -1,0 +1,24 @@
+FROM pytorch/pytorch:2.1.1-cuda12.1-cudnn8-devel
+# Pytorch官方并没有支持，但是它因为pin了版本，所以更容易保持稳定性
+
+WORKDIR /workdir
+
+COPY requirements/pip-requirements.txt /workdir/requirements/
+RUN pip3 install -r requirements/pip-requirements.txt
+
+COPY requirements/shared-requirements.txt /workdir/requirements/
+RUN pip3 install -r requirements/shared-requirements.txt
+
+COPY bladecreate /workdir/
+RUN pip3 install -e .
+
+COPY configs /workdir/configs/
+
+ENV GPU_PLATFORM=cuda
+ENV SETTINGS_FILE_FOR_DYNACONF='["configs/settings.yaml"]'
+ENV ENV_FOR_DYNACONF=test
+ENV HF_HOME=/tmp/hf_home
+
+EXPOSE 8081
+
+ENTRYPOINT ["uvicorn", "bladecreate.generate_app:app", "--host", "0.0.0.0", "--port", "8081"]

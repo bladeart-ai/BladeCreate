@@ -1,0 +1,5 @@
+[flake8]
+max-line-length = 100
+# required for compatibility with Black:
+extend-ignore = E203, E501, W293, W291, F841, F541
+exclude = .venv

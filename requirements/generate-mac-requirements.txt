@@ -1,0 +1,5 @@
+torch
+diffusers[torch]
+transformers
+
+-e third-parties/ml-stable-diffusion

@@ -1,0 +1,60 @@
+name: API Services Top Level CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+      - "staging/**"
+      - "releases/**"
+  pull_request:
+    branches:
+      - "main"
+
+jobs:
+  format-and-lint:
+    name: "Format and Lint"
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        working-directory: .
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Python
+        uses: actions/setup-python@v3
+        timeout-minutes: 5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            **/pip-requirements.txt
+            **/dev-requirements.txt
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r requirements/pip-requirements.txt
+          pip install -r requirements/dev-requirements.txt
+
+      - name: Format Python imports
+        run: |
+          isort --check-only $(git ls-files "*.py")
+
+      - name: Format Python
+        run: |
+          black --check $(git ls-files "*.py")
+
+      - name: Lint Python
+        run: |
+          flake8 $(git ls-files "*.py")
+
+  call-build:
+    name: "Build"
+    uses: ./.github/workflows/build-crud-service.yml
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
