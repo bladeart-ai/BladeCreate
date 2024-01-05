@@ -28,9 +28,7 @@ logger = logging.getLogger(__name__)
 logger.info("logger is configured!")
 
 
-router = APIRouter(
-    prefix="/api", dependencies=[Depends(get_db), Depends(get_osm)]
-)
+router = APIRouter(prefix="/api", dependencies=[Depends(get_db), Depends(get_osm)])
 
 
 @router.get("/projects/{user_id}/images", response_model=ImagesURLOrData)
@@ -118,9 +116,7 @@ async def get_project(
         for g in layer.generations:
             image_uuids.extend(g.image_uuids)
 
-    project.images = await get_image_data_or_url(
-        user_id, project_uuid, image_uuids, osm
-    )
+    project.images = await get_image_data_or_url(user_id, project_uuid, image_uuids, osm)
 
     return project
 

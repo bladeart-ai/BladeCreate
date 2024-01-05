@@ -1,6 +1,6 @@
 [project]
 name = "bladecreate"
-version = "0"
+version = "1"
 
 [build-system]
 requires = ["setuptools"]
@@ -9,11 +9,12 @@ requires = ["setuptools"]
 packages = ["bladecreate"]
 
 [tool.black]
-line-length = 79
-target-version = ['py38']
+line-length = 100
+target-version = ['py312']
 
 [tool.isort]
 profile = "black"
+py_version = 310
 known_first_party = ["bladecreate"] # see package configuration below
 
 [tool.pyright]

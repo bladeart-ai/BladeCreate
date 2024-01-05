@@ -41,4 +41,4 @@ jobs:
       - name: Run build
         run: pnpm build
       - name: "Run Prettier with project configuration"
-        run: pnpm run prettier:check:ci
+        run: pnpm prettier:check

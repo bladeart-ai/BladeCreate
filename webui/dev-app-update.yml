@@ -1,0 +1,3 @@
+provider: generic
+url: https://bladeart.ai/auto-updates
+updaterCacheDirName: bladecreate-updater

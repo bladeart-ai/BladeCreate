@@ -6,7 +6,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -25,10 +25,10 @@ const fakeModelDetail = {
     source: 'Civitai',
     imageURLs: [],
     civitaiURL: 'http://umm',
-    trainingID: null,
+    trainingID: null
   },
   modelVersionUIDs: ['8', '7', '8-inpainting', '7-inpainting'],
-  modelPresets: [],
+  modelPresets: []
 } as ModelDetail
 
 export function AddModelFromCivitaiModal() {
@@ -44,12 +44,12 @@ export function AddModelFromCivitaiModal() {
             设定Civitai模型的地址，点击检查可用按钮，最后点击确认提交。
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4 w-1000">
+        <div className="w-1000 grid gap-4 py-4">
           <div className="grid w-full gap-4">
             <Label htmlFor="civitaiURL">复制浏览器地址</Label>
             <Textarea
-              placeholder="https://civitai.com/models/4384?modelVersionId=128713"
               id="civitaiURL"
+              placeholder="https://civitai.com/models/4384?modelVersionId=128713"
             />
           </div>
           <ImportedModelDetails {...fakeModelDetail} />
@@ -71,11 +71,9 @@ export function AddModelFromFilesModal() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>上传模型文件</DialogTitle>
-          <DialogDescription>
-            上传模型文件，点击检查可用按钮，最后点击确认提交。
-          </DialogDescription>
+          <DialogDescription>上传模型文件，点击检查可用按钮，最后点击确认提交。</DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4 w-1000">
+        <div className="w-1000 grid gap-4 py-4">
           <div className="grid w-full gap-4">[占位：文件上传器]</div>
           <ImportedModelDetails {...fakeModelDetail} />
         </div>

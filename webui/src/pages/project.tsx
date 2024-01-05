@@ -14,7 +14,7 @@ import { SidePanelSwitch } from '@/components/side-panel-switch'
 import { GeneratePanel } from '@/components/generate-panel'
 
 function CanvasPanelResizeHandle() {
-  return <PanelResizeHandle className="w-1 h-full" />
+  return <PanelResizeHandle className="h-full w-1" />
 }
 
 export const ProjectPage = observer(() => {
@@ -33,20 +33,16 @@ export const ProjectPage = observer(() => {
   return (
     <ProjectContextProvider>
       <Toolbar />
-      <PanelGroup
-        autoSaveId="bladecreate"
-        direction="horizontal"
-        className="fixed pt-12"
-      >
+      <PanelGroup autoSaveId="bladecreate" className="fixed pt-12" direction="horizontal">
         <SidePanelSwitch />
         {cs.sidePanelSwitch == 'layers' && (
           <>
             <Panel
-              defaultSizePixels={300}
-              minSizePixels={200}
-              maxSizePixels={400}
               collapsible
+              defaultSizePixels={300}
               id="layerlistpanel"
+              maxSizePixels={400}
+              minSizePixels={200}
               order={1}
             >
               <LayerListPanel />
@@ -57,11 +53,11 @@ export const ProjectPage = observer(() => {
         {cs.sidePanelSwitch == 'generate' && (
           <>
             <Panel
-              defaultSizePixels={300}
-              minSizePixels={200}
-              maxSizePixels={400}
               collapsible
+              defaultSizePixels={300}
               id="generatepanel"
+              maxSizePixels={400}
+              minSizePixels={200}
               order={2}
             >
               <GeneratePanel />
@@ -75,9 +71,9 @@ export const ProjectPage = observer(() => {
         <CanvasPanelResizeHandle />
         <Panel
           defaultSizePixels={150}
-          minSizePixels={150}
-          maxSizePixels={300}
           id="layerresultpanel"
+          maxSizePixels={300}
+          minSizePixels={150}
           order={4}
         >
           <LayerResultPanel />

@@ -17,7 +17,7 @@ export const Toolbar = observer(() => {
   const onUploadingChange = action(
     (imageList: ImageListType, addUpdateIndex: number[] | undefined) => {
       // data for submit
-      addUpdateIndex?.forEach(i => {
+      addUpdateIndex?.forEach((i) => {
         let name = imageList[i].file?.name
         if (!name) {
           name = ''
@@ -39,27 +39,27 @@ export const Toolbar = observer(() => {
   }
 
   return (
-    <div className="fixed top-0 z-50 w-full h-12 gap-1 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 justify-start items-center inline-flex">
-      <div className="grow shrink basis-0 self-stretch flex justify-start items-center">
+    <div className="fixed top-0 z-50 inline-flex h-12 w-full items-center justify-start gap-1 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="flex shrink grow basis-0 items-center justify-start self-stretch">
         <NavBarLogo />
       </div>
       <ImageUploading
-        multiple
-        value={uploadImageBuffer}
-        onChange={onUploadingChange}
-        maxNumber={10}
         dataURLKey="data_url"
+        maxNumber={10}
+        multiple
+        onChange={onUploadingChange}
+        value={uploadImageBuffer}
       >
         {({ onImageUpload }) => (
           <div className="upload__image-wrapper">
-            <Button variant="ghost" size="icon" onClick={onImageUpload}>
+            <Button onClick={onImageUpload} size="icon" variant="ghost">
               <UploadIcon className="m-2.5" />
             </Button>
           </div>
         )}
       </ImageUploading>
-      <div className="grow shrink basis-0 self-stretch flex justify-end items-center">
-        <Button variant="ghost" size="icon" onClick={handleExport}>
+      <div className="flex shrink grow basis-0 items-center justify-end self-stretch">
+        <Button onClick={handleExport} size="icon" variant="ghost">
           <DownloadIcon className="m-2.5" />
         </Button>
         <TextSpan className="p-2" text={Math.floor(cs.scale * 100) + '%'} />

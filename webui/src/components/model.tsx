@@ -6,37 +6,32 @@ import { Toggle } from '@/components/ui/toggle'
 import { ModelDetail, ModelPreset, ModelSnapshot } from '../context/model'
 import { Badge } from '@/components/ui/badge'
 import { IconJarLogoIcon } from '@radix-ui/react-icons'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import civitaiIcon from '../../resources/civitai_icon.png?asset'
 
 export function ModelBadge(text: string) {
-  return <Badge className="w-fit h-6 gap-1 text-base">{text}</Badge>
+  return <Badge className="h-6 w-fit gap-1 text-base">{text}</Badge>
 }
 
 export function ModelSourceBadge(source: string, trainingUID: string | null) {
   {
     if (source == 'training') {
       return (
-        <Badge className="w-fit h-6 gap-1 text-base">
+        <Badge className="h-6 w-fit gap-1 text-base">
           <IconJarLogoIcon className="h-4" />
-          <div className="text-base">
-            {trainingUID == null ? '训练' : '训练 ' + trainingUID}
-          </div>
+          <div className="text-base">{trainingUID == null ? '训练' : '训练 ' + trainingUID}</div>
         </Badge>
       )
     } else if (source == 'civitai') {
       return (
-        <Badge className="w-fit h-6 gap-1 text-base">
-          <img className="CivitaiIcon h-4" src="/civitai_icon.png" />
+        <Badge className="h-6 w-fit gap-1 text-base">
+          <img className="CivitaiIcon h-4" src={civitaiIcon} />
           <div className="text-base">Civitai</div>
         </Badge>
       )
     } else {
       return (
-        <Badge className="w-fit h-6 gap-1 text-base">
+        <Badge className="h-6 w-fit gap-1 text-base">
           <div className="text-base">Unknown</div>
         </Badge>
       )
@@ -53,31 +48,31 @@ export function ImportedModelDetails(modelDetail: ModelDetail) {
       </div>
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="modelUsable">模型可用</Label>
-        <CheckCircle2Icon></CheckCircle2Icon>
+        <CheckCircle2Icon />
       </div>
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="modelName">模型名称</Label>
-        <Input id="modelName" value="" className="col-span-3" />
+        <Input className="col-span-3" id="modelName" value="" />
       </div>
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="modelVersion">模型版本</Label>
 
-        <div className="col-span-3 gap-2 inline-flex flex-wrap">
-          {modelDetail.modelVersionUIDs.map(versionUID =>
+        <div className="col-span-3 inline-flex flex-wrap gap-2">
+          {modelDetail.modelVersionUIDs.map((versionUID) =>
             modelDetail.modelSnapshot.versionUID == versionUID ? (
               <Toggle
-                variant="outline"
                 aria-label="Toggle italic"
+                defaultPressed
                 key={'importedModelDetails_' + versionUID}
-                defaultPressed={true}
+                variant="outline"
               >
                 {versionUID}
               </Toggle>
             ) : (
               <Toggle
-                variant="outline"
                 aria-label="Toggle italic"
                 key={'importedModelDetails_' + versionUID}
+                variant="outline"
               >
                 {versionUID}
               </Toggle>
@@ -104,13 +99,9 @@ export function ImportedModelDetails(modelDetail: ModelDetail) {
 export function DisplayModelDetails(modelSnapshot: ModelSnapshot) {
   return (
     <div className="grid w-full gap-4">
-      <h3 className="self-stretch text-black text-xl font-bold leading-10">
-        模型介绍
-      </h3>
+      <h3 className="self-stretch text-xl font-bold leading-10 text-black">模型介绍</h3>
       <p>{modelSnapshot.modelIntro}</p>
-      <h3 className="self-stretch text-black text-xl font-bold leading-10">
-        模型详情
-      </h3>
+      <h3 className="self-stretch text-xl font-bold leading-10 text-black">模型详情</h3>
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="modelType">创建时间</Label>
         <p>{modelSnapshot.createTime}</p>
@@ -133,18 +124,18 @@ export function DisplayModelDetails(modelSnapshot: ModelSnapshot) {
 
 export function ModelCard(modelSnapshot: ModelSnapshot) {
   return (
-    <div className="ModelCard w-72 h-96 rounded-lg shadow border border-1 gap-2 relative overflow-hidden">
+    <div className="ModelCard border-1 relative h-96 w-72 gap-2 overflow-hidden rounded-lg border shadow">
       <img
-        className="ProfileImg w-full h-full object-contain object-top hover:scale-110 absolute inset-x-0 top-0"
-        key={'modelCard-' + modelSnapshot.imageURLs[0]}
         alt={modelSnapshot.modelName}
+        className="ProfileImg absolute inset-x-0 top-0 h-full w-full object-contain object-top hover:scale-110"
+        key={'modelCard-' + modelSnapshot.imageURLs[0]}
         src={modelSnapshot.imageURLs[0]}
       />
-      <div className="BottomCard bg-neutral-600/80 self-stretch h-auto px-3.5 py-1 rounded-lg flex-col justify-end items-center gap-1 flex absolute inset-x-0 bottom-0">
-        <div className="ModelName self-stretch text-white text-base font-semibold">
+      <div className="BottomCard absolute inset-x-0 bottom-0 flex h-auto flex-col items-center justify-end gap-1 self-stretch rounded-lg bg-neutral-600/80 px-3.5 py-1">
+        <div className="ModelName self-stretch text-base font-semibold text-white">
           {modelSnapshot.modelName}
         </div>
-        <div className="Badges self-stretch justify-start items-start gap-1.5 inline-flex">
+        <div className="Badges inline-flex items-start justify-start gap-1.5 self-stretch">
           {ModelBadge(modelSnapshot.baseModel)}
           {ModelBadge(modelSnapshot.modelType)}
           {ModelSourceBadge(modelSnapshot.source, modelSnapshot.trainingID)}
@@ -156,9 +147,9 @@ export function ModelCard(modelSnapshot: ModelSnapshot) {
 
 export function ModelCoverCard(imageURL: string) {
   return (
-    <div className="ModelCoverCard w-72 h-96 rounded-lg shadown border border-1 gap-2 relative overflow-hidden">
+    <div className="ModelCoverCard shadown border-1 relative h-96 w-72 gap-2 overflow-hidden rounded-lg border">
       <img
-        className="ProfileImg w-auto h-auto object-contain absolute inset-x-0 top-0"
+        className="ProfileImg absolute inset-x-0 top-0 h-auto w-auto object-contain"
         key={'modelCoverCard-' + imageURL}
         src={imageURL}
       />
@@ -167,14 +158,14 @@ export function ModelCoverCard(imageURL: string) {
 }
 export function ModelPresetCard(modelPreset: ModelPreset) {
   return (
-    <div className="ModelPresetCard w-72 h-96 rounded-lg shadow border border-1 gap-2 relative overflow-hidden">
+    <div className="ModelPresetCard border-1 relative h-96 w-72 gap-2 overflow-hidden rounded-lg border shadow">
       <img
-        className="ProfileImg w-auto h-auto object-contain absolute inset-x-0 top-0"
+        className="ProfileImg absolute inset-x-0 top-0 h-auto w-auto object-contain"
         key={'modelPresetCard-' + modelPreset.imageURL}
         src={modelPreset.imageURL}
       />
-      <div className="BottomCard bg-neutral-600/80 self-stretch h-auto px-3.5 py-1 rounded-lg flex-col justify-end items-center gap-1 flex absolute inset-x-0 bottom-0">
-        <div className="ModelName self-stretch text-white text-base font-semibold">
+      <div className="BottomCard absolute inset-x-0 bottom-0 flex h-auto flex-col items-center justify-end gap-1 self-stretch rounded-lg bg-neutral-600/80 px-3.5 py-1">
+        <div className="ModelName self-stretch text-base font-semibold text-white">
           {modelPreset.presetUID}
         </div>
       </div>
@@ -187,7 +178,7 @@ export function ModelFilterPopover() {
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="ghost">
-          <FilterIcon></FilterIcon>
+          <FilterIcon />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto">
@@ -195,47 +186,29 @@ export function ModelFilterPopover() {
           <div className="grid gap-2">
             <Label htmlFor="modelType">模型类型</Label>
             <div className="grid grid-cols-2 items-center gap-2">
-              <Toggle
-                variant="outline"
-                aria-label="Toggle italic h-4 text-base"
-              >
+              <Toggle aria-label="Toggle italic h-4 text-base" variant="outline">
                 LoRA
               </Toggle>
-              <Toggle
-                variant="outline"
-                aria-label="Toggle italic h-4 text-base"
-              >
+              <Toggle aria-label="Toggle italic h-4 text-base" variant="outline">
                 大模型
               </Toggle>
             </div>
             <Label htmlFor="baseModel">基础模型</Label>
             <div className="grid grid-cols-2 items-center gap-2">
-              <Toggle
-                variant="outline"
-                aria-label="Toggle italic h-4 text-base"
-              >
+              <Toggle aria-label="Toggle italic h-4 text-base" variant="outline">
                 SD 1.5
               </Toggle>
-              <Toggle
-                variant="outline"
-                aria-label="Toggle italic h-4 w-auto text-base"
-              >
+              <Toggle aria-label="Toggle italic h-4 w-auto text-base" variant="outline">
                 SDXL 1.0
               </Toggle>
             </div>
             <Label htmlFor="modelSource">模型来源</Label>
             <div className="grid grid-cols-2 items-center gap-2">
-              <Toggle
-                variant="outline"
-                aria-label="Toggle italic h-4 text-base"
-              >
-                <img className="CivitaiIcon h-4" src="/civitai_icon.png" />
+              <Toggle aria-label="Toggle italic h-4 text-base" variant="outline">
+                <img className="CivitaiIcon h-4" src={civitaiIcon} />
                 Civitai
               </Toggle>
-              <Toggle
-                variant="outline"
-                aria-label="Toggle italic h-4 text-base"
-              >
+              <Toggle aria-label="Toggle italic h-4 text-base" variant="outline">
                 <IconJarLogoIcon className="h-4" />
                 训练
               </Toggle>

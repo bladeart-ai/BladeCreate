@@ -8,7 +8,7 @@ export default function ErrorPage() {
 
   if (isRouteErrorResponse(error)) {
     // error is type `ErrorResponse`
-    errorMessage = error.error?.message || error.statusText
+    errorMessage = error.statusText
   } else if (error instanceof Error) {
     errorMessage = error.message
   } else if (typeof error === 'string') {
@@ -21,9 +21,7 @@ export default function ErrorPage() {
 
   return (
     <Layout>
-      <h1 className="self-stretch text-black text-5xl font-extrabold leading-10">
-        错误！🙅
-      </h1>
+      <h1 className="self-stretch text-5xl font-extrabold leading-10 text-black">错误！🙅</h1>
       <p>抱歉，预料之外的错误发生了！</p>
       <p>
         <i>{errorMessage}</i>

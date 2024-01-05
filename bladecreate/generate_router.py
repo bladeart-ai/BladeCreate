@@ -2,6 +2,7 @@
 import io
 import logging
 import uuid
+from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from pydantic import TypeAdapter
@@ -13,12 +14,7 @@ from bladecreate.dependencies import get_db, get_osm, get_sdxl
 from bladecreate.logging_setup import logging_setup
 from bladecreate.models.sd import SDXL
 from bladecreate.osm import ObjectStorageManager
-from bladecreate.schemas import (
-    UUID,
-    GenerationCreate,
-    GenerationDone,
-    ImagesURLOrData,
-)
+from bladecreate.schemas import GenerationCreate, GenerationDone, ImagesURLOrData
 
 logging_setup()
 logger = logging.getLogger(__name__)
@@ -67,15 +63,12 @@ async def generate(
     output_number = g.params.output_number
     if g.params.seeds:
         seeds = [
-            g.params.seeds[ix] if ix < len(g.params.seeds) else -1
-            for ix in range(0, output_number)
+            g.params.seeds[ix] if ix < len(g.params.seeds) else -1 for ix in range(0, output_number)
         ]
     else:
         seeds = [-1] * output_number
 
-    images = sdxl.generate(
-        prompt, negative_prompt, height, width, output_number, seeds
-    )
+    images = sdxl.generate(prompt, negative_prompt, height, width, output_number, seeds)
     image_uuid_to_bytes = {}
     for img in images:
         with io.BytesIO() as bytes_io:
@@ -84,8 +77,7 @@ async def generate(
 
     # Step 3: upload results
     image_uuid_to_data = {
-        k: image_bytes_to_inline_data(image_uuid_to_bytes[k], "png")
-        for k in image_uuid_to_bytes
+        k: image_bytes_to_inline_data(image_uuid_to_bytes[k], "png") for k in image_uuid_to_bytes
     }
     osm.upload_objects_from_text(
         {

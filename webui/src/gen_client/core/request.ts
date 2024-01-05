@@ -3,12 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 import axios from 'axios'
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse,
-  AxiosInstance,
-} from 'axios'
+import type { AxiosError, AxiosRequestConfig, AxiosResponse, AxiosInstance } from 'axios'
 import FormData from 'form-data'
 
 import { ApiError } from './ApiError'
@@ -72,7 +67,7 @@ export const getQueryString = (params: Record<string, any>): string => {
   const process = (key: string, value: any) => {
     if (isDefined(value)) {
       if (Array.isArray(value)) {
-        value.forEach(v => {
+        value.forEach((v) => {
           process(key, v)
         })
       } else if (typeof value === 'object') {
@@ -115,9 +110,7 @@ const getUrl = (config: OpenAPIConfig, options: ApiRequestOptions): string => {
   return url
 }
 
-export const getFormData = (
-  options: ApiRequestOptions
-): FormData | undefined => {
+export const getFormData = (options: ApiRequestOptions): FormData | undefined => {
   if (options.formData) {
     const formData = new FormData()
 
@@ -133,7 +126,7 @@ export const getFormData = (
       .filter(([_, value]) => isDefined(value))
       .forEach(([key, value]) => {
         if (Array.isArray(value)) {
-          value.forEach(v => process(key, v))
+          value.forEach((v) => process(key, v))
         } else {
           process(key, value)
         }
@@ -165,20 +158,19 @@ export const getHeaders = async (
   const username = await resolve(options, config.USERNAME)
   const password = await resolve(options, config.PASSWORD)
   const additionalHeaders = await resolve(options, config.HEADERS)
-  const formHeaders =
-    (typeof formData?.getHeaders === 'function' && formData?.getHeaders()) || {}
+  const formHeaders = (typeof formData?.getHeaders === 'function' && formData?.getHeaders()) || {}
 
   const headers = Object.entries({
     Accept: 'application/json',
     ...additionalHeaders,
     ...options.headers,
-    ...formHeaders,
+    ...formHeaders
   })
     .filter(([_, value]) => isDefined(value))
     .reduce(
       (headers, [key, value]) => ({
         ...headers,
-        [key]: String(value),
+        [key]: String(value)
       }),
       {} as Record<string, string>
     )
@@ -232,7 +224,7 @@ export const sendRequest = async <T>(
     data: body ?? formData,
     method: options.method,
     withCredentials: config.WITH_CREDENTIALS,
-    cancelToken: source.token,
+    cancelToken: source.token
   }
 
   onCancel(() => source.cancel('The user aborted a request.'))
@@ -268,10 +260,7 @@ export const getResponseBody = (response: AxiosResponse<any>): any => {
   return undefined
 }
 
-export const catchErrorCodes = (
-  options: ApiRequestOptions,
-  result: ApiResult
-): void => {
+export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): void => {
   const errors: Record<number, string> = {
     400: 'Bad Request',
     401: 'Unauthorized',
@@ -280,7 +269,7 @@ export const catchErrorCodes = (
     500: 'Internal Server Error',
     502: 'Bad Gateway',
     503: 'Service Unavailable',
-    ...options.errors,
+    ...options.errors
   }
 
   const error = errors[result.status]
@@ -339,17 +328,14 @@ export const request = <T>(
           axiosClient
         )
         const responseBody = getResponseBody(response)
-        const responseHeader = getResponseHeader(
-          response,
-          options.responseHeader
-        )
+        const responseHeader = getResponseHeader(response, options.responseHeader)
 
         const result: ApiResult = {
           url,
           ok: isSuccess(response.status),
           status: response.status,
           statusText: response.statusText,
-          body: responseHeader ?? responseBody,
+          body: responseHeader ?? responseBody
         }
 
         catchErrorCodes(options, result)

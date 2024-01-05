@@ -7,7 +7,7 @@ import {
   FieldPath,
   FieldValues,
   FormProvider,
-  useFormContext,
+  useFormContext
 } from 'react-hook-form'
 
 import { cn } from '@/lib/utils'
@@ -17,21 +17,17 @@ const Form = FormProvider
 
 type FormFieldContextValue<
   TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 > = {
   name: TName
 }
 
-const FormFieldContext = React.createContext<FormFieldContextValue>(
-  {} as FormFieldContextValue
-)
+const FormFieldContext = React.createContext<FormFieldContextValue>({} as FormFieldContextValue)
 
-const FormField = <
+function FormField<
   TFieldValues extends FieldValues = FieldValues,
-  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
->({
-  ...props
-}: ControllerProps<TFieldValues, TName>) => {
+  TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
+>({ ...props }: ControllerProps<TFieldValues, TName>) {
   return (
     <FormFieldContext.Provider value={{ name: props.name }}>
       <Controller {...props} />
@@ -58,7 +54,7 @@ const useFormField = () => {
     formItemId: `${id}-form-item`,
     formDescriptionId: `${id}-form-item-description`,
     formMessageId: `${id}-form-item-message`,
-    ...fieldState,
+    ...fieldState
   }
 }
 
@@ -66,22 +62,19 @@ type FormItemContextValue = {
   id: string
 }
 
-const FormItemContext = React.createContext<FormItemContextValue>(
-  {} as FormItemContextValue
+const FormItemContext = React.createContext<FormItemContextValue>({} as FormItemContextValue)
+
+const FormItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, ...props }, ref) => {
+    const id = React.useId()
+
+    return (
+      <FormItemContext.Provider value={{ id }}>
+        <div className={cn('space-y-2', className)} ref={ref} {...props} />
+      </FormItemContext.Provider>
+    )
+  }
 )
-
-const FormItem = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => {
-  const id = React.useId()
-
-  return (
-    <FormItemContext.Provider value={{ id }}>
-      <div ref={ref} className={cn('space-y-2', className)} {...props} />
-    </FormItemContext.Provider>
-  )
-})
 FormItem.displayName = 'FormItem'
 
 const FormLabel = React.forwardRef<
@@ -92,9 +85,9 @@ const FormLabel = React.forwardRef<
 
   return (
     <Label
-      ref={ref}
       className={cn(error && 'text-destructive', className)}
       htmlFor={formItemId}
+      ref={ref}
       {...props}
     />
   )
@@ -109,14 +102,10 @@ const FormControl = React.forwardRef<
 
   return (
     <Slot
-      ref={ref}
-      id={formItemId}
-      aria-describedby={
-        !error
-          ? `${formDescriptionId}`
-          : `${formDescriptionId} ${formMessageId}`
-      }
+      aria-describedby={!error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`}
       aria-invalid={!!error}
+      id={formItemId}
+      ref={ref}
       {...props}
     />
   )
@@ -131,9 +120,9 @@ const FormDescription = React.forwardRef<
 
   return (
     <p
-      ref={ref}
-      id={formDescriptionId}
       className={cn('text-sm text-muted-foreground', className)}
+      id={formDescriptionId}
+      ref={ref}
       {...props}
     />
   )
@@ -153,9 +142,9 @@ const FormMessage = React.forwardRef<
 
   return (
     <p
-      ref={ref}
-      id={formMessageId}
       className={cn('text-sm font-medium text-destructive', className)}
+      id={formMessageId}
+      ref={ref}
       {...props}
     >
       {body}
@@ -172,5 +161,5 @@ export {
   FormControl,
   FormDescription,
   FormMessage,
-  FormField,
+  FormField
 }

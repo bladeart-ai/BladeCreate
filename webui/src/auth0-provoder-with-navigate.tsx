@@ -2,7 +2,7 @@ import { Auth0Provider, AppState } from '@auth0/auth0-react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { AUTH0_DOMAIN, AUTH0_CLIENT, DISABLE_AUTH } from './config'
 
-export const Auth0ProviderWithNavigate = (): JSX.Element | null => {
+export function Auth0ProviderWithNavigate(): JSX.Element | null {
   const navigate = useNavigate()
 
   if (DISABLE_AUTH) {
@@ -22,14 +22,14 @@ export const Auth0ProviderWithNavigate = (): JSX.Element | null => {
 
   return (
     <Auth0Provider
-      domain={domain}
-      clientId={clientId}
       authorizationParams={{
-        redirect_uri: window.location.origin + '/callback',
+        redirect_uri: window.location.origin + '/callback'
       }}
+      cacheLocation="localstorage"
+      clientId={clientId}
+      domain={domain}
       onRedirectCallback={onRedirectCallback}
       useRefreshTokens
-      cacheLocation="localstorage"
     >
       <Outlet />
     </Auth0Provider>

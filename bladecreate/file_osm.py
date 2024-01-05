@@ -21,9 +21,7 @@ class FileObjectStorageManager(ObjectStorageManager):
             raise Exception("Wrong directory key")
 
         res = set()
-        for dirpath, dirs, filenames in os.walk(
-            self.key_to_storage_path(dir_key)
-        ):
+        for dirpath, dirs, filenames in os.walk(self.key_to_storage_path(dir_key)):
             for dir in dirs:
                 parent_rel_path = self.storage_path_to_key(dirpath)
                 key = os.path.join(parent_rel_path, dir) + "/"

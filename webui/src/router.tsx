@@ -18,30 +18,30 @@ export const router = createBrowserRouter([
         children: [
           {
             index: true,
-            lazy: () => import('./pages/welcome'),
+            lazy: () => import('./pages/welcome')
           },
           {
             path: 'models',
-            lazy: () => import('./pages/models'),
+            lazy: () => import('./pages/models')
           },
           {
             path: 'models/:modelUID',
-            lazy: () => import('./pages/model-detail'),
+            lazy: () => import('./pages/model-detail')
           },
           {
             path: 'models/:modelUID/:versionUID',
-            lazy: () => import('./pages/model-detail'),
+            lazy: () => import('./pages/model-detail')
           },
           {
             path: 'projects',
-            lazy: () => import('./pages/projects'),
+            lazy: () => import('./pages/projects')
           },
           {
             path: 'projects/:projectUUID',
-            lazy: () => import('./pages/project'),
-          },
-        ],
-      },
-    ],
-  },
+            lazy: () => import('./pages/project')
+          }
+        ]
+      }
+    ]
+  }
 ])

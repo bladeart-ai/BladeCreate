@@ -2,19 +2,12 @@ import { cn } from '@/lib/utils'
 
 export function TextSpan({
   className = '',
-  text,
+  text
 }: {
-  className?: string
-  text: string
+  readonly className?: string
+  readonly text: string
 }) {
   return (
-    <p
-      className={cn(
-        'truncate text-black text-sm font-medium leading-tight',
-        className
-      )}
-    >
-      {text}
-    </p>
+    <p className={cn('truncate text-black text-sm font-medium leading-tight', className)}>{text}</p>
   )
 }

@@ -29,9 +29,7 @@ def test_folder_key(test_id):
 
 @pytest.fixture
 def local_folder_path() -> str:
-    cur_file_dir = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "fixture_files"
-    )
+    cur_file_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixture_files")
     return cur_file_dir
 
 

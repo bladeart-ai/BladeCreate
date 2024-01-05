@@ -16,11 +16,7 @@ logging_setup()
 logger = logging.getLogger(__name__)
 logger.info("logger is configured!")
 
-connect_args = (
-    {"check_same_thread": False}
-    if SQLALCHEMY_DATABASE_URL.startswith("sqlite")
-    else {}
-)
+connect_args = {"check_same_thread": False} if SQLALCHEMY_DATABASE_URL.startswith("sqlite") else {}
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base.metadata.create_all(bind=engine)
@@ -40,9 +36,7 @@ def select_projects_metadata(
             )
         ).all()
     else:
-        db_obj = db.scalars(
-            select(Project).where(Project.user_id == user_id)
-        ).all()
+        db_obj = db.scalars(select(Project).where(Project.user_id == user_id)).all()
     return TypeAdapter(list[schemas.ProjectMetadata]).validate_python(db_obj)
 
 
@@ -204,9 +198,7 @@ def update_project_layer(
     return TypeAdapter(schemas.Layer).validate_python(db_obj)
 
 
-def delete_layer(
-    db: Session, user_id: str, project_uuid: UUID, layer_uuid: UUID
-) -> UUID:
+def delete_layer(db: Session, user_id: str, project_uuid: UUID, layer_uuid: UUID) -> UUID:
     db_proj = db.scalars(
         select(Project).where(
             and_(

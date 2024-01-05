@@ -12,7 +12,7 @@ configure({
   computedRequiresReaction: true,
   reactionRequiresObservable: true,
   observableRequiresReaction: true,
-  disableErrorBoundaries: true,
+  disableErrorBoundaries: true
 })
 
 createRoot(document.getElementById('root')!).render(

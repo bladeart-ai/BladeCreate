@@ -9,11 +9,7 @@ export interface AuthContextType {
 
 export const AuthContext = createContext<AuthContextType | null>(null)
 
-export function AuthContextProvider({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export function AuthContextProvider({ children }: { readonly children: React.ReactNode }) {
   let { user } = useAuth0()
 
   if (DISABLE_AUTH) {
@@ -21,13 +17,11 @@ export function AuthContextProvider({
   }
 
   if (!user || !user.sub)
-    throw new Error(
-      "You are already auth-ed but user is not retrievable. (This shouldn't happen.)"
-    )
+    throw new Error("You are already auth-ed but user is not retrievable. (This shouldn't happen.)")
 
   const ctx: AuthContextType = {
     user: user,
-    userUID: user.sub,
+    userUID: user.sub
   }
 
   return <AuthContext.Provider value={ctx}>{children}</AuthContext.Provider>

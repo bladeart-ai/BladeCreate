@@ -39,9 +39,7 @@ class User(Base):
 class Project(Base):
     __tablename__ = "projects"
 
-    uuid: Mapped[UUID] = mapped_column(
-        primary_key=True, index=True, default=uuid.uuid4
-    )
+    uuid: Mapped[UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
 
     name: Mapped[str] = mapped_column(String(128))
@@ -54,13 +52,9 @@ class Project(Base):
 class Layer(Base):
     __tablename__ = "layers"
 
-    uuid: Mapped[UUID] = mapped_column(
-        primary_key=True, index=True, default=uuid.uuid4
-    )
+    uuid: Mapped[UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
-    project_uuid: Mapped[UUID] = mapped_column(
-        ForeignKey("projects.uuid"), index=True
-    )
+    project_uuid: Mapped[UUID] = mapped_column(ForeignKey("projects.uuid"), index=True)
 
     name: Mapped[str] = mapped_column(String(128))
     x: Mapped[Optional[float]]
@@ -80,13 +74,9 @@ class Layer(Base):
 class Generation(Base):
     __tablename__ = "generations"
 
-    uuid: Mapped[UUID] = mapped_column(
-        primary_key=True, index=True, default=uuid.uuid4
-    )
+    uuid: Mapped[UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
-    project_uuid: Mapped[UUID] = mapped_column(
-        ForeignKey("projects.uuid"), index=True
-    )
+    project_uuid: Mapped[UUID] = mapped_column(ForeignKey("projects.uuid"), index=True)
     layer_uuid: Mapped[UUID] = mapped_column(ForeignKey("layers.uuid"))
     layer: Mapped["Layer"] = relationship(back_populates="generations")
 

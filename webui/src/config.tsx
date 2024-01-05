@@ -5,7 +5,7 @@ export const AUTH0_DOMAIN = import.meta.env.VITE_AUTH0_DOMAIN
 export const AUTH0_CLIENT = import.meta.env.VITE_AUTH0_CLIENT_ID
 
 export const TEST_USER = {
-  sub: 'test_user',
+  sub: 'test_user'
 }
 
 const API_SERVICE_URL = import.meta.env.VITE_API_SERVICE_URL

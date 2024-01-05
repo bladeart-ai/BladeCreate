@@ -6,7 +6,7 @@ import {
   Generation,
   DefaultService,
   Layer,
-  LayerCreate,
+  LayerCreate
 } from '@/gen_client'
 import { action, makeAutoObservable } from 'mobx'
 import { User } from '@auth0/auth0-react'
@@ -53,13 +53,13 @@ class ProjectStore {
   }
 
   get toDisplay() {
-    return this.layerOrder.map(layerUUID => this.layers[layerUUID])
+    return this.layerOrder.map((layerUUID) => this.layers[layerUUID])
   }
 
   get toDisplayReversed() {
     return this.layerOrder
       .map((_, index, array) => array[array.length - 1 - index])
-      .map(layerUUID => this.layers[layerUUID])
+      .map((layerUUID) => this.layers[layerUUID])
   }
 
   get fetching() {
@@ -80,7 +80,7 @@ class ProjectStore {
     this.projectUUID = projectUUID
 
     DefaultService.getProject(this.userID, projectUUID).then(
-      action('fetchProjectSuccess', project => {
+      action('fetchProjectSuccess', (project) => {
         document.title = project.name
         this.project = project
         this.layerOrder = project.layers_order || []
@@ -90,12 +90,12 @@ class ProjectStore {
 
         if (project.images) {
           Promise.allSettled(
-            Object.keys(project.images.urls).map(image_uuid => {
+            Object.keys(project.images.urls).map((image_uuid) => {
               const url = project.images?.urls[image_uuid] || ''
               return fetch(url)
-                .then(val => val.text())
+                .then((val) => val.text())
                 .then(
-                  action(val => {
+                  action((val) => {
                     this.image_data[url] = val
                   })
                 )
@@ -104,13 +104,13 @@ class ProjectStore {
             action('fetchImagesSuccess', () => {
               this.fetchingImages = false
             }),
-            action('fetchImagesError', error => {
+            action('fetchImagesError', (error) => {
               console.error('fetch error', error)
             })
           )
         }
       }),
-      action('fetchProjectError', error => {
+      action('fetchProjectError', (error) => {
         console.error('fetchProjectError', error)
       })
     )
@@ -123,10 +123,10 @@ class ProjectStore {
       x: cs.props.xPadding,
       y: cs.props.yPadding,
       rotation: 0,
-      image_data: imageData,
+      image_data: imageData
     } as LayerCreate)
       .then(
-        action(res => {
+        action((res) => {
           this.layers[res.uuid] = res
           this.image_data[res.uuid] = imageData
           this.layerOrder.unshift(res.uuid)
@@ -141,9 +141,9 @@ class ProjectStore {
     const callGenerate = action((outputLayerUUID: string) => {
       return DefaultService.generate(this.userID, this.projectUUID, {
         output_layer_uuid: outputLayerUUID,
-        params: params,
+        params: params
       }).then(
-        action(val => {
+        action((val) => {
           if (val.images) {
             this.image_data = { ...this.image_data, ...val.images.data }
           }
@@ -164,11 +164,11 @@ class ProjectStore {
       outputLayerUUID = uuidv4()
       const newLayer = {
         uuid: outputLayerUUID,
-        name: 'Generation',
+        name: 'Generation'
       }
       DefaultService.createProjectLayer(this.userID, this.projectUUID, newLayer)
         .then(
-          action(val => {
+          action((val) => {
             this.layers[val.uuid] = newLayer
             this.layerOrder.unshift(val.uuid)
           })
@@ -186,12 +186,9 @@ class ProjectStore {
 
   updateLayerImageUUID(layerUUID: string, imageUUID: string) {
     this.lockUI()
-    DefaultService.updateProjectLayer(
-      this.userID,
-      this.projectUUID,
-      layerUUID,
-      { image_uuid: imageUUID }
-    )
+    DefaultService.updateProjectLayer(this.userID, this.projectUUID, layerUUID, {
+      image_uuid: imageUUID
+    })
       .then(
         action(() => {
           this.layers[layerUUID].image_uuid = imageUUID
@@ -213,7 +210,7 @@ class ProjectStore {
     this.lockUI()
 
     Promise.allSettled(
-      transformProps.map(l => {
+      transformProps.map((l) => {
         const newLayer = { ...this.layers[l.layerUUID] }
         if (l.x) newLayer.x = l.x
         if (l.y) newLayer.y = l.y
@@ -229,7 +226,7 @@ class ProjectStore {
           l.layerUUID,
           newLayer
         ).then(
-          action(val => {
+          action((val) => {
             this.layers[l.layerUUID] = val
           })
         )
@@ -249,7 +246,7 @@ class ProjectStore {
     newLayerOrder.splice(endIndex, 0, removed)
 
     DefaultService.updateProject(this.userID, this.projectUUID, {
-      layers_order: newLayerOrder,
+      layers_order: newLayerOrder
     })
       .then(() => {
         this.layerOrder = newLayerOrder
@@ -258,32 +255,28 @@ class ProjectStore {
   }
 
   deleteLayer(layerUUID: string) {
-    const found = this.layerOrder.findIndex(uuid => uuid == layerUUID)
+    const found = this.layerOrder.findIndex((uuid) => uuid == layerUUID)
     if (found == -1) return
 
     this.lockUI()
 
     this.layerOrder.splice(found, 1)
     delete this.layers[layerUUID]
-    cs.setSelectedIDs(cs.selectedIDs.filter(uuid => uuid !== layerUUID))
+    cs.setSelectedIDs(cs.selectedIDs.filter((uuid) => uuid !== layerUUID))
 
-    DefaultService.deleteLayer(
-      this.userID,
-      this.projectUUID,
-      layerUUID
-    ).finally(action(() => this.unlockUI()))
+    DefaultService.deleteLayer(this.userID, this.projectUUID, layerUUID).finally(
+      action(() => this.unlockUI())
+    )
   }
 
-  exportLayersToDataURL(
-    imageLayerRef: React.MutableRefObject<Konva.Layer | null>
-  ) {
+  exportLayersToDataURL(imageLayerRef: React.MutableRefObject<Konva.Layer | null>) {
     const url = imageLayerRef.current?.toDataURL({
       mimeType: 'image/png',
       x: cs.props.xPadding * cs.scale,
       y: cs.props.yPadding * cs.scale,
       width: cs.stageProps.workAreaWidth * cs.scale,
       height: cs.stageProps.workAreaHeight * cs.scale,
-      pixelRatio: 1 / cs.scale,
+      pixelRatio: 1 / cs.scale
     }) as string
     return url
   }
@@ -309,7 +302,7 @@ class CanvasStore {
       yPadding: 200,
       scaleStep: 1.04,
       maxScale: 2,
-      minScale: 0.5,
+      minScale: 0.5
     }
     this.ref = createRef<Konva.Layer>()
     this.trRef = createRef<Konva.Transformer>()
@@ -333,7 +326,7 @@ class CanvasStore {
       workAreaY: this.props.yPadding,
       scaleStep: this.props.scaleStep,
       maxScale: this.props.maxScale,
-      minScale: this.props.minScale,
+      minScale: this.props.minScale
     }
   }
   setScale(scale: number) {

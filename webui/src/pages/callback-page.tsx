@@ -9,10 +9,8 @@ export const CallbackPage: React.FC = () => {
   if (error) {
     return (
       <Layout>
-        <div className="content-layout">
-          <h1 id="page-title" className="content__title">
-            Error
-          </h1>
+        <div>
+          <h1 id="page-title">Error</h1>
           <div>
             <p id="page-description">
               <span>{error.message}</span>

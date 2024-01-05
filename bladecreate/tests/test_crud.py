@@ -17,9 +17,7 @@ def test_health_check(client: TestClient):
     assert resp.status_code == 200
 
 
-def test_projects_metadata(
-    client: TestClient, user_id: str, local_file_text: str
-):
+def test_projects_metadata(client: TestClient, user_id: str, local_file_text: str):
     # get projects metadata
     resp = client.get(f"/api/projects/{user_id}")
     assert resp.status_code == 200
@@ -59,9 +57,7 @@ def test_projects_metadata(
     assert new_project_get["name"] == updated_project["name"]
 
 
-def test_project_layers(
-    client: TestClient, user_id: str, local_file_text: str
-):
+def test_project_layers(client: TestClient, user_id: str, local_file_text: str):
     # create project
     new_project = {"name": "test_project_layers new"}
     resp = client.post(f"/api/projects/{user_id}", json=new_project)
@@ -113,23 +109,15 @@ def test_project_layers(
         layer2_uuid,
         layer1_uuid,
     ]
-    compare_layer_with_input(
-        project_layers["layers"][layer1_uuid], layer1_input
-    )
-    compare_layer_with_input(
-        project_layers["layers"][layer2_uuid], layer2_input
-    )
+    compare_layer_with_input(project_layers["layers"][layer1_uuid], layer1_input)
+    compare_layer_with_input(project_layers["layers"][layer2_uuid], layer2_input)
 
     # download from layer url and validate image_data
     if project_layers["layers"][layer1_uuid]["image_url"]:
-        resp = request.urlopen(
-            project_layers["layers"][layer1_uuid]["image_url"]
-        )
+        resp = request.urlopen(project_layers["layers"][layer1_uuid]["image_url"])
         data = resp.read().decode()
         assert data == local_file_text
-        resp = request.urlopen(
-            project_layers["layers"][layer2_uuid]["image_url"]
-        )
+        resp = request.urlopen(project_layers["layers"][layer2_uuid]["image_url"])
         data = resp.read().decode()
         assert data == local_file_text
     else:
@@ -153,12 +141,8 @@ def test_project_layers(
         layer1_uuid,
         layer2_uuid,
     ]
-    compare_layer_with_input(
-        project_layers["layers"][layer1_uuid], layer1_input
-    )
-    compare_layer_with_input(
-        project_layers["layers"][layer2_uuid], layer2_input
-    )
+    compare_layer_with_input(project_layers["layers"][layer1_uuid], layer1_input)
+    compare_layer_with_input(project_layers["layers"][layer2_uuid], layer2_input)
 
     # update project layer
     layer1_updated_input = {
@@ -180,12 +164,8 @@ def test_project_layers(
         layer1_uuid,
         layer2_uuid,
     ]
-    compare_layer_with_input(
-        project_layers["layers"][layer1_uuid], layer1_updated_input
-    )
-    compare_layer_with_input(
-        project_layers["layers"][layer2_uuid], layer2_input
-    )
+    compare_layer_with_input(project_layers["layers"][layer1_uuid], layer1_updated_input)
+    compare_layer_with_input(project_layers["layers"][layer2_uuid], layer2_input)
 
     # delete layer
     resp = client.delete(
@@ -198,6 +178,4 @@ def test_project_layers(
     assert resp.status_code == 200
     project_layers = resp.json()
     assert project_layers["layers_order"] == [layer1_uuid]
-    compare_layer_with_input(
-        project_layers["layers"][layer1_uuid], layer1_updated_input
-    )
+    compare_layer_with_input(project_layers["layers"][layer1_uuid], layer1_updated_input)

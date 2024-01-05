@@ -5,20 +5,14 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from '@/components/ui/form'
 import { Textarea } from '@/components/ui/textarea'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { Input } from './ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Slider } from './ui/slider'
 import { TextSpan } from './text'
 import { HWRatioEnum } from '@/gen_client'
@@ -32,7 +26,7 @@ export const GeneratePanel = observer(() => {
     negative_prompt: z.string(),
     h_w_ratio: z.string(),
     output_num: z.number().int().positive().lte(8),
-    seeds: z.string(),
+    seeds: z.string()
   })
   const form = useForm({
     resolver: zodResolver(generateFormSchema),
@@ -41,8 +35,8 @@ export const GeneratePanel = observer(() => {
       negative_prompt: '',
       h_w_ratio: '4:3',
       output_num: 4,
-      seeds: '-1',
-    },
+      seeds: '-1'
+    }
   })
 
   const onSubmit = action((values: z.infer<typeof generateFormSchema>) => {
@@ -51,9 +45,7 @@ export const GeneratePanel = observer(() => {
     //   2. or one layer is selected but is not created from generation.
     let outputLayerUUID: string | null = null
     if (cs.selectedIDs.length === 1 && ps.layers) {
-      const found = Object.values(ps.layers).find(
-        item => item.uuid === cs.selectedIDs[0]
-      )
+      const found = Object.values(ps.layers).find((item) => item.uuid === cs.selectedIDs[0])
       if (found?.generations && found?.generations.length > 0) {
         outputLayerUUID = found.uuid
       }
@@ -63,14 +55,14 @@ export const GeneratePanel = observer(() => {
       negative_prompt: values.negative_prompt,
       h_w_ratio: values.h_w_ratio as HWRatioEnum,
       output_number: values.output_num,
-      seeds: values.seeds.split(',').map(Number),
+      seeds: values.seeds.split(',').map(Number)
     })
   })
 
   return (
-    <div className="w-full h-full mt-2 inline-flex flex-col">
+    <div className="mt-2 inline-flex h-full w-full flex-col">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+        <form className="space-y-2" onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
             control={form.control}
             name="prompt"
@@ -103,10 +95,7 @@ export const GeneratePanel = observer(() => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="pl-2">比例</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select defaultValue={field.value} onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="比例" />
@@ -130,16 +119,13 @@ export const GeneratePanel = observer(() => {
                 <FormLabel className="pl-2">张数</FormLabel>
                 <FormControl>
                   <div className="flex flex-row">
-                    <TextSpan
-                      className="ml-3 mr-0 w-[10%]"
-                      text={field.value.toString()}
-                    />
+                    <TextSpan className="ml-3 mr-0 w-[10%]" text={field.value.toString()} />
                     <Slider
+                      className="w-[90%]"
                       defaultValue={[4]}
                       max={8}
+                      onValueChange={(val) => field.onChange(val[0])}
                       step={1}
-                      onValueChange={val => field.onChange(val[0])}
-                      className="w-[90%]"
                     />
                   </div>
                 </FormControl>
@@ -157,7 +143,7 @@ export const GeneratePanel = observer(() => {
                   <Input
                     type="string"
                     {...field}
-                    onChange={event => field.onChange(+event.target.value)}
+                    onChange={(event) => field.onChange(+event.target.value)}
                     placeholder="种子"
                   />
                 </FormControl>

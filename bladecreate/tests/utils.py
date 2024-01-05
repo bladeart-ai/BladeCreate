@@ -1,6 +1,4 @@
-def compare_layer_with_input(
-    layer_output: dict[str, any], layer_input: dict[str, any]
-):
+def compare_layer_with_input(layer_output: dict[str, any], layer_input: dict[str, any]):
     l1, l2 = layer_output.copy(), layer_input.copy()
     l1.pop("image_url", None)
     l1.pop("image_data", None)

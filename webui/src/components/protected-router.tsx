@@ -4,7 +4,7 @@ import { LoaderDiv } from './page-loader'
 import { DISABLE_AUTH } from '@/config'
 import { AuthContextProvider } from '@/context/auth-context'
 
-export const ProtectedRoute = () => {
+export function ProtectedRoute() {
   const location = useLocation()
   const { isAuthenticated, isLoading } = useAuth0()
 
@@ -21,7 +21,7 @@ export const ProtectedRoute = () => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace state={{ from: location }} />
+    return <Navigate replace state={{ from: location }} to="/login" />
   }
 
   return (

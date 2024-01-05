@@ -7,7 +7,7 @@ import {
   DropdownMenu,
   DropdownMenuItem,
   DropdownMenuContent,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { cs, ps } from '@/store/project-store'
 import { observer, Observer } from 'mobx-react-lite'
@@ -15,7 +15,7 @@ import { action } from 'mobx'
 import { Layer } from '@/gen_client'
 import { color } from './color-utils'
 
-export const LayerListPanel = () => {
+export function LayerListPanel() {
   // References:
   // 1. Drag-and-drop list source code: https://github.com/hello-pangea/dnd
   // 1. Drag-and-drop list doc: https://github.com/atlassian/react-beautiful-dnd
@@ -30,20 +30,20 @@ export const LayerListPanel = () => {
     ps.moveLayer(result.source.index, result.destination.index)
   }
 
-  const LayerItemDropdownMenu = ({ layer }: { layer: Layer }) => {
+  function LayerItemDropdownMenu({ layer }: { readonly layer: Layer }) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
+          <Button size="icon" variant="ghost">
             <DotsVerticalIcon className="m-2.5" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-28">
           <DropdownMenuItem
+            className="py-0"
             onClick={action(() => {
               ps.deleteLayer(layer.uuid)
             })}
-            className="py-0"
           >
             <TrashIcon className="m-2.5" />
             <TextSpan text="删除" />
@@ -54,7 +54,7 @@ export const LayerListPanel = () => {
   }
 
   const LayerItem = observer(
-    ({ layer, dragging }: { layer: Layer; dragging: boolean }) => {
+    ({ layer, dragging }: { layer: Layer; readonly dragging: boolean }) => {
       const bgcolor = color(cs.selectedIDs.includes(layer.uuid), dragging)
 
       return (
@@ -63,13 +63,13 @@ export const LayerListPanel = () => {
             'w-full h-auto pl-2 flex items-center rounded-lg border transition-colors',
             bgcolor
           )}
-          onClick={action(evt => {
+          onClick={action((evt) => {
             const metaPressed = evt.shiftKey || evt.ctrlKey || evt.metaKey
             cs.selectLayer(layer.uuid, metaPressed)
           })}
         >
           <TextSpan text={layer.name || ''} />
-          <div className="grow shrink self-stretch" />
+          <div className="shrink grow self-stretch" />
           <LayerItemDropdownMenu layer={layer} />
         </div>
       )
@@ -77,12 +77,8 @@ export const LayerListPanel = () => {
   )
 
   const DraggableLayerItem = observer(
-    ({ layer, index }: { layer: Layer; index: number }) => (
-      <Draggable
-        key={'layer_' + layer.uuid}
-        draggableId={'layer_' + layer.uuid}
-        index={index}
-      >
+    ({ layer, index }: { readonly layer: Layer; readonly index: number }) => (
+      <Draggable draggableId={'layer_' + layer.uuid} index={index} key={'layer_' + layer.uuid}>
         {(provided, snapshot) => (
           <div
             ref={provided.innerRef}
@@ -91,10 +87,10 @@ export const LayerListPanel = () => {
             style={{
               // This is to fix the position of a draggable when it is being dragged because of the side panel is "fixed" positioned
               marginTop: snapshot.isDragging ? 0 : 0,
-              ...provided.draggableProps.style,
+              ...provided.draggableProps.style
             }}
           >
-            <LayerItem layer={layer} dragging={snapshot.isDragging} />
+            <LayerItem dragging={snapshot.isDragging} layer={layer} />
           </div>
         )}
       </Draggable>
@@ -102,10 +98,10 @@ export const LayerListPanel = () => {
   )
 
   return (
-    <div className="w-full h-full inline-flex flex-col">
-      <div className="w-full h-12 pl-2 self-stretch justify start items-center inline-flex">
+    <div className="inline-flex h-full w-full flex-col">
+      <div className="justify start inline-flex h-12 w-full items-center self-stretch pl-2">
         <TextSpan text="所有图层" />
-        <div className="grow shrink basis-0 self-stretch"></div>
+        <div className="shrink grow basis-0 self-stretch" />
       </div>
 
       <div className="relative overflow-y-scroll">
@@ -116,14 +112,14 @@ export const LayerListPanel = () => {
                 {() => (
                   <div
                     {...provided.droppableProps}
-                    ref={provided.innerRef}
                     className={snapshot.isDraggingOver ? 'bg-pink-100/90' : ''}
+                    ref={provided.innerRef}
                   >
                     {ps.toDisplay.map((layerSnapshot, index) => (
                       <DraggableLayerItem
+                        index={index}
                         key={'DraggableLayerItem-' + layerSnapshot.uuid}
                         layer={layerSnapshot}
-                        index={index}
                       />
                     ))}
                     {provided.placeholder}

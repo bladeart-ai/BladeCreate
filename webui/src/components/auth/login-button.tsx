@@ -8,17 +8,17 @@ export const LoginButton: React.FC = () => {
   const handleLogin = async () => {
     await loginWithRedirect({
       appState: {
-        returnTo: '/',
+        returnTo: '/'
       },
       authorizationParams: {
-        prompt: 'login',
-      },
+        prompt: 'login'
+      }
     })
   }
 
   return (
     <Button className="h-12 text-base" onClick={handleLogin}>
-      <div className="relative -top-[1px]">登陆</div>
+      <div className="relative top-[1px]">登陆</div>
     </Button>
   )
 }

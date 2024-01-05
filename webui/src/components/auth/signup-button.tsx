@@ -8,22 +8,18 @@ export const SignupButton: React.FC = () => {
   const handleSignUp = async () => {
     await loginWithRedirect({
       appState: {
-        returnTo: '/',
+        returnTo: '/'
       },
       authorizationParams: {
         prompt: 'login',
-        screen_hint: 'signup',
-      },
+        screen_hint: 'signup'
+      }
     })
   }
 
   return (
-    <Button
-      className="h-12 text-base"
-      variant="secondary"
-      onClick={handleSignUp}
-    >
-      <div className="relative -top-[1px]">注册</div>
+    <Button className="h-12 text-base" onClick={handleSignUp} variant="secondary">
+      <div className="relative top-[1px]">注册</div>
     </Button>
   )
 }

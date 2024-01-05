@@ -1,12 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 import { cs, ps } from '@/store/project-store'
-import {
-  Layer as LayerComp,
-  Rect,
-  Stage,
-  Transformer,
-  Image,
-} from 'react-konva'
+import { Layer as LayerComp, Rect, Stage, Transformer, Image } from 'react-konva'
 import Konva from 'konva'
 import useImage from 'use-image'
 import { Vector2d } from 'konva/lib/types'
@@ -37,12 +31,7 @@ const TransformableImage = observer(({ layer }: { layer: Layer }) => {
   }
 
   // Initialize the image size
-  if (
-    !layer.width &&
-    !layer.height &&
-    image?.naturalWidth &&
-    image?.naturalHeight
-  ) {
+  if (!layer.width && !layer.height && image?.naturalWidth && image?.naturalHeight) {
     width = image?.naturalWidth
     height = image?.naturalHeight
 
@@ -52,10 +41,7 @@ const TransformableImage = observer(({ layer }: { layer: Layer }) => {
       resizeScale = cs.stageProps.workAreaWidth / image.naturalWidth
     }
     if (image.naturalHeight > cs.stageProps.workAreaHeight) {
-      resizeScale = Math.min(
-        resizeScale,
-        cs.stageProps.workAreaHeight / image.naturalHeight
-      )
+      resizeScale = Math.min(resizeScale, cs.stageProps.workAreaHeight / image.naturalHeight)
     }
 
     width = width * resizeScale
@@ -64,15 +50,11 @@ const TransformableImage = observer(({ layer }: { layer: Layer }) => {
 
   return (
     <Image
+      draggable
+      height={height || undefined}
       id={'image_' + layer.uuid}
       image={image}
-      x={x || undefined}
-      y={y || undefined}
-      width={width || undefined}
-      height={height || undefined}
-      rotation={layer.rotation || undefined}
-      draggable
-      onDragEnd={action(e => {
+      onDragEnd={action((e) => {
         ps.transformLayers([
           {
             layerUUID: layer.uuid,
@@ -80,10 +62,14 @@ const TransformableImage = observer(({ layer }: { layer: Layer }) => {
             y: e.target.y(),
             width: null,
             height: null,
-            rotation: null,
-          },
+            rotation: null
+          }
         ])
       })}
+      rotation={layer.rotation || undefined}
+      width={width || undefined}
+      x={x || undefined}
+      y={y || undefined}
     />
   )
 })
@@ -109,7 +95,7 @@ export const Canvas = observer(() => {
     x1: 0,
     y1: 0,
     x2: 0,
-    y2: 0,
+    y2: 0
   })
 
   // Initialize scrolling of viewport
@@ -118,7 +104,7 @@ export const Canvas = observer(() => {
     action(() => {
       viewportRef.current?.scrollTo({
         top: cs.props.yPadding * cs.scale,
-        left: cs.props.xPadding * cs.scale,
+        left: cs.props.xPadding * cs.scale
       })
     }),
     []
@@ -130,9 +116,9 @@ export const Canvas = observer(() => {
     () =>
       reaction(
         () => cs.selectedIDs,
-        selectedIDs => {
+        (selectedIDs) => {
           // we need to attach transformer manually
-          const nodes = selectedIDs.flatMap(UID => {
+          const nodes = selectedIDs.flatMap((UID) => {
             const node = stageRef.current?.findOne('#image_' + UID)
             if (!node) {
               return []
@@ -147,9 +133,7 @@ export const Canvas = observer(() => {
   )
 
   const handleSelectOrDeselect = action(
-    (
-      e: Konva.KonvaEventObject<MouseEvent> | Konva.KonvaEventObject<TouchEvent>
-    ) => {
+    (e: Konva.KonvaEventObject<MouseEvent> | Konva.KonvaEventObject<TouchEvent>) => {
       // Multi-selection -> update selected ids
 
       if (selectionRectState.visible) {
@@ -157,8 +141,7 @@ export const Canvas = observer(() => {
       }
 
       // if clicked on empty area, remove all selections
-      const clickedOnEmpty =
-        e.target === e.target.getStage() || e.target.id() === 'workarea_bg'
+      const clickedOnEmpty = e.target === e.target.getStage() || e.target.id() === 'workarea_bg'
       if (clickedOnEmpty) {
         cs.deselect()
         return
@@ -175,30 +158,27 @@ export const Canvas = observer(() => {
     }
   )
 
-  const handleSelectionRectStart = action(
-    (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
-      // Multi-selection -> selection rectangle set visible
+  const handleSelectionRectStart = action((e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
+    // Multi-selection -> selection rectangle set visible
 
-      // do nothing if we mousedown on any shape
-      const clickedOnEmpty =
-        e.target === e.target.getStage() || e.target.id() === 'workarea_bg'
-      if (!clickedOnEmpty) {
-        return
-      }
-      e.evt.preventDefault()
-
-      const stage = e.target.getStage() as Konva.Stage
-      const relativePt = stage.getRelativePointerPosition() as Vector2d
-      setSelectionRectState({
-        visible: false,
-        clicked: true,
-        x1: relativePt.x,
-        y1: relativePt.y,
-        x2: relativePt.x,
-        y2: relativePt.y,
-      })
+    // do nothing if we mousedown on any shape
+    const clickedOnEmpty = e.target === e.target.getStage() || e.target.id() === 'workarea_bg'
+    if (!clickedOnEmpty) {
+      return
     }
-  )
+    e.evt.preventDefault()
+
+    const stage = e.target.getStage() as Konva.Stage
+    const relativePt = stage.getRelativePointerPosition() as Vector2d
+    setSelectionRectState({
+      visible: false,
+      clicked: true,
+      x1: relativePt.x,
+      y1: relativePt.y,
+      x2: relativePt.x,
+      y2: relativePt.y
+    })
+  })
 
   const handleSelectionRectRelocate = action(
     (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
@@ -218,41 +198,37 @@ export const Canvas = observer(() => {
         x1: selectionRectState.x1,
         y1: selectionRectState.y1,
         x2: relativePt.x,
-        y2: relativePt.y,
+        y2: relativePt.y
       })
     }
   )
 
-  const handleSelectionRectHide = action(
-    (e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
-      // Multi-selection -> selection rectangle set hidden
+  const handleSelectionRectHide = action((e: Konva.KonvaEventObject<MouseEvent | TouchEvent>) => {
+    // Multi-selection -> selection rectangle set hidden
 
-      // do nothing if we didn't start selection
-      if (!selectionRectState.clicked) {
-        return
-      }
-      e.evt.preventDefault()
-
-      const stage = e.target.getStage() as Konva.Stage
-      // update visibility in timeout, so we can check it in click event
-      setTimeout(() => {
-        setSelectionRectState({
-          ...selectionRectState,
-          clicked: false,
-          visible: false,
-        })
-      })
-
-      const elements = stage.find('Image')
-      const box = (selectionRectRef.current as Konva.Rect).getClientRect()
-      const selectedIDs = elements
-        .filter(element =>
-          Konva.Util.haveIntersection(box, element.getClientRect())
-        )
-        .map(element => element.id().substring(6))
-      cs.setSelectedIDs(selectedIDs)
+    // do nothing if we didn't start selection
+    if (!selectionRectState.clicked) {
+      return
     }
-  )
+    e.evt.preventDefault()
+
+    const stage = e.target.getStage() as Konva.Stage
+    // update visibility in timeout, so we can check it in click event
+    setTimeout(() => {
+      setSelectionRectState({
+        ...selectionRectState,
+        clicked: false,
+        visible: false
+      })
+    })
+
+    const elements = stage.find('Image')
+    const box = (selectionRectRef.current as Konva.Rect).getClientRect()
+    const selectedIDs = elements
+      .filter((element) => Konva.Util.haveIntersection(box, element.getClientRect()))
+      .map((element) => element.id().substring(6))
+    cs.setSelectedIDs(selectedIDs)
+  })
 
   const scaleStage = action((e: Konva.KonvaEventObject<WheelEvent>) => {
     // when we zoom on trackpad, e.evt.ctrlKey is true, otherwise using default scrolling.
@@ -271,9 +247,7 @@ export const Canvas = observer(() => {
     // how to scale? Zoom in? Or zoom out?
     const direction = e.evt.deltaY > 0 ? -1 : 1
     let newScale =
-      direction > 0
-        ? oldScale * cs.stageProps.scaleStep
-        : oldScale / cs.stageProps.scaleStep
+      direction > 0 ? oldScale * cs.stageProps.scaleStep : oldScale / cs.stageProps.scaleStep
     if (newScale > cs.stageProps.maxScale) {
       newScale = cs.stageProps.maxScale
     } else if (newScale < cs.stageProps.minScale) {
@@ -293,7 +267,7 @@ export const Canvas = observer(() => {
     if (pointer !== null) {
       viewportRef.current?.scrollTo({
         top: pointer.y * (scaleBy - 1) + viewportRef.current?.scrollTop,
-        left: pointer.x * (scaleBy - 1) + viewportRef.current?.scrollLeft,
+        left: pointer.x * (scaleBy - 1) + viewportRef.current?.scrollLeft
       })
     }
   })
@@ -302,7 +276,7 @@ export const Canvas = observer(() => {
     setTimeout(
       action(() => {
         const transforms = cs.selectedIDs
-          .map(layerUUID => {
+          .map((layerUUID) => {
             const node = stageRef.current?.findOne('#image_' + layerUUID)
             if (node === undefined) {
               return
@@ -316,7 +290,7 @@ export const Canvas = observer(() => {
               width: Math.max(node.width() * node.scaleX(), 5),
               height: Math.max(node.height() * node.scaleY(), 5),
               scaleX: 1,
-              scaleY: 1,
+              scaleY: 1
             })
 
             return {
@@ -325,10 +299,10 @@ export const Canvas = observer(() => {
               y: node.y(),
               width: node.width(),
               height: node.height(),
-              rotation: node.rotation(),
+              rotation: node.rotation()
             }
           })
-          .filter(x => x) as {
+          .filter((x) => x) as {
           layerUUID: string
           x: number | null
           y: number | null
@@ -346,47 +320,47 @@ export const Canvas = observer(() => {
   // TODO: 使用自已做的滚动条，原生滚动条有点问题
   return (
     <div
+      className="relative flex h-full w-full justify-center overflow-scroll border border-pink-200"
       id="canvas-viewport"
-      className="relative w-full h-full flex justify-center overflow-scroll border border-pink-200"
       ref={viewportRef}
     >
-      <div id="canvas-full" className="w-fit h-fit">
+      <div className="h-fit w-fit" id="canvas-full">
         <Stage
-          ref={stageRef}
-          width={cs.stageProps.width * cs.scale}
           height={cs.stageProps.height * cs.scale}
+          onClick={handleSelectOrDeselect}
+          onMouseDown={handleSelectionRectStart}
+          onMouseMove={handleSelectionRectRelocate}
+          onMouseUp={handleSelectionRectHide}
+          onTap={handleSelectOrDeselect}
+          onTouchEnd={handleSelectionRectHide}
+          onTouchMove={handleSelectionRectRelocate}
+          onTouchStart={handleSelectionRectStart}
+          onWheel={scaleStage}
+          ref={stageRef}
           scale={{ x: cs.scale, y: cs.scale }}
           style={{ background: 'grey' }}
-          onMouseDown={handleSelectionRectStart}
-          onTouchStart={handleSelectionRectStart}
-          onMouseMove={handleSelectionRectRelocate}
-          onTouchMove={handleSelectionRectRelocate}
-          onMouseUp={handleSelectionRectHide}
-          onTouchEnd={handleSelectionRectHide}
-          onClick={handleSelectOrDeselect}
-          onTap={handleSelectOrDeselect}
-          onWheel={scaleStage}
+          width={cs.stageProps.width * cs.scale}
         >
           <LayerComp ref={imageLayerRef}>
             <Rect
+              fill="white"
+              height={cs.stageProps.workAreaHeight}
               id="workarea_bg"
+              width={cs.stageProps.workAreaWidth}
               x={cs.stageProps.workAreaX}
               y={cs.stageProps.workAreaY}
-              height={cs.stageProps.workAreaHeight}
-              width={cs.stageProps.workAreaWidth}
-              fill="white"
             />
 
-            {ps.toDisplayReversed.map(layer => (
+            {ps.toDisplayReversed.map((layer) => (
               <TransformableImage key={'image_' + layer.uuid} layer={layer} />
             ))}
           </LayerComp>
 
           <LayerComp>
             <Transformer
-              ref={trRef}
-              style={cs.selectedIDs.length > 0 ? {} : { display: 'none' }}
               flipEnabled={false}
+              onTransformEnd={handleTransformLayers}
+              ref={trRef}
               boundBoxFunc={(oldBox, newBox) => {
                 // limit resize
                 if (Math.abs(newBox.width) < 5 || Math.abs(newBox.height) < 5) {
@@ -397,17 +371,17 @@ export const Canvas = observer(() => {
               // anchorStroke='rgb(244,114,182)' // Tailwind Pink 400
               // borderStroke='rgb(244,114,182)' // Tailwind Pink 400
 
-              onTransformEnd={handleTransformLayers}
+              style={cs.selectedIDs.length > 0 ? {} : { display: 'none' }}
             />
 
             <Rect
-              ref={selectionRectRef}
               fill="rgba(0,0,255,0.5)"
+              height={Math.abs(selectionRectState.y2 - selectionRectState.y1)}
+              ref={selectionRectRef}
               visible={selectionRectState.visible}
+              width={Math.abs(selectionRectState.x2 - selectionRectState.x1)}
               x={Math.min(selectionRectState.x1, selectionRectState.x2)}
               y={Math.min(selectionRectState.y1, selectionRectState.y2)}
-              width={Math.abs(selectionRectState.x2 - selectionRectState.x1)}
-              height={Math.abs(selectionRectState.y2 - selectionRectState.y1)}
             />
           </LayerComp>
         </Stage>

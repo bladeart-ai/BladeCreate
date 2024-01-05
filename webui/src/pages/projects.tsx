@@ -22,11 +22,11 @@ export const ProjectsPage = observer(() => {
 
   return (
     <Layout>
-      <div className="w-full h-auto justify-start items-start inline-flex">
-        <h1 className="w-full self-stretch text-black text-3xl font-extrabold leading-10">
+      <div className="inline-flex h-auto w-full items-start justify-start">
+        <h1 className="w-full self-stretch text-3xl font-extrabold leading-10 text-black">
           所有创作
         </h1>
-        <div className="w-1/3 h-auto justify-start items-start inline-flex gap-2">
+        <div className="inline-flex h-auto w-1/3 items-start justify-start gap-2">
           <Button
             onClick={action(() => {
               projectsStore.createProject()
@@ -37,9 +37,9 @@ export const ProjectsPage = observer(() => {
         </div>
       </div>
 
-      <div className="w-full h-full justify-start items-start inline-flex flex-wrap gap-3.5">
-        {projectsStore.toDisplay.map(p => (
-          <Link to={'/projects/' + p.uuid} key={p.uuid}>
+      <div className="inline-flex h-full w-full flex-wrap items-start justify-start gap-3.5">
+        {projectsStore.toDisplay.map((p) => (
+          <Link key={p.uuid} to={'/projects/' + p.uuid}>
             <ProjectCard {...p} />
           </Link>
         ))}

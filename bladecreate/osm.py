@@ -40,11 +40,7 @@ class ObjectStorageManager:
                 else:
                     res[k] = local_full_path
 
-                    future_to_key[
-                        executor.submit(
-                            self.download_object, k, local_full_path
-                        )
-                    ] = k
+                    future_to_key[executor.submit(self.download_object, k, local_full_path)] = k
 
             for future in futures.as_completed(future_to_key):
                 exception = future.exception()
@@ -103,15 +99,9 @@ class ObjectStorageManager:
         if not os.path.isdir(local_dir):
             raise Exception("Key is not a folder.")
 
-        filenames = [
-            f
-            for f in os.listdir(local_dir)
-            if os.path.isfile(os.path.join(local_dir, f))
-        ]
+        filenames = [f for f in os.listdir(local_dir) if os.path.isfile(os.path.join(local_dir, f))]
 
-        print(
-            f"Uploading {len(filenames)} files from {local_dir} to {key_prefix}"
-        )
+        print(f"Uploading {len(filenames)} files from {local_dir} to {key_prefix}")
 
         res = {}
         with ThreadPoolExecutor(max_workers=8) as executor:
@@ -119,11 +109,7 @@ class ObjectStorageManager:
             for filename in filenames:
                 local_path = os.path.join(local_dir, filename)
                 key = os.path.join(key_prefix, filename)
-                future_to_key[
-                    executor.submit(
-                        self.upload_object_from_file, local_path, key
-                    )
-                ] = key
+                future_to_key[executor.submit(self.upload_object_from_file, local_path, key)] = key
 
             for future in futures.as_completed(future_to_key):
                 exception = future.exception()

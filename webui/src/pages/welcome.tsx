@@ -1,13 +1,13 @@
 import { Layout } from '@/components/layout'
 
 interface UseCaseCardProps {
-  label: string
+  readonly label: string
 }
 function UseCaseCard(props: UseCaseCardProps) {
   return (
-    <div className="Frame51 flex-col justify-center items-center gap-1 inline-flex">
-      <div className="w-72 h-60 bg-zinc-300" />
-      <div className="w-72 h-6 text-center text-black text-lg font-semibold leading-7">
+    <div className="inline-flex flex-col items-center justify-center gap-1">
+      <div className="h-60 w-72 bg-zinc-300" />
+      <div className="h-6 w-72 text-center text-lg font-semibold leading-7 text-black">
         {props.label}
       </div>
     </div>
@@ -16,14 +16,14 @@ function UseCaseCard(props: UseCaseCardProps) {
 function WelcomePage() {
   return (
     <Layout>
-      <h1 className="self-stretch text-black text-3xl font-extrabold leading-10">
+      <h1 className="self-stretch text-3xl font-extrabold leading-10 text-black">
         欢迎使用BladeCreate创作平台
       </h1>
-      <div className="self-stretch text-black text-xl font-normal leading-7">
+      <div className="self-stretch text-xl font-normal leading-7 text-black">
         BladeCreate是针对创意美术工作流的AI创作工具。
       </div>
-      <div className="text-black text-xl font-semibold leading-9">使用范例</div>
-      <div className="self-stretch flex-wrap justify-start items-start gap-5 inline-flex">
+      <div className="text-xl font-semibold leading-9 text-black">使用范例</div>
+      <div className="inline-flex flex-wrap items-start justify-start gap-5 self-stretch">
         <UseCaseCard label="复杂、创意性构图的制作" />
         <UseCaseCard label="AI辅助的素材生成和拼接" />
         <UseCaseCard label="寻找最优的模型和生成参数" />

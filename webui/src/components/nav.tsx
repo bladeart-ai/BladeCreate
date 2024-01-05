@@ -6,42 +6,40 @@ import { BackpackIcon, HobbyKnifeIcon } from '@radix-ui/react-icons'
 import { LogoutButton } from './auth/logout'
 import { Auth0Avatar } from './auth/auth0-avatar'
 import { DISABLE_AUTH } from '@/config'
+import logoPng from '../../resources/logo.png?asset'
 
 interface NavItem {
-  icon: React.ForwardRefExoticComponent<
+  readonly icon: React.ForwardRefExoticComponent<
     IconProps & React.RefAttributes<SVGSVGElement>
   > | null
-  path: string
-  label: string
+  readonly path: string
+  readonly label: string
 }
 
 export function NavBarLogo() {
   return (
-    <Link className="w-fit h-fit" to="/">
+    <Link className="h-fit w-fit" to="/">
       <Button
-        variant="ghost"
-        className="Logo w-24 h-full p-2.5 flex-col justify-start items-start gap-2.5 inline-flex"
+        className="Logo inline-flex h-full w-24 flex-col items-start justify-start gap-2.5 p-2.5"
         key=""
+        variant="ghost"
       >
-        <img className="self-stretch grow shrink basis-0" src="/logo.png" />
+        <img className="shrink grow basis-0 self-stretch" src={logoPng} />
       </Button>
     </Link>
   )
 }
 function NavBarItem(props: NavItem) {
   return (
-    <div className="w-fit h-full">
+    <div className="h-full w-fit">
       <Link to={props.path}>
         <Button
-          variant="ghost"
-          className="w-fit h-full p-2.5 gap-1 justify-center items-center inline-flex"
+          className="inline-flex h-full w-fit items-center justify-center gap-1 p-2.5"
           key={props.label}
+          variant="ghost"
         >
-          {props.icon &&
-            React.createElement(props.icon, { className: 'w-4 h-4 relative' })}
-          <span className="text-black text-xl font-normal leading-7">
-            {props.label}
-          </span>
+          {props.icon ? React.createElement(props.icon, { className: 'w-4 h-4 relative' }) : null}
+          <span className="text-xl font-normal leading-7 text-black">{props.label}</span>
         </Button>
       </Link>
     </div>
@@ -52,20 +50,20 @@ const navItems: NavItem[] = [
   {
     icon: BackpackIcon,
     label: '模型',
-    path: '/models',
+    path: '/models'
   },
   {
     icon: HobbyKnifeIcon,
     label: '创作',
-    path: '/projects',
-  },
+    path: '/projects'
+  }
 ]
 
-export const NavBar = ({ children }: { children?: React.ReactNode }) => {
+export function NavBar({ children }: { readonly children?: React.ReactNode }) {
   return (
-    <nav className="NavigationBar fixed top-0 z-50 w-full h-12 gap-1 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 justify-start items-center inline-flex">
+    <nav className="NavigationBar fixed top-0 z-50 inline-flex h-12 w-full items-center justify-start gap-1 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <NavBarLogo />
-      {navItems.map(item => (
+      {navItems.map((item) => (
         <NavBarItem key={item.path} {...item} />
       ))}
       {children}
@@ -79,7 +77,7 @@ export function NavigationBar() {
   }
   return (
     <NavBar>
-      <div className="grow shrink basis-0 self-stretch px-3 justify-end items-center flex">
+      <div className="flex shrink grow basis-0 items-center justify-end self-stretch px-3">
         {' '}
         <LogoutButton />
         <Auth0Avatar />

@@ -13,13 +13,13 @@ export const LogoutButton: React.FC = () => {
   const handleLogout = () => {
     logout({
       logoutParams: {
-        returnTo: window.location.origin,
-      },
+        returnTo: window.location.origin
+      }
     })
   }
 
   return (
-    <Button variant="link" size="icon" onClick={handleLogout}>
+    <Button onClick={handleLogout} size="icon" variant="link">
       <ExitIcon className="h-4 w-4" />
     </Button>
   )

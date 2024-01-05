@@ -41,9 +41,7 @@ def test_generation(client: TestClient, user_id: str):
     resp = client.get(f"/api/projects/{user_id}/{project_uuid}")
     assert resp.status_code == 200
     project_layers = resp.json()
-    compare_layer_with_input(
-        project_layers["layers"][new_layer["uuid"]], new_layer
-    )
+    compare_layer_with_input(project_layers["layers"][new_layer["uuid"]], new_layer)
 
     # generate with specified layer
     new_generation_input = {
@@ -66,9 +64,7 @@ def test_generation(client: TestClient, user_id: str):
     assert generate_resp["params"] == new_generation_input["generation_params"]
 
     # validate generation
-    resp = client.get(
-        f"api/projects/{user_id}/{project_uuid}/generations/{generate_resp['uuid']}"
-    )
+    resp = client.get(f"api/projects/{user_id}/{project_uuid}/generations/{generate_resp['uuid']}")
     assert resp.status_code == 200
     assert generate_resp == resp.json()
 
@@ -77,6 +73,4 @@ def test_generation(client: TestClient, user_id: str):
     assert resp.status_code == 200
     project_layers = resp.json()
     new_layer["generation_uuid"] = generate_resp["uuid"]
-    compare_layer_with_input(
-        project_layers["layers"][new_layer["uuid"]], new_layer
-    )
+    compare_layer_with_input(project_layers["layers"][new_layer["uuid"]], new_layer)

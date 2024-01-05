@@ -21,20 +21,14 @@ class MacSDXL(SDXL):
         converted_model_directory = "/Users/shiyuanzhu/workdir/models/mac"
         compute_unit = "CPU_AND_GPU"
 
-        SDP = (
-            StableDiffusionXLPipeline
-            if "xl" in model_version
-            else StableDiffusionPipeline
-        )
+        SDP = StableDiffusionXLPipeline if "xl" in model_version else StableDiffusionPipeline
 
         pytorch_pipe = SDP.from_pretrained(model_version)
 
         # Get Force Zeros Config if it exists
         force_zeros_for_empty_prompt: bool = False
         if "force_zeros_for_empty_prompt" in pytorch_pipe.config:
-            force_zeros_for_empty_prompt = pytorch_pipe.config[
-                "force_zeros_for_empty_prompt"
-            ]
+            force_zeros_for_empty_prompt = pytorch_pipe.config["force_zeros_for_empty_prompt"]
 
         self.pipeline = get_coreml_pipe(
             pytorch_pipe=pytorch_pipe,

@@ -36,15 +36,15 @@ export class DefaultService {
       method: 'GET',
       url: '/api/projects/{user_id}/images',
       path: {
-        user_id: userId,
+        user_id: userId
       },
       query: {
         project_uuid: projectUuid,
-        image_uuids: imageUuids,
+        image_uuids: imageUuids
       },
       errors: {
-        422: `Validation Error`,
-      },
+        422: `Validation Error`
+      }
     })
   }
 
@@ -63,14 +63,14 @@ export class DefaultService {
       method: 'GET',
       url: '/api/projects/{user_id}',
       path: {
-        user_id: userId,
+        user_id: userId
       },
       query: {
-        uuids: uuids,
+        uuids: uuids
       },
       errors: {
-        422: `Validation Error`,
-      },
+        422: `Validation Error`
+      }
     })
   }
 
@@ -89,13 +89,13 @@ export class DefaultService {
       method: 'POST',
       url: '/api/projects/{user_id}',
       path: {
-        user_id: userId,
+        user_id: userId
       },
       body: requestBody,
       mediaType: 'application/json',
       errors: {
-        422: `Validation Error`,
-      },
+        422: `Validation Error`
+      }
     })
   }
 
@@ -117,13 +117,13 @@ export class DefaultService {
       url: '/api/projects/{user_id}/{project_uuid}',
       path: {
         user_id: userId,
-        project_uuid: projectUuid,
+        project_uuid: projectUuid
       },
       body: requestBody,
       mediaType: 'application/json',
       errors: {
-        422: `Validation Error`,
-      },
+        422: `Validation Error`
+      }
     })
   }
 
@@ -134,20 +134,17 @@ export class DefaultService {
    * @returns Project Successful Response
    * @throws ApiError
    */
-  public static getProject(
-    userId: string,
-    projectUuid: string
-  ): CancelablePromise<Project> {
+  public static getProject(userId: string, projectUuid: string): CancelablePromise<Project> {
     return __request(OpenAPI, {
       method: 'GET',
       url: '/api/projects/{user_id}/{project_uuid}',
       path: {
         user_id: userId,
-        project_uuid: projectUuid,
+        project_uuid: projectUuid
       },
       errors: {
-        422: `Validation Error`,
-      },
+        422: `Validation Error`
+      }
     })
   }
 
@@ -169,13 +166,13 @@ export class DefaultService {
       url: '/api/projects/{user_id}/{project_uuid}/layers',
       path: {
         user_id: userId,
-        project_uuid: projectUuid,
+        project_uuid: projectUuid
       },
       body: requestBody,
       mediaType: 'application/json',
       errors: {
-        422: `Validation Error`,
-      },
+        422: `Validation Error`
+      }
     })
   }
 
@@ -200,13 +197,13 @@ export class DefaultService {
       path: {
         user_id: userId,
         project_uuid: projectUuid,
-        layer_uuid: layerUuid,
+        layer_uuid: layerUuid
       },
       body: requestBody,
       mediaType: 'application/json',
       errors: {
-        422: `Validation Error`,
-      },
+        422: `Validation Error`
+      }
     })
   }
 
@@ -229,11 +226,11 @@ export class DefaultService {
       path: {
         user_id: userId,
         project_uuid: projectUuid,
-        layer_uuid: layerUuid,
+        layer_uuid: layerUuid
       },
       errors: {
-        422: `Validation Error`,
-      },
+        422: `Validation Error`
+      }
     })
   }
 
@@ -256,11 +253,11 @@ export class DefaultService {
       path: {
         user_id: userId,
         project_uuid: projectUuid,
-        generation_uuid: generationUuid,
+        generation_uuid: generationUuid
       },
       errors: {
-        422: `Validation Error`,
-      },
+        422: `Validation Error`
+      }
     })
   }
 
@@ -282,13 +279,13 @@ export class DefaultService {
       url: '/api/projects/{user_id}/{project_uuid}/generate',
       path: {
         user_id: userId,
-        project_uuid: projectUuid,
+        project_uuid: projectUuid
       },
       body: requestBody,
       mediaType: 'application/json',
       errors: {
-        422: `Validation Error`,
-      },
+        422: `Validation Error`
+      }
     })
   }
 
@@ -300,7 +297,7 @@ export class DefaultService {
   public static healthCheck(): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/health',
+      url: '/health'
     })
   }
 }

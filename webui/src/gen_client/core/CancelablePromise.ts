@@ -69,15 +69,15 @@ export class CancelablePromise<T> implements Promise<T> {
       }
 
       Object.defineProperty(onCancel, 'isResolved', {
-        get: (): boolean => this.#isResolved,
+        get: (): boolean => this.#isResolved
       })
 
       Object.defineProperty(onCancel, 'isRejected', {
-        get: (): boolean => this.#isRejected,
+        get: (): boolean => this.#isRejected
       })
 
       Object.defineProperty(onCancel, 'isCancelled', {
-        get: (): boolean => this.#isCancelled,
+        get: (): boolean => this.#isCancelled
       })
 
       return executor(onResolve, onReject, onCancel as OnCancel)

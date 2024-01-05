@@ -13,7 +13,7 @@ const GenerationProgress = observer(({ layer }: { layer: Layer }) => {
 
   return (
     <div>
-      {layer.generations?.map(g => {
+      {layer.generations?.map((g) => {
         if (g.status !== 'SUCCEEDED') {
           return (
             <div key={'generation_progress' + g.uuid}>
@@ -21,30 +21,30 @@ const GenerationProgress = observer(({ layer }: { layer: Layer }) => {
             </div>
           )
         }
-        return <div key={'generation_progress' + g.uuid}></div>
+        return <div key={'generation_progress' + g.uuid} />
       })}
     </div>
   )
 })
 
-const GenerationImageCard = ({
+function GenerationImageCard({
   imageUUID,
   imageSrc,
-  onClick,
+  onClick
 }: {
-  imageUUID: string
-  imageSrc: string
-  onClick: React.MouseEventHandler<HTMLDivElement>
-}) => {
+  readonly imageUUID: string
+  readonly imageSrc: string
+  readonly onClick: React.MouseEventHandler<HTMLDivElement>
+}) {
   return (
     <div
-      className="w-full h-96 rounded-lg shadow border border-1 gap-2 relative overflow-hidden"
+      className="border-1 relative h-96 w-full gap-2 overflow-hidden rounded-lg border shadow"
       onClick={onClick}
     >
       <img
-        className="w-full h-full object-contain hover:scale-110 absolute inset-x-0 top-0"
-        key={'generation-image-card-' + imageUUID}
         alt={'generation-image-card-' + imageUUID}
+        className="absolute inset-x-0 top-0 h-full w-full object-contain hover:scale-110"
+        key={'generation-image-card-' + imageUUID}
         src={imageSrc}
       />
     </div>
@@ -58,14 +58,14 @@ const GenerateResultsArea = observer(({ layer }: { layer: Layer }) => {
 
   const GenerateResult = observer(({ g }: { g: Generation }) => {
     return (
-      <div className="w-full h-full p-1 rounded shadow justify-center items-start gap-1 inline-flex flex-wrap overflow-y-scroll relative">
-        {g.image_uuids.flatMap(uuid => {
+      <div className="relative inline-flex h-full w-full flex-wrap items-start justify-center gap-1 overflow-y-scroll rounded p-1 shadow">
+        {g.image_uuids.flatMap((uuid) => {
           if (ps.image_data[uuid]) {
             return (
               <GenerationImageCard
-                key={'generation-image-' + uuid}
-                imageUUID={uuid}
                 imageSrc={ps.image_data[uuid]}
+                imageUUID={uuid}
+                key={'generation-image-' + uuid}
                 onClick={() => ps.updateLayerImageUUID(layer.uuid, uuid)}
               />
             )
@@ -79,15 +79,15 @@ const GenerateResultsArea = observer(({ layer }: { layer: Layer }) => {
   return (
     <div>
       {layer.generations
-        ?.filter(g => g.status === 'SUCCEEDED')
-        .map(g => <GenerateResult key={'GenerateResult-' + g.uuid} g={g} />)}
+        ?.filter((g) => g.status === 'SUCCEEDED')
+        .map((g) => <GenerateResult g={g} key={'GenerateResult-' + g.uuid} />)}
     </div>
   )
 })
 
 export const LayerResultPanel = observer(() => {
   return (
-    <div className="w-full h-full pl-0 pr-1">
+    <div className="h-full w-full pl-0 pr-1">
       {cs.selectedIDs.length === 1 && ps.layers[cs.selectedIDs[0]] ? (
         <>
           <GenerationProgress layer={ps.layers[cs.selectedIDs[0]]} />
