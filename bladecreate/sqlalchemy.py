@@ -1,4 +1,3 @@
-import logging
 import uuid
 from typing import Optional, Tuple
 from uuid import UUID
@@ -8,16 +7,16 @@ from sqlalchemy import and_, create_engine, delete, select
 from sqlalchemy.orm import Session, selectinload, sessionmaker
 
 from bladecreate import schemas
-from bladecreate.config import SQLALCHEMY_DATABASE_URL
 from bladecreate.db_schemas import Base, Generation, Layer, Project
-from bladecreate.logging_setup import logging_setup
+from bladecreate.logging import Logger
+from bladecreate.settings import settings
 
-logging_setup()
-logger = logging.getLogger(__name__)
-logger.info("logger is configured!")
+logger = Logger.get_logger(__name__)
 
-connect_args = {"check_same_thread": False} if SQLALCHEMY_DATABASE_URL.startswith("sqlite") else {}
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=connect_args)
+connect_args = (
+    {"check_same_thread": False} if settings.sqlalchemy_url().startswith("sqlite") else {}
+)
+engine = create_engine(settings.sqlalchemy_url(), connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base.metadata.create_all(bind=engine)
 

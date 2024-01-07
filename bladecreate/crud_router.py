@@ -1,14 +1,12 @@
 # coding=utf-8
-import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 import bladecreate.sqlalchemy as sql
-from bladecreate.config import IMAGE_PATH_FORMAT
 from bladecreate.db_schemas import empty_uuid
 from bladecreate.dependencies import get_db, get_osm
-from bladecreate.logging_setup import logging_setup
+from bladecreate.logging import Logger
 from bladecreate.osm import ObjectStorageManager
 from bladecreate.schemas import (
     UUID,
@@ -22,10 +20,9 @@ from bladecreate.schemas import (
     ProjectMetadata,
     ProjectUpdate,
 )
+from bladecreate.settings import settings
 
-logging_setup()
-logger = logging.getLogger(__name__)
-logger.info("logger is configured!")
+logger = Logger.get_logger(__name__)
 
 
 router = APIRouter(prefix="/api", dependencies=[Depends(get_db), Depends(get_osm)])
@@ -46,7 +43,7 @@ async def get_image_data_or_url(
 
         try:
             url = osm.generate_download_url(
-                IMAGE_PATH_FORMAT.format(
+                settings.storage_paths.images.format(
                     user_id=user_id,
                     project_uuid=project_uuid,
                     image_uuid=image_uuid,
@@ -139,7 +136,7 @@ async def create_project_layer(
 
     # Step 2: upload image data
     if body.image_data is not None:
-        image_path = IMAGE_PATH_FORMAT.format(
+        image_path = settings.storage_paths.images.format(
             user_id=user_id,
             project_uuid=project_uuid,
             image_uuid=new_layer.uuid,

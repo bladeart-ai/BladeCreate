@@ -1,15 +1,11 @@
-import logging
-
 import PIL
 import PIL.Image
 from diffusers import StableDiffusionPipeline, StableDiffusionXLPipeline
 
-from bladecreate.logging_setup import logging_setup
+from bladecreate.logging import Logger
 from bladecreate.models.sd import SDXL
 
-logging_setup()
-logger = logging.getLogger(__name__)
-logger.info("logger is configured!")
+logger = Logger.get_logger(__name__)
 
 
 class MacSDXL(SDXL):
@@ -18,6 +14,7 @@ class MacSDXL(SDXL):
         from python_coreml_stable_diffusion.pipeline import get_coreml_pipe
 
         model_version = "stabilityai/stable-diffusion-xl-base-1.0"
+        # TODO: fix it
         converted_model_directory = "/Users/shiyuanzhu/workdir/models/mac"
         compute_unit = "CPU_AND_GPU"
 

@@ -1,15 +1,11 @@
-import logging
-
 import PIL
 import PIL.Image
 import torch
 
-from bladecreate.logging_setup import logging_setup
+from bladecreate.logging import Logger
 from bladecreate.models.sd import SDXL
 
-logging_setup()
-logger = logging.getLogger(__name__)
-logger.info("logger is configured!")
+logger = Logger.get_logger(__name__)
 
 
 class CUDASDXL(SDXL):

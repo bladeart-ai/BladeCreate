@@ -1,6 +1,5 @@
 # coding=utf-8
 import io
-import logging
 import uuid
 from uuid import UUID
 
@@ -8,17 +7,15 @@ from fastapi import APIRouter, Depends
 from pydantic import TypeAdapter
 
 import bladecreate.sqlalchemy as sql
-from bladecreate.config import IMAGE_PATH_FORMAT
 from bladecreate.data_utils import image_bytes_to_inline_data
 from bladecreate.dependencies import get_db, get_osm, get_sdxl
-from bladecreate.logging_setup import logging_setup
+from bladecreate.logging import Logger
 from bladecreate.models.sd import SDXL
 from bladecreate.osm import ObjectStorageManager
 from bladecreate.schemas import GenerationCreate, GenerationDone, ImagesURLOrData
+from bladecreate.settings import settings
 
-logging_setup()
-logger = logging.getLogger(__name__)
-logger.info("logger is configured!")
+logger = Logger.get_logger(__name__)
 
 get_sdxl()
 
@@ -41,7 +38,7 @@ async def generate(
     osm: ObjectStorageManager = Depends(get_osm),
     sdxl: SDXL = Depends(get_sdxl),
 ):
-    logger.info("Handling generation request", body.model_dump())
+    logger.info(f"Handling generation request: {body.model_dump_json(indent=2)}")
 
     # Step 0: Reject generation requests
     # TODO: if a generation of the specified layer is in progress, reject
@@ -81,7 +78,7 @@ async def generate(
     }
     osm.upload_objects_from_text(
         {
-            IMAGE_PATH_FORMAT.format(
+            settings.storage_paths.images.format(
                 user_id=user_id,
                 project_uuid=project_uuid,
                 image_uuid=k,

@@ -1,8 +1,6 @@
 # Data types
 pydantic==2.5.2
-
-# Configuration
-dynaconf==3.2.3
+pydantic-settings==2.1.0
 
 # # Postgres
 # psycopg2-binary==2.9.9

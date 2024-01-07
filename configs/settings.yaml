@@ -1,9 +1,0 @@
-default:
-  local_task_path: /tmp
-  gpu_platform: mac
-  database: sqlite
-  sqlite:
-    path: /tmp/bladecreate.db
-  object_storage: file_storage
-  file_storage:
-    base_path: /tmp/bladecreate/

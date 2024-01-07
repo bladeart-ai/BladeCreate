@@ -2,16 +2,16 @@ import os
 import shutil
 from typing import Set
 
-from bladecreate.config import FILE_OBJECT_STORAGE_DIR
 from bladecreate.osm import ObjectStorageManager
+from bladecreate.settings import settings
 
 
 class FileObjectStorageManager(ObjectStorageManager):
     def key_to_storage_path(self, key):
-        return os.path.join(FILE_OBJECT_STORAGE_DIR, key)
+        return os.path.join(settings.object_storage.path, key)
 
     def storage_path_to_key(self, path):
-        return os.path.relpath(path, FILE_OBJECT_STORAGE_DIR)
+        return os.path.relpath(path, settings.object_storage.path)
 
     def _create_dirs_if_not_exists(self, path):
         os.makedirs(os.path.dirname(path), exist_ok=True)

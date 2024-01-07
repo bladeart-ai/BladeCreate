@@ -6,7 +6,7 @@ import { BackpackIcon, HobbyKnifeIcon } from '@radix-ui/react-icons'
 import { LogoutButton } from './auth/logout'
 import { Auth0Avatar } from './auth/auth0-avatar'
 import { DISABLE_AUTH } from '@/config'
-import logoPng from '../../resources/logo.png?asset'
+import logoPng from '@/public/logo.png?asset'
 
 interface NavItem {
   readonly icon: React.ForwardRefExoticComponent<

@@ -12,11 +12,9 @@ RUN pip3 install -r requirements/shared-requirements.txt
 COPY bladecreate /workdir/
 RUN pip3 install -e .
 
-COPY configs /workdir/configs/
-
-ENV GPU_PLATFORM=cuda
-ENV SETTINGS_FILE_FOR_DYNACONF='["configs/settings.yaml"]'
-ENV ENV_FOR_DYNACONF=test
+ENV BC_ENV="dev"
+ENV BC_GPU_PLATFORM=cuda
+ENV BC_SERVER__APIS='["generate"]'
 ENV HF_HOME=/tmp/hf_home
 
 EXPOSE 8081

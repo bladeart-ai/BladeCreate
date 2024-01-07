@@ -7,7 +7,7 @@ import { ModelDetail, ModelPreset, ModelSnapshot } from '../context/model'
 import { Badge } from '@/components/ui/badge'
 import { IconJarLogoIcon } from '@radix-ui/react-icons'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import civitaiIcon from '../../resources/civitai_icon.png?asset'
+import civitaiIcon from '@/public/civitai_icon.png?asset'
 
 export function ModelBadge(text: string) {
   return <Badge className="h-6 w-fit gap-1 text-base">{text}</Badge>

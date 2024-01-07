@@ -1,7 +1,7 @@
 import { LoginButton } from '@/components/auth/login-button'
 import { SignupButton } from '@/components/auth/signup-button'
 import { Link } from 'react-router-dom'
-import herePng from '../../resources/hero.jpg?asset'
+import herePng from '@/public/hero.jpg?asset'
 
 export const AuthenticationPage: React.FC = () => {
   return (

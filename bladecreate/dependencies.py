@@ -1,18 +1,8 @@
-import logging
-
 import bladecreate.sqlalchemy as sql
-from bladecreate.config import (
-    CUDA,
-    FILE_OBJECT_STORAGE,
-    GPU_PLATFORM,
-    MAC,
-    OBJECT_STORAGE,
-)
-from bladecreate.logging_setup import logging_setup
+from bladecreate.logging import Logger
+from bladecreate.settings import settings
 
-logging_setup()
-logger = logging.getLogger(__name__)
-logger.info("logger is configured!")
+logger = Logger.get_logger(__name__)
 
 
 def get_db():
@@ -24,12 +14,12 @@ def get_db():
 
 
 def get_osm():
-    if OBJECT_STORAGE == FILE_OBJECT_STORAGE:
+    if settings.is_file_storage:
         from bladecreate.file_osm import FileObjectStorageManager
 
         osm = FileObjectStorageManager()
     else:
-        raise Exception("Unknown storage", OBJECT_STORAGE)
+        raise Exception("Unknown storage", settings.object_storage.model_dump_json(indent=2))
 
     try:
         yield osm
@@ -38,15 +28,20 @@ def get_osm():
 
 
 def get_sdxl():
-    if GPU_PLATFORM == CUDA:
+    if settings.gpu_platform is None:
+        return None
+
+    elif settings.gpu_platform.is_cuda:
         from bladecreate.models.cuda_sd import CUDASDXL
 
         sdxl = CUDASDXL.instance()
-    elif GPU_PLATFORM == MAC:
+
+    elif settings.gpu_platform.is_mac:
         from bladecreate.models.mac_sd import MacSDXL
 
         sdxl = MacSDXL.instance()
+
     else:
-        raise Exception(f"GPU platform {GPU_PLATFORM} is not supported")
+        raise Exception(f"GPU platform {settings.gpu_platform} is not supported")
 
     return sdxl
