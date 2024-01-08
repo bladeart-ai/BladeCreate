@@ -2,6 +2,9 @@
 pydantic==2.5.2
 pydantic-settings==2.1.0
 
+# DB
+sqlalchemy==2.0.25
+
 # # Postgres
 # psycopg2-binary==2.9.9
 
