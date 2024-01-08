@@ -1,3 +1,6 @@
+import multiprocessing
+import sys
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,6 +10,14 @@ from bladecreate.settings import settings, uvicorn_logging
 
 logger = Logger.get_logger(__name__)
 logger.info(f"Settings: {settings.model_dump_json(indent=2)}")
+
+# Check if it is frozen (running from pyinstaller-built bundle)
+if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+    logger.info("running in a PyInstaller bundle")
+    multiprocessing.freeze_support()
+else:
+    logger.info("running in a normal Python process")
+    pass
 
 app = FastAPI(generate_unique_id_function=lambda route: f"{route.name}")
 app.add_middleware(
