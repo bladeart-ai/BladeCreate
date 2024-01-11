@@ -1,7 +1,12 @@
 appId: com.bladeartai.bladecreate
-productName: bladecreate
+productName: BladeCreate
 directories:
   buildResources: build
+extraResources:
+  - from: ../dist/py
+    to: py
+    filter:
+      - '**/*'
 files:
   - '!**/.vscode/*'
   - '!src/*'

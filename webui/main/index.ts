@@ -1,7 +1,64 @@
 import { app, shell, BrowserWindow } from 'electron'
 import { join } from 'path'
+import child_process from 'child_process'
+import fs from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../src/public/favicon.svg?asset'
+// import icon from '../src/public/favicon.svg?asset'
+
+const MODE = import.meta.env.MODE
+const PY_DIST_PATH = import.meta.env.MAIN_VITE_PY_DIST_PATH || 'py/py'
+
+let pyProc: child_process.ChildProcess | null = null
+
+const createPyProc = () => {
+  let pyDistPath: string | null = null
+
+  // Looking for Python distribution
+  let possibilities: string[] = []
+  if (process.platform === 'win32') {
+    possibilities = [
+      join(__dirname, '../../../dist', PY_DIST_PATH, '.exe'),
+      join(process.resourcesPath, PY_DIST_PATH, '.exe')
+    ]
+  } else {
+    possibilities = [
+      join(__dirname, '../../../dist', PY_DIST_PATH), // when Python dist is generated
+      join(process.resourcesPath, PY_DIST_PATH) // when in packaged app ?
+    ]
+  }
+
+  console.log('Looking for py dist paths:', possibilities)
+  for (const path of possibilities) {
+    if (fs.existsSync(path)) {
+      pyDistPath = path
+    }
+  }
+
+  const port = '8081'
+  // TODO: check if port is used
+
+  if (pyDistPath) {
+    console.log('Found Python distribution in', pyDistPath)
+    pyProc = child_process.spawn(pyDistPath, [], {
+      env: { BC_SERVER__PORT: port },
+      stdio: 'inherit'
+    })
+  } else if (MODE !== 'production') {
+    console.log('Cannot find Python distribution; calling Python directly')
+    pyProc = child_process.spawn('python', ['-m', 'bladecreate.app'], {
+      env: { BC_SERVER__PORT: port },
+      stdio: 'inherit'
+    })
+  }
+
+  if (pyProc != null) {
+    console.log('child process success on port ' + port)
+  }
+}
+
+const exitPyProc = () => {
+  if (pyProc) pyProc.kill()
+}
 
 function createWindow(): void {
   // Create the browser window.
@@ -10,7 +67,7 @@ function createWindow(): void {
     height: 670,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    // ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
@@ -56,6 +113,8 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+
+  createPyProc()
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -64,6 +123,7 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
+    exitPyProc()
   }
 })
 

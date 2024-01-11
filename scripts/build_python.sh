@@ -1,3 +1,3 @@
 #!/bin/sh
 
-cd bladecreate && pyinstaller --noconfirm app.py
+pyinstaller --noconfirm --distpath dist --workpath build --onedir --name py bladecreate/app.py
