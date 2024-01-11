@@ -8,4 +8,7 @@ Free and open-source cross-platform AI canvas for everyone
 
 ## Prerequisites
 
-## Quick Start
+## Installation Option 1 - Docker
+
+## Installation Option 2 - pip & pnpm
+

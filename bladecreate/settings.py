@@ -36,10 +36,10 @@ class S3Storage(BaseModel):
 
 
 class StoragePaths(BaseModel):
-    datasets: str = "datasets/user-{user_id}/default/"
-    sample_sets: str = "sample_sets/user-{user_id}/{task_id}/"
-    pretrain_models: str = "models/pretrain/{pretrain_model_id}"
-    out_models: str = "models/user-{user_id}/{task_id}/"
+    datasets: str = "datasets/{user_id}/default/"
+    sample_sets: str = "sample_sets/{user_id}/{task_id}/"
+    pretrain_models: str = "pretrain_models/{pretrain_model_id}"
+    out_models: str = "out_models/{user_id}/{task_id}/"
     images: str = "images/{user_id}/{project_uuid}/{image_uuid}"
 
 
@@ -84,9 +84,8 @@ class Settings(BaseSettings):
     database: Union[SQLiteDatabase, PostgresDatabase] = Field(
         default=SQLiteDatabase(), union_mode="left_to_right"
     )
-    object_storage: Union[FileStorage, S3Storage] = Field(
-        default=FileStorage(), union_mode="left_to_right"
-    )
+    local_object_storage: FileStorage = Field(default=FileStorage())
+    remote_object_storage: Optional[S3Storage] = Field(default=None)
     storage_paths: StoragePaths = Field(default=StoragePaths())
     gpu_platform: Optional[GPUPlatformEnum] = Field(default=None)
     server: Server = Field(default=Server())
@@ -111,11 +110,11 @@ class Settings(BaseSettings):
 
     @property
     def is_file_storage(self):
-        return isinstance(self.object_storage, FileStorage)
+        return self.remote_object_storage is None
 
     @property
     def is_s3_storage(self):
-        return isinstance(self.object_storage, S3Storage)
+        return isinstance(self.remote_object_storage, S3Storage)
 
     def init_prod(self):
         self.server.host = "127.0.0.1"

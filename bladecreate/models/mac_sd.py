@@ -1,9 +1,12 @@
+import os
+
 import PIL
 import PIL.Image
 from diffusers import StableDiffusionPipeline, StableDiffusionXLPipeline
 
 from bladecreate.logging import Logger
 from bladecreate.models.sd import SDXL
+from bladecreate.settings import settings
 
 logger = Logger.get_logger(__name__)
 
@@ -14,8 +17,11 @@ class MacSDXL(SDXL):
         from python_coreml_stable_diffusion.pipeline import get_coreml_pipe
 
         model_version = "stabilityai/stable-diffusion-xl-base-1.0"
-        # TODO: fix it
-        converted_model_directory = "/Users/shiyuanzhu/workdir/models/mac"
+        # TODO: download models if not exist
+        converted_model_directory = os.path.join(
+            settings.local_object_storage.path,
+            settings.storage_paths.pretrain_models.format(pretrain_model_id="mac-sdxl-1.0"),
+        )
         compute_unit = "CPU_AND_GPU"
 
         SDP = StableDiffusionXLPipeline if "xl" in model_version else StableDiffusionPipeline

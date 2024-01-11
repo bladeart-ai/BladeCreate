@@ -19,7 +19,7 @@ def get_osm():
 
         osm = FileObjectStorageManager()
     else:
-        raise Exception("Unknown storage", settings.object_storage.model_dump_json(indent=2))
+        raise Exception("Unknown storage", settings.remote_object_storage.model_dump_json(indent=2))
 
     try:
         yield osm

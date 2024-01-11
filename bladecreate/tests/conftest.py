@@ -1,15 +1,9 @@
 import os
 import uuid
 
-import boto3
 import pytest
 
 from bladecreate.data_utils import image_bytes_to_inline_data
-
-
-@pytest.fixture(autouse=True)
-def setup_s3():
-    boto3.setup_default_session(profile_name="shiyuan")
 
 
 @pytest.fixture()

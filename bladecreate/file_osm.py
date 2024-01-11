@@ -8,10 +8,10 @@ from bladecreate.settings import settings
 
 class FileObjectStorageManager(ObjectStorageManager):
     def key_to_storage_path(self, key):
-        return os.path.join(settings.object_storage.path, key)
+        return os.path.join(settings.local_object_storage.path, key)
 
     def storage_path_to_key(self, path):
-        return os.path.relpath(path, settings.object_storage.path)
+        return os.path.relpath(path, settings.local_object_storage.path)
 
     def _create_dirs_if_not_exists(self, path):
         os.makedirs(os.path.dirname(path), exist_ok=True)
