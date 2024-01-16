@@ -13,7 +13,7 @@ import { cs, ps } from '@/store/project-store'
 import { observer, Observer } from 'mobx-react-lite'
 import { action } from 'mobx'
 import { Layer } from '@/gen_client'
-import { color } from './color-utils'
+import { color } from '../lib/color-utils'
 
 export function LayerListPanel() {
   // References:

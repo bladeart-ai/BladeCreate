@@ -5,8 +5,10 @@ import { Link } from 'react-router-dom'
 import { Layout } from '@/components/layout'
 import { useEffect, useState } from 'react'
 import { LoaderDiv } from '@/components/page-loader'
+import { useTranslation } from 'react-i18next'
 
 function ModelsPage() {
+  const { t } = useTranslation()
   const [modelSnapshots, setModelSnapshots] = useState<ModelSnapshot[] | null>(null)
 
   useEffect(() => {
@@ -21,7 +23,7 @@ function ModelsPage() {
     <Layout>
       <div className="inline-flex h-auto w-full items-start justify-start">
         <h1 className="w-full self-stretch text-3xl font-extrabold leading-10 text-black">
-          所有模型
+          {t('All Models')}
         </h1>
         <div className="inline-flex h-auto w-1/3 items-start justify-start gap-2">
           <AddModelFromCivitaiModal />

@@ -1,11 +1,13 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { RouterProvider } from 'react-router-dom'
+import { RouterProvider, createBrowserRouter, createHashRouter } from 'react-router-dom'
 import './tailwind.css'
 import './global.css'
-import { router } from './router'
+import './i18n'
+import { routes } from './routes'
 
 import { configure } from 'mobx'
+import { ELECTRON } from './config'
 
 configure({
   enforceActions: 'always',
@@ -14,6 +16,13 @@ configure({
   observableRequiresReaction: true,
   disableErrorBoundaries: true
 })
+
+let router
+if (ELECTRON) {
+  router = createHashRouter(routes)
+} else {
+  router = createBrowserRouter(routes)
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

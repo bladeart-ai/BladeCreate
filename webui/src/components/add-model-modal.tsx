@@ -10,8 +10,9 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { ImportedModelDetails } from './model'
-import { ModelDetail } from '../context/model'
+import { ImportedModelDetails } from '@/components/model'
+import { ModelDetail } from '@/context/model'
+import { useTranslation } from 'react-i18next'
 
 const fakeModelDetail = {
   modelSnapshot: {
@@ -32,14 +33,15 @@ const fakeModelDetail = {
 } as ModelDetail
 
 export function AddModelFromCivitaiModal() {
+  const { t } = useTranslation()
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>从Civitai导入</Button>
+        <Button>{t('Import Civitai Models')}</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>从Civitai导入</DialogTitle>
+          <DialogTitle>{t('Import Civitai Models')}</DialogTitle>
           <DialogDescription>
             设定Civitai模型的地址，点击检查可用按钮，最后点击确认提交。
           </DialogDescription>
@@ -63,14 +65,15 @@ export function AddModelFromCivitaiModal() {
 }
 
 export function AddModelFromFilesModal() {
+  const { t } = useTranslation()
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>上传模型文件</Button>
+        <Button>{t('Upload Model Files')}</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>上传模型文件</DialogTitle>
+          <DialogTitle>{t('Upload Model Files')}</DialogTitle>
           <DialogDescription>上传模型文件，点击检查可用按钮，最后点击确认提交。</DialogDescription>
         </DialogHeader>
         <div className="w-1000 grid gap-4 py-4">

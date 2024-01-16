@@ -1,0 +1,16 @@
+{
+  "Models": "模型",
+  "Projects": "项目",
+  "Log In": "登陆",
+  "Log Out": "登出",
+  "Sign Up": "注册",
+  "welcome": "欢迎来到BladeCreate!",
+  "intro": "BladeCreate是一个无门槛的创意工具。",
+  "All Projects": "所有项目",
+  "New Project": "新建项目",
+  "All Models": "所有模型",
+  "Import Civitai Models": "导入Civitai模型",
+  "Upload Model Files": "上传模型文件",
+  "WelcomeUser": "欢迎用户{{user}}！",
+  "WelcomeGuestUser": "欢迎游客！"
+}

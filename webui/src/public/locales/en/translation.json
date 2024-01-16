@@ -1,0 +1,16 @@
+{
+  "Models": "Models",
+  "Projects": "Projects",
+  "Log In": "Log In",
+  "Log Out": "Log Out",
+  "Sign Up": "Sign Up",
+  "welcome": "Welcome to BladeCreate!",
+  "intro": "BladeCreate is a creative tool for everyone.",
+  "All Projects": "All Projects",
+  "New Project": "New Project",
+  "All Models": "All Models",
+  "Import Civitai Models": "Import Civitai Models",
+  "Upload Model Files": "Upload Model Files",
+  "WelcomeUser": "Welcome, {{user}}!",
+  "WelcomeGuestUser": "Welcome, Guest!"
+}
