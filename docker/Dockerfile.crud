@@ -20,7 +20,6 @@ COPY bladecreate /workdir/bladecreate/
 RUN pip3 install -e .
 
 ENV BC_ENV="prod"
-ENV BC_SERVER__APIS='["crud"]'
 
 EXPOSE 8080
 

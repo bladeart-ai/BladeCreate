@@ -1,11 +1,12 @@
-import bladecreate.sqlalchemy as sql
+import bladecreate.db.sqlalchemy as sql
 from bladecreate.logging import Logger
+from bladecreate.object_storages.osm import ObjectStorageManager
 from bladecreate.settings import settings
 
 logger = Logger.get_logger(__name__)
 
 
-def get_db():
+def get_db() -> sql.SessionLocal:
     db = sql.SessionLocal()
     try:
         yield db
@@ -13,9 +14,9 @@ def get_db():
         db.close()
 
 
-def get_osm():
+def get_osm() -> ObjectStorageManager:
     if settings.is_file_storage:
-        from bladecreate.file_osm import FileObjectStorageManager
+        from bladecreate.object_storages.file_osm import FileObjectStorageManager
 
         osm = FileObjectStorageManager()
     else:
@@ -25,23 +26,3 @@ def get_osm():
         yield osm
     finally:
         pass
-
-
-def get_sdxl():
-    if settings.gpu_platform is None:
-        return None
-
-    elif settings.gpu_platform.is_cuda:
-        from bladecreate.models.cuda_sd import CUDASDXL
-
-        sdxl = CUDASDXL.instance()
-
-    elif settings.gpu_platform.is_mac:
-        from bladecreate.models.mac_sd import MacSDXL
-
-        sdxl = MacSDXL.instance()
-
-    else:
-        raise Exception(f"GPU platform {settings.gpu_platform} is not supported")
-
-    return sdxl

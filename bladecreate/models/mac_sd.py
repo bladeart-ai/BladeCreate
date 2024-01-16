@@ -16,6 +16,14 @@ class MacSDXL(SDXL):
         logger.info(f"Initializing GPU platform: MAC")
         from python_coreml_stable_diffusion.pipeline import get_coreml_pipe
 
+        # Override logger python_coreml_stable_diffusion.*
+        Logger.get_logger("python_coreml_stable_diffusion", disable=True)
+
+        # Disable progress bars
+        from diffusers.utils.logging import disable_progress_bar
+
+        disable_progress_bar()
+
         model_version = "stabilityai/stable-diffusion-xl-base-1.0"
         # TODO: download models if not exist
         converted_model_directory = os.path.join(
@@ -25,7 +33,6 @@ class MacSDXL(SDXL):
         compute_unit = "CPU_AND_GPU"
 
         SDP = StableDiffusionXLPipeline if "xl" in model_version else StableDiffusionPipeline
-
         pytorch_pipe = SDP.from_pretrained(model_version)
 
         # Get Force Zeros Config if it exists
@@ -43,6 +50,7 @@ class MacSDXL(SDXL):
             force_zeros_for_empty_prompt=force_zeros_for_empty_prompt,
             sources=None,
         )
+        logger.info(f"Pipeline is loaded")
 
         # Run a test generate to initialize everything
         self.generate("haha", "", 128, 128, 1, [-1])

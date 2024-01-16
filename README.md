@@ -6,6 +6,17 @@ Free and open-source cross-platform AI canvas for everyone
 
 ## Why BladeCreate?
 
+- You are a individual designer
+- You run a design studio
+- You are a developer
+
+## Features
+
+- Canvas
+- GPU Types
+- Models
+- Deployment
+
 ## Prerequisites
 
 ## Installation Option 1 - Docker

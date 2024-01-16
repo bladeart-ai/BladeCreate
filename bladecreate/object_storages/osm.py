@@ -3,6 +3,10 @@ from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Set
 
+from bladecreate.logging import Logger
+
+logger = Logger.get_logger(__name__)
+
 
 class ObjectStorageManager:
     def key_to_storage_path(self, key):
@@ -58,7 +62,7 @@ class ObjectStorageManager:
             raise Exception("Key is not a folder.")
 
         objs = self.list_objects(key)
-        print(f"Downloading {len(objs)} files from {key} to {local_dir_path}")
+        logger.debug(f"Downloading {len(objs)} files from {key} to {local_dir_path}")
         return self.download_objects(objs, key, local_dir_path)
 
     def delete_objects_in_folder(self, key):
@@ -71,9 +75,8 @@ class ObjectStorageManager:
         pass
 
     def upload_objects_from_text(self, file_key_to_text):
-        print(f"Uploading text of {len(file_key_to_text)} files")
+        logger.debug(f"Uploading text of {len(file_key_to_text)} files")
 
-        res = {}
         with ThreadPoolExecutor(max_workers=8) as executor:
             future_to_key = {}
             for key in file_key_to_text:
@@ -90,7 +93,6 @@ class ObjectStorageManager:
 
                 if exception:
                     raise exception
-        return res
 
     def upload_object_from_file(self, local_path, key):
         pass
@@ -101,9 +103,8 @@ class ObjectStorageManager:
 
         filenames = [f for f in os.listdir(local_dir) if os.path.isfile(os.path.join(local_dir, f))]
 
-        print(f"Uploading {len(filenames)} files from {local_dir} to {key_prefix}")
+        logger.debug(f"Uploading {len(filenames)} files from {local_dir} to {key_prefix}")
 
-        res = {}
         with ThreadPoolExecutor(max_workers=8) as executor:
             future_to_key = {}
             for filename in filenames:
@@ -116,7 +117,6 @@ class ObjectStorageManager:
 
                 if exception:
                     raise exception
-        return res
 
-    def generate_download_url(self, key):
+    def generate_download_url(self, key) -> str:
         pass

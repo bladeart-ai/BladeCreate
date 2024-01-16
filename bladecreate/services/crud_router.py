@@ -3,14 +3,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-import bladecreate.sqlalchemy as sql
-from bladecreate.db_schemas import empty_uuid
+import bladecreate.db.sqlalchemy as sql
 from bladecreate.dependencies import get_db, get_osm
 from bladecreate.logging import Logger
-from bladecreate.osm import ObjectStorageManager
+from bladecreate.object_storages.osm import ObjectStorageManager
 from bladecreate.schemas import (
     UUID,
-    Generation,
     ImagesURLOrData,
     Layer,
     LayerCreate,
@@ -31,21 +29,16 @@ router = APIRouter(prefix="/api", dependencies=[Depends(get_db), Depends(get_osm
 @router.get("/projects/{user_id}/images", response_model=ImagesURLOrData)
 async def get_image_data_or_url(
     user_id: str,
-    project_uuid: UUID,
     image_uuids: Annotated[list[str], Query()] = [],
     osm: ObjectStorageManager = Depends(get_osm),
 ):
     data = {}
     urls = {}
     for image_uuid in image_uuids:
-        if image_uuid == empty_uuid:
-            continue
-
         try:
             url = osm.generate_download_url(
                 settings.storage_paths.images.format(
                     user_id=user_id,
-                    project_uuid=project_uuid,
                     image_uuid=image_uuid,
                 )
             )
@@ -98,22 +91,24 @@ async def get_project(
     osm: ObjectStorageManager = Depends(get_osm),
 ):
     # Step 1: get project and its layers from DB
-    project, layers = sql.select_project(db, user_id, project_uuid)
+    project, layers, generations = sql.select_project(db, user_id, project_uuid)
     if project is None:
         raise HTTPException(status_code=404, detail="Project not found")
 
     # Step 2: create downloading URL for frontend
     project.layers = {}
+    project.generations = {}
     image_uuids = []
     for layer in layers:
         project.layers[layer.uuid] = layer
         if layer.image_uuid:
             image_uuids.append(layer.image_uuid)
 
-        for g in layer.generations:
-            image_uuids.extend(g.image_uuids)
+    for g in generations:
+        project.generations[g.uuid] = g
+        image_uuids.extend(g.image_uuids)
 
-    project.images = await get_image_data_or_url(user_id, project_uuid, image_uuids, osm)
+    project.images = await get_image_data_or_url(user_id, image_uuids, osm)
 
     return project
 
@@ -138,7 +133,6 @@ async def create_project_layer(
     if body.image_data is not None:
         image_path = settings.storage_paths.images.format(
             user_id=user_id,
-            project_uuid=project_uuid,
             image_uuid=new_layer.uuid,
         )
         osm.upload_object_from_text(
@@ -179,22 +173,4 @@ async def delete_layer(
     res = sql.delete_layer(db, user_id, project_uuid, layer_uuid)
     if res is None:
         raise HTTPException(status_code=404, detail="Layer not found")
-    return res
-
-
-@router.get(
-    "/projects/{user_id}/{project_uuid}/generations/{generation_uuid}",
-    response_model=Generation,
-)
-async def get_generation(
-    user_id: str,
-    project_uuid: UUID,
-    generation_uuid: UUID,
-    db: sql.Session = Depends(get_db),
-):
-    # Step 1: get the entity from the DB if the task ends
-    res = sql.get_generation(db, user_id, project_uuid, generation_uuid)
-    if res is None:
-        raise HTTPException(status_code=404, detail="Generation not found")
-
     return res

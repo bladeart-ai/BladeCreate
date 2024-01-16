@@ -5,12 +5,9 @@ pydantic-settings==2.1.0
 # DB
 sqlalchemy==2.0.25
 
-# # Postgres
-# psycopg2-binary==2.9.9
-
-# # S3
-# boto3==1.33.5
-
 # FastAPI
 fastapi==0.105.0
 uvicorn==0.24.0.post1
+
+# Socket IO
+python-socketio[asyncio_client]==5.11

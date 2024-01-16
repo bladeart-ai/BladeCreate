@@ -6,18 +6,12 @@
       "source.organizeImports": "explicit"
     }
   },
-  "isort.args": [
-    "--profile",
-    "black"
-  ],
+  "isort.args": ["--profile", "black"],
   "python.analysis.autoImportCompletions": true,
   "editor.defaultFormatter": "ms-python.black-formatter",
   "editor.formatOnSave": true,
   "python.terminal.activateEnvInCurrentTerminal": false,
   "editor.wordWrap": "on",
-  "python.analysis.extraPaths": [
-    "./third-parties/ml-stable-diffusion"
-  ],
   "[shellscript]": {
     "editor.defaultFormatter": "foxundermoon.shell-format"
   },
@@ -30,9 +24,7 @@
   "[dockerfile]": {
     "editor.defaultFormatter": "ms-azuretools.vscode-docker"
   },
-  "black-formatter.args": [
-    "--line-length=100"
-  ],
+  "black-formatter.args": ["--line-length=100"],
   "flake8.cwd": "${workspaceFolder}",
   "editor.defaultFoldingRangeProvider": null,
   "[typescriptreact]": {
@@ -48,6 +40,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "[jsonc]": {
-    "editor.defaultFormatter": "vscode.json-language-features"
-  }
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "python.terminal.activateEnvironment": true
 }

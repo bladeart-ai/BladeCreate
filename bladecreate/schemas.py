@@ -33,10 +33,6 @@ class LayerBase(BaseModel):
     rotation: Optional[float] = None
 
 
-class GenerationBase(BaseModel):
-    params: GenerationParams
-
-
 class ProjectMetadata(ProjectMetadataBase):
     model_config = ConfigDict(from_attributes=True)
 
@@ -46,17 +42,6 @@ class ProjectMetadata(ProjectMetadataBase):
     update_time: datetime
 
 
-class Generation(GenerationBase):
-    model_config = ConfigDict(from_attributes=True)
-
-    uuid: UUID
-    create_time: datetime
-    update_time: datetime
-    status: str
-
-    image_uuids: list[UUID]
-
-
 class Layer(LayerBase):
     model_config = ConfigDict(from_attributes=True)
 
@@ -64,21 +49,12 @@ class Layer(LayerBase):
 
     image_uuid: Optional[UUID] = None
 
-    generations: Optional[list[Generation]] = None
+    generations_order: list[UUID] = []
 
 
 class ImagesURLOrData(BaseModel):
     urls: dict[UUID, str]
     data: dict[UUID, str]
-
-
-class Project(ProjectMetadata):
-    model_config = ConfigDict(from_attributes=True)
-
-    layers_order: list[UUID] = []
-    layers: dict[UUID, Layer] = {}
-
-    images: Optional[ImagesURLOrData] = None
 
 
 class ProjectCreate(ProjectMetadataBase):
@@ -100,10 +76,38 @@ class LayerUpdate(LayerBase):
     image_uuid: Optional[UUID] = None
 
 
+class GenerationBase(BaseModel):
+    params: GenerationParams
+
+
+class Generation(GenerationBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    uuid: UUID
+    create_time: datetime
+    update_time: datetime
+    status: str
+
+    image_uuids: list[UUID]
+
+
 class GenerationCreate(GenerationBase):
     uuid: Optional[UUID] = None
-    output_layer_uuid: Optional[UUID] = None
+
+
+class GenerationTask(Generation):
+    user_id: str
 
 
 class GenerationDone(Generation):
+    images: Optional[ImagesURLOrData] = None
+
+
+class Project(ProjectMetadata):
+    model_config = ConfigDict(from_attributes=True)
+
+    layers_order: list[UUID] = []
+    layers: dict[UUID, Layer] = {}
+    generations: dict[UUID, Generation] = {}
+
     images: Optional[ImagesURLOrData] = None

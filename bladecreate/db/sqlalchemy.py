@@ -4,15 +4,16 @@ from uuid import UUID
 
 from pydantic import TypeAdapter
 from sqlalchemy import and_, create_engine, delete, select
-from sqlalchemy.orm import Session, selectinload, sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 from bladecreate import schemas
-from bladecreate.db_schemas import Base, Generation, Layer, Project
+from bladecreate.db.db_schemas import Base, Generation, Layer, Project
 from bladecreate.logging import Logger
 from bladecreate.settings import settings
 
 logger = Logger.get_logger(__name__)
 
+logger.info(f"DB Connecting: {settings.sqlalchemy_url()}")
 connect_args = (
     {"check_same_thread": False} if settings.sqlalchemy_url().startswith("sqlite") else {}
 )
@@ -86,7 +87,9 @@ def update_project(
 
 def select_project(
     db: Session, user_id: str, project_uuid: UUID
-) -> Tuple[Optional[schemas.Project], Optional[list[schemas.Layer]]]:
+) -> Tuple[
+    Optional[schemas.Project], Optional[list[schemas.Layer]], Optional[list[schemas.Generation]]
+]:
     db_obj = db.scalars(
         select(Project).where(
             and_(
@@ -96,12 +99,10 @@ def select_project(
         )
     ).first()
     if db_obj is None:
-        return None, None
+        return None, None, None
 
     layers = db.scalars(
-        select(Layer)
-        .options(selectinload(Layer.generations))
-        .where(
+        select(Layer).where(
             and_(
                 Layer.user_id == user_id,
                 Layer.project_uuid == project_uuid,
@@ -109,9 +110,16 @@ def select_project(
         )
     ).all()
 
-    return TypeAdapter(schemas.Project).validate_python(db_obj), TypeAdapter(
-        list[schemas.Layer]
-    ).validate_python(layers)
+    generations_order = [zip(*layer.generations_order) for layer in layers]
+    generations = db.scalars(
+        select(Generation).filter(Generation.uuid.in_(generations_order))
+    ).all()
+
+    return (
+        TypeAdapter(schemas.Project).validate_python(db_obj),
+        TypeAdapter(list[schemas.Layer]).validate_python(layers),
+        TypeAdapter(list[schemas.Generation]).validate_python(generations),
+    )
 
 
 def create_project_layer(
@@ -233,17 +241,35 @@ def delete_layer(db: Session, user_id: str, project_uuid: UUID, layer_uuid: UUID
     return db_obj[0]
 
 
+def pop_most_recent_generation_task(
+    db: Session,
+) -> schemas.GenerationTask:
+    # TODO: revisit if locking here is implement correctly for concurrency
+    db_obj = db.scalars(
+        select(Generation)
+        .with_for_update(nowait=True)
+        .where(Generation.status == "CREATED")
+        .order_by(Generation.create_time.asc())
+    ).first()
+    if db_obj is None:
+        return None
+
+    db_obj.status = "STARTED"
+    db.commit()
+    db.refresh(db_obj)
+
+    return TypeAdapter(schemas.GenerationTask).validate_python(db_obj)
+
+
 def get_generation(
     db: Session,
     user_id: str,
-    project_uuid: UUID,
     generation_uuid: UUID,
 ) -> schemas.Generation:
     db_obj = db.scalars(
         select(Generation).where(
             and_(
                 Generation.user_id == user_id,
-                Generation.project_uuid == project_uuid,
                 Generation.uuid == generation_uuid,
             )
         )
@@ -251,20 +277,17 @@ def get_generation(
     if db_obj is None:
         return None
 
-    return TypeAdapter(list[schemas.Generation]).validate_python(db_obj)
+    return TypeAdapter(schemas.Generation).validate_python(db_obj)
 
 
 def create_generation(
     db: Session,
     user_id: str,
-    project_uuid: UUID,
     req: schemas.GenerationCreate,
 ) -> Optional[schemas.Generation]:
     db_obj = Generation(
         uuid=req.uuid,
         user_id=user_id,
-        project_uuid=project_uuid,
-        layer_uuid=req.output_layer_uuid,
         status="CREATED",
         params=req.params.model_dump(),
         image_uuids=[],
@@ -277,16 +300,10 @@ def create_generation(
 
 def update_generation_succeeded(
     db: Session,
-    g: schemas.Generation,
+    g_uuid: UUID,
     image_uuids: list[UUID],
 ) -> schemas.Generation:
-    db_obj = db.scalars(
-        select(Generation).where(
-            and_(
-                Generation.uuid == g.uuid,
-            )
-        )
-    ).first()
+    db_obj = db.scalars(select(Generation).where(Generation.uuid == g_uuid)).first()
     if db_obj is None:
         return None
 

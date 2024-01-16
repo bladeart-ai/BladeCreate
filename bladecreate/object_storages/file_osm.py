@@ -2,8 +2,11 @@ import os
 import shutil
 from typing import Set
 
-from bladecreate.osm import ObjectStorageManager
+from bladecreate.logging import Logger
+from bladecreate.object_storages.osm import ObjectStorageManager
 from bladecreate.settings import settings
+
+logger = Logger.get_logger(__name__)
 
 
 class FileObjectStorageManager(ObjectStorageManager):
@@ -47,7 +50,7 @@ class FileObjectStorageManager(ObjectStorageManager):
         self._create_dirs_if_not_exists(local_path)
         if os.path.exists(local_path):
             if if_exist_ignore:
-                print(
+                logger.debug(
                     "Skipping downloading",
                     key,
                     "to",
@@ -65,7 +68,7 @@ class FileObjectStorageManager(ObjectStorageManager):
             raise Exception("Key is not a folder.")
 
         objs = self.list_objects(key)
-        print(f"Deleting {len(objs)} files in {key}")
+        logger.debug(f"Deleting {len(objs)} files in {key}")
         if len(objs) == 0:
             return
 
@@ -81,14 +84,14 @@ class FileObjectStorageManager(ObjectStorageManager):
                 shutil.rmtree(dst_path)
 
     def upload_object_from_bytes(self, file_key, bytes):
-        print(f"Uploading bytes to {file_key}")
+        logger.debug(f"Uploading bytes to {file_key}")
         dst_path = self.key_to_storage_path(file_key)
         self._create_dirs_if_not_exists(dst_path)
         with open(dst_path, "xb") as f:
             f.write(bytes)
 
     def upload_object_from_text(self, file_key, text: str):
-        print(f"Uploading text to {file_key}")
+        logger.debug(f"Uploading text to {file_key}")
         dst_path = self.key_to_storage_path(file_key)
         self._create_dirs_if_not_exists(dst_path)
         with open(dst_path, "x") as f:

@@ -14,9 +14,7 @@ RUN pip3 install -e .
 
 ENV BC_ENV="dev"
 ENV BC_GPU_PLATFORM=cuda
-ENV BC_SERVER__APIS='["generate"]'
 ENV BC_SERVER__PORT=8081
-ENV HF_HOME=/tmp/hf_home
 
 EXPOSE 8081
 

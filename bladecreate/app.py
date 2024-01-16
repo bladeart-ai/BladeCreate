@@ -6,6 +6,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from bladecreate.logging import Logger
+from bladecreate.services.crud_router import router as crud_router
+from bladecreate.services.generate_router import router as generate_router
+from bladecreate.services.worker_sio import app as sio_app
 from bladecreate.settings import settings, uvicorn_logging
 
 logger = Logger.get_logger(__name__)
@@ -16,7 +19,7 @@ if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
     logger.info("running in a PyInstaller bundle")
     multiprocessing.freeze_support()
 else:
-    logger.info("running in a normal Python process")
+    logger.info("running in a unbundled Python process")
     pass
 
 app = FastAPI(generate_unique_id_function=lambda route: f"{route.name}")
@@ -27,17 +30,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-if settings.server.is_crud_on:
-    from bladecreate.crud_router import router as crud_router
-
-    app.include_router(crud_router)
-
-if settings.server.is_generate_on:
-    from bladecreate.generate_router import router as generate_router
-
-    app.include_router(generate_router)
+app.include_router(crud_router)
+app.include_router(generate_router)
+app.mount("/api", sio_app)
 
 
 @app.get("/health", response_model=None)

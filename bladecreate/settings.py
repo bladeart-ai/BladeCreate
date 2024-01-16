@@ -1,7 +1,8 @@
+import os
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import BaseModel, Field, FilePath, NewPath
+from pydantic import BaseModel, Field, FilePath, NewPath, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,6 +19,13 @@ class SQLiteDatabase(BaseModel):
     path: Union[NewPath, FilePath] = Field(
         default="/tmp/bladecreate/bladecreate.db", union_mode="left_to_right"
     )
+
+    @model_validator(mode="after")
+    def create_folders_if_not_exists(self):
+        dirpath = os.path.dirname(self.path)
+        if not os.path.exists(dirpath):
+            os.makedirs(dirpath)
+        return self
 
 
 class PostgresDatabase(BaseModel):
@@ -40,7 +48,7 @@ class StoragePaths(BaseModel):
     sample_sets: str = "sample_sets/{user_id}/{task_id}/"
     pretrain_models: str = "pretrain_models/{pretrain_model_id}"
     out_models: str = "out_models/{user_id}/{task_id}/"
-    images: str = "images/{user_id}/{project_uuid}/{image_uuid}"
+    images: str = "images/{user_id}/{image_uuid}"
 
 
 class GPUPlatformEnum(str, Enum):
@@ -57,24 +65,10 @@ class GPUPlatformEnum(str, Enum):
         return self == GPUPlatformEnum.MAC
 
 
-class APISwitchEnum(str, Enum):
-    CRUD = "crud"
-    GENERATE = "generate"
-
-
 class Server(BaseModel):
-    apis: list[APISwitchEnum] = Field(default=[APISwitchEnum.CRUD])
     host: str = Field(default="0.0.0.0")
     port: int = Field(default=8080)
     reload: bool = Field(default=True)
-
-    @property
-    def is_crud_on(self):
-        return APISwitchEnum.CRUD in self.apis
-
-    @property
-    def is_generate_on(self):
-        return APISwitchEnum.GENERATE in self.apis
 
 
 class Settings(BaseSettings):
@@ -116,17 +110,20 @@ class Settings(BaseSettings):
     def is_s3_storage(self):
         return isinstance(self.remote_object_storage, S3Storage)
 
-    def init_prod(self):
-        self.server.host = "127.0.0.1"
-        self.server.reload = False
-        self.logging = Logging(level="info")
+    def set_hf(self):
+        if "HF_HOME" not in os.environ:
+            os.environ["HF_HOME"] = os.path.join(self.local_object_storage.path, "huggingface")
+
+    def init(self):
+        if self.env == EnvEnum.prod:
+            self.server.host = "127.0.0.1"
+            self.server.reload = False
+            self.logging = Logging(level="info")
+        self.set_hf()
 
 
 settings = Settings()
-if settings.env == EnvEnum.prod:
-    settings.init_prod()
-
-# TODO: override HG_HOME with values from settings
+settings.init()
 
 
 uvicorn_logging = {
@@ -135,12 +132,12 @@ uvicorn_logging = {
     "formatters": {
         "default": {
             "()": "uvicorn.logging.DefaultFormatter",
-            "fmt": "%(asctime)s : %(levelprefix)s %(message)s",
+            "fmt": "%(asctime)s - %(levelprefix)s - %(processName)s: %(message)s",
             "use_colors": None,
         },
         "access": {
             "()": "uvicorn.logging.AccessFormatter",
-            "fmt": '%(asctime)s : %(levelprefix)s %(client_addr)s - "%(request_line)s" %(status_code)s',  # noqa: E501
+            "fmt": '%(asctime)s - %(levelprefix)s - %(processName)s - %(client_addr)s - "%(request_line)s" %(status_code)s',  # noqa: E501
         },
     },
     "handlers": {

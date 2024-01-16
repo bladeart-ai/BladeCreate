@@ -1,6 +1,6 @@
 import os
 
-from bladecreate.file_osm import FileObjectStorageManager
+from bladecreate.object_storages.file_osm import FileObjectStorageManager
 
 
 def test_file_osm(
