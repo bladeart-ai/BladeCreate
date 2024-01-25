@@ -14,7 +14,7 @@ function ProtectedRoute() {
   const { isAuthenticated, isLoading, user } = useAuth0()
 
   if (IS_DEV) {
-    console.log('user', user)
+    console.log('Current auth0 user is', user)
   }
 
   // Auth is disabled and guest is disabled, do not initialize auth context

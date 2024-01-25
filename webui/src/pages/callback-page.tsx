@@ -1,6 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react'
 import React from 'react'
-import { NavBar } from '@/components/nav'
+import { NavBar } from '@/components/layout-top'
 import { Layout } from '@/components/layout'
 
 export const CallbackPage: React.FC = () => {
@@ -21,9 +21,5 @@ export const CallbackPage: React.FC = () => {
     )
   }
 
-  return (
-    <NavBar>
-      <div />
-    </NavBar>
-  )
+  return <NavBar userDropDown={false} />
 }

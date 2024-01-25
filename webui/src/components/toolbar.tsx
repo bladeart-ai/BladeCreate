@@ -1,6 +1,5 @@
 import { TextSpan } from '@/components/text'
 import { DownloadIcon, UploadIcon } from '@radix-ui/react-icons'
-import { Button } from '@/components/ui/button'
 import { cs, ps } from '@/store/project-store'
 import { observer } from 'mobx-react-lite'
 import { ProjectContext, ProjectContextType } from '@/context/project-context'
@@ -8,7 +7,8 @@ import { useContext, useState } from 'react'
 import { action } from 'mobx'
 import { ImageListType } from 'react-images-uploading'
 import ImageUploading from 'react-images-uploading'
-import { NavBarLogo } from './nav'
+import { ShrinkDiv, TopBar, UserDropdown } from './layout-top'
+import { IconButton } from './buttons'
 
 export const Toolbar = observer(() => {
   const ctx = useContext(ProjectContext) as ProjectContextType
@@ -28,7 +28,7 @@ export const Toolbar = observer(() => {
     }
   )
 
-  const handleExport = () => {
+  const handleExport = action(() => {
     const url = ps.exportLayersToDataURL(ctx.imagesLayerRef)
     const link = document.createElement('a')
     link.download = ps.project?.name + '.png'
@@ -36,13 +36,11 @@ export const Toolbar = observer(() => {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-  }
+  })
 
   return (
-    <div className="fixed top-0 z-50 inline-flex h-12 w-full items-center justify-start gap-1 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex shrink grow basis-0 items-center justify-start self-stretch">
-        <NavBarLogo />
-      </div>
+    <TopBar>
+      <ShrinkDiv />
       <ImageUploading
         dataURLKey="data_url"
         maxNumber={10}
@@ -52,18 +50,14 @@ export const Toolbar = observer(() => {
       >
         {({ onImageUpload }) => (
           <div className="upload__image-wrapper">
-            <Button onClick={onImageUpload} size="icon" variant="ghost">
-              <UploadIcon className="m-2.5" />
-            </Button>
+            <IconButton icon={UploadIcon} onClick={onImageUpload} />
           </div>
         )}
       </ImageUploading>
-      <div className="flex shrink grow basis-0 items-center justify-end self-stretch">
-        <Button onClick={handleExport} size="icon" variant="ghost">
-          <DownloadIcon className="m-2.5" />
-        </Button>
-        <TextSpan className="p-2" text={Math.floor(cs.scale * 100) + '%'} />
-      </div>
-    </div>
+      <ShrinkDiv />
+      <IconButton icon={DownloadIcon} onClick={handleExport} />
+      <TextSpan className="p-2" text={Math.floor(cs.scale * 100) + '%'} />
+      <UserDropdown />
+    </TopBar>
   )
 })
