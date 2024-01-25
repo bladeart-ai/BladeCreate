@@ -8,5 +8,4 @@ import type { GenerationParams } from './GenerationParams'
 export type GenerationCreate = {
   params: GenerationParams
   uuid?: string | null
-  output_layer_uuid?: string | null
 }

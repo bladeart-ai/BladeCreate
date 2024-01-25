@@ -1,13 +1,13 @@
 import { action, makeAutoObservable } from 'mobx'
 import { User } from '@auth0/auth0-react'
 import { v4 as uuidv4 } from 'uuid'
-import { DefaultService, ProjectMetadata } from '@/gen_client'
+import { DefaultService, Project } from '@/gen_client'
 
 class ProjectsStore {
   fetching: boolean = true
   user: User | null = null
   userID: string = ''
-  projects: ProjectMetadata[] = []
+  projects: Project[] = []
 
   constructor() {
     makeAutoObservable(this)
@@ -25,13 +25,10 @@ class ProjectsStore {
     this.fetching = true
     this.userID = user.sub || ''
 
-    DefaultService.getProjectsMetadata(this.userID).then(
-      action('fetchProjectsSuccess', (projects) => {
+    DefaultService.getProjects(this.userID).then(
+      action((projects) => {
         this.projects = projects
         this.fetching = false
-      }),
-      action('fetchProjectsError', (error) => {
-        console.error('fetchProjectsError', error)
       })
     )
   }
@@ -41,11 +38,12 @@ class ProjectsStore {
     this.projects.unshift({
       ...newProject,
 
+      data: {},
       create_time: '',
       update_time: ''
     })
     DefaultService.createProject(this.userID, newProject).then(
-      action('createProjectSuccess', (res) => {
+      action((res) => {
         this.projects.map((project) => {
           if (project.uuid == res.uuid) {
             project.create_time = res.create_time
@@ -54,9 +52,6 @@ class ProjectsStore {
           }
           return project
         })
-      }),
-      action('createProjectError', (error) => {
-        console.error('createProjectError', error)
       })
     )
   }

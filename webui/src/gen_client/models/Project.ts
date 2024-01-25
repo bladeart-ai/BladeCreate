@@ -3,15 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { ImagesURLOrData } from './ImagesURLOrData'
-import type { Layer } from './Layer'
+import type { ProjectData } from './ProjectData'
 
 export type Project = {
   uuid: string
-  name: string
   create_time: string
   update_time: string
-  layers_order?: Array<string>
-  layers?: Record<string, Layer>
-  images?: ImagesURLOrData | null
+  name: string
+  data: ProjectData
 }

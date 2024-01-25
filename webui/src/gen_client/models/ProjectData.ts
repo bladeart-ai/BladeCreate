@@ -3,9 +3,9 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type ProjectMetadata = {
-  uuid: string
-  name: string
-  create_time: string
-  update_time: string
+import type { Layer } from './Layer'
+
+export type ProjectData = {
+  layers_order?: Array<string>
+  layers?: Record<string, Layer>
 }

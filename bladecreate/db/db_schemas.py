@@ -1,6 +1,5 @@
 import datetime
 import uuid
-from typing import Optional
 from uuid import UUID
 
 from sqlalchemy import JSON, Boolean, Column, ForeignKey, Integer, String
@@ -45,25 +44,7 @@ class Project(Base):
 
     create_time: Mapped[create_time]
     update_time: Mapped[update_time]
-    layers_order: Mapped[pickable_uuid_list]
-
-
-class Layer(Base):
-    __tablename__ = "layers"
-
-    uuid: Mapped[UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
-    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
-    project_uuid: Mapped[UUID] = mapped_column(ForeignKey("projects.uuid"), index=True)
-
-    name: Mapped[str] = mapped_column(String(128))
-    x: Mapped[Optional[float]]
-    y: Mapped[Optional[float]]
-    width: Mapped[Optional[float]]
-    height: Mapped[Optional[float]]
-    rotation: Mapped[Optional[float]]
-    image_uuid: Mapped[UUID]
-
-    generations_order: Mapped[pickable_uuid_list]
+    data: Mapped[pickable_dict]
 
 
 class Generation(Base):

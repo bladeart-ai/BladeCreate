@@ -4,7 +4,7 @@ import { Layer as LayerComp, Rect, Stage, Transformer, Image } from 'react-konva
 import Konva from 'konva'
 import useImage from 'use-image'
 import { Vector2d } from 'konva/lib/types'
-import { action, reaction } from 'mobx'
+import { action, reaction, toJS } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { ProjectContext, ProjectContextType } from '@/context/project-context'
 import { Layer } from '@/gen_client'
@@ -12,6 +12,8 @@ import { Layer } from '@/gen_client'
 const TransformableImage = observer(({ layer }: { layer: Layer }) => {
   const imageURL = ps.image_data[layer.image_uuid || ''] || ''
   const [image, status] = useImage(imageURL)
+
+  if (imageURL == '') console.error('error empty image', toJS(layer))
 
   if (status !== 'loaded') {
     return <></>

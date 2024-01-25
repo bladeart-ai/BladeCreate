@@ -1,13 +1,18 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
 
-class ProjectMetadataBase(BaseModel):
-    pass
+class ImagesData(BaseModel):
+    data: dict[UUID, str]
+
+
+class ImagesURLOrData(BaseModel):
+    urls: dict[UUID, str]
+    data: dict[UUID, str]
 
 
 class HWRatioEnum(str, Enum):
@@ -22,58 +27,6 @@ class GenerationParams(BaseModel):
     h_w_ratio: Optional[HWRatioEnum] = "4:3"
     output_number: Optional[int] = 1
     seeds: Optional[list[int]] = None
-
-
-class LayerBase(BaseModel):
-    name: Optional[str] = None
-    x: Optional[float] = None
-    y: Optional[float] = None
-    width: Optional[float] = None
-    height: Optional[float] = None
-    rotation: Optional[float] = None
-
-
-class ProjectMetadata(ProjectMetadataBase):
-    model_config = ConfigDict(from_attributes=True)
-
-    uuid: UUID
-    name: str
-    create_time: datetime
-    update_time: datetime
-
-
-class Layer(LayerBase):
-    model_config = ConfigDict(from_attributes=True)
-
-    uuid: UUID
-
-    image_uuid: Optional[UUID] = None
-
-    generations_order: list[UUID] = []
-
-
-class ImagesURLOrData(BaseModel):
-    urls: dict[UUID, str]
-    data: dict[UUID, str]
-
-
-class ProjectCreate(ProjectMetadataBase):
-    uuid: Optional[UUID] = None
-    name: Optional[str] = ""
-
-
-class ProjectUpdate(BaseModel):
-    name: Optional[str] = ""
-    layers_order: Optional[list[UUID]] = None
-
-
-class LayerCreate(LayerBase):
-    uuid: Optional[UUID] = None
-    image_data: Optional[str] = None
-
-
-class LayerUpdate(LayerBase):
-    image_uuid: Optional[UUID] = None
 
 
 class GenerationBase(BaseModel):
@@ -103,11 +56,47 @@ class GenerationDone(Generation):
     images: Optional[ImagesURLOrData] = None
 
 
-class Project(ProjectMetadata):
+class Layer(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    uuid: UUID
+
+    name: Optional[str] = None
+    x: Optional[float] = None
+    y: Optional[float] = None
+    width: Optional[float] = None
+    height: Optional[float] = None
+    rotation: Optional[float] = None
+
+    image_uuid: Optional[UUID] = None
+    generations: list[Generation] = []
+
+
+class ProjectData(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     layers_order: list[UUID] = []
     layers: dict[UUID, Layer] = {}
-    generations: dict[UUID, Generation] = {}
 
-    images: Optional[ImagesURLOrData] = None
+
+class Project(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    uuid: UUID
+    create_time: datetime
+    update_time: datetime
+
+    name: str
+    data: ProjectData
+
+
+class ProjectCreate(BaseModel):
+    uuid: Optional[UUID] = None
+
+    name: str
+    data: dict[str, Any] = {}  # Not typed to make openapi generator not generate duplicate types
+
+
+class ProjectUpdate(BaseModel):
+    name: str = ""
+    data: dict[str, Any] = {}  # Not typed to make openapi generator not generate duplicate types

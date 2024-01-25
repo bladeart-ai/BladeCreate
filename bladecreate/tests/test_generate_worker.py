@@ -146,10 +146,8 @@ def test_generate_worker(db: sql.SessionLocal, user_id: str):
             ),
         ),
     )
-    g_get = sql.get_generation(db, user_id, g1.uuid)
-    assert g1 == g_get
-    g_get = sql.get_generation(db, user_id, g2.uuid)
-    assert g2 == g_get
+    g_get = sql.get_generations(db, user_id, [g1.uuid, g2.uuid])
+    assert g1, g2 == g_get
 
     expected = [
         "Worker is connected",

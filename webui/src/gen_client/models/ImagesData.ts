@@ -3,8 +3,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export type ProjectCreate = {
-  uuid?: string | null
-  name: string
-  data?: Record<string, any>
+export type ImagesData = {
+  data: Record<string, string>
 }

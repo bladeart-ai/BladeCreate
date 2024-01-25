@@ -4,14 +4,10 @@
 /* eslint-disable */
 import type { Generation } from '../models/Generation'
 import type { GenerationCreate } from '../models/GenerationCreate'
-import type { GenerationDone } from '../models/GenerationDone'
+import type { ImagesData } from '../models/ImagesData'
 import type { ImagesURLOrData } from '../models/ImagesURLOrData'
-import type { Layer } from '../models/Layer'
-import type { LayerCreate } from '../models/LayerCreate'
-import type { LayerUpdate } from '../models/LayerUpdate'
 import type { Project } from '../models/Project'
 import type { ProjectCreate } from '../models/ProjectCreate'
-import type { ProjectMetadata } from '../models/ProjectMetadata'
 import type { ProjectUpdate } from '../models/ProjectUpdate'
 
 import type { CancelablePromise } from '../core/CancelablePromise'
@@ -22,24 +18,21 @@ export class DefaultService {
   /**
    * Get Image Data Or Url
    * @param userId
-   * @param projectUuid
    * @param imageUuids
    * @returns ImagesURLOrData Successful Response
    * @throws ApiError
    */
   public static getImageDataOrUrl(
     userId: string,
-    projectUuid: string,
     imageUuids?: Array<string>
   ): CancelablePromise<ImagesURLOrData> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/projects/{user_id}/images',
+      url: '/api/images/{user_id}',
       path: {
         user_id: userId
       },
       query: {
-        project_uuid: projectUuid,
         image_uuids: imageUuids
       },
       errors: {
@@ -49,16 +42,38 @@ export class DefaultService {
   }
 
   /**
-   * Get Projects Metadata
+   * Upload Images
    * @param userId
-   * @param uuids
-   * @returns ProjectMetadata Successful Response
+   * @param requestBody
+   * @returns any Successful Response
    * @throws ApiError
    */
-  public static getProjectsMetadata(
+  public static uploadImages(userId: string, requestBody: ImagesData): CancelablePromise<any> {
+    return __request(OpenAPI, {
+      method: 'POST',
+      url: '/api/images/{user_id}',
+      path: {
+        user_id: userId
+      },
+      body: requestBody,
+      mediaType: 'application/json',
+      errors: {
+        422: `Validation Error`
+      }
+    })
+  }
+
+  /**
+   * Get Projects
+   * @param userId
+   * @param uuids
+   * @returns Project Successful Response
+   * @throws ApiError
+   */
+  public static getProjects(
     userId: string,
     uuids?: Array<string>
-  ): CancelablePromise<Array<ProjectMetadata>> {
+  ): CancelablePromise<Array<Project>> {
     return __request(OpenAPI, {
       method: 'GET',
       url: '/api/projects/{user_id}',
@@ -78,13 +93,13 @@ export class DefaultService {
    * Create Project
    * @param userId
    * @param requestBody
-   * @returns ProjectMetadata Successful Response
+   * @returns Project Successful Response
    * @throws ApiError
    */
   public static createProject(
     userId: string,
     requestBody: ProjectCreate
-  ): CancelablePromise<ProjectMetadata> {
+  ): CancelablePromise<Project> {
     return __request(OpenAPI, {
       method: 'POST',
       url: '/api/projects/{user_id}',
@@ -93,6 +108,27 @@ export class DefaultService {
       },
       body: requestBody,
       mediaType: 'application/json',
+      errors: {
+        422: `Validation Error`
+      }
+    })
+  }
+
+  /**
+   * Get Project
+   * @param userId
+   * @param projectUuid
+   * @returns Project Successful Response
+   * @throws ApiError
+   */
+  public static getProject(userId: string, projectUuid: string): CancelablePromise<Project> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/api/projects/{user_id}/{project_uuid}',
+      path: {
+        user_id: userId,
+        project_uuid: projectUuid
+      },
       errors: {
         422: `Validation Error`
       }
@@ -128,132 +164,24 @@ export class DefaultService {
   }
 
   /**
-   * Get Project
+   * Get Generations
    * @param userId
-   * @param projectUuid
-   * @returns Project Successful Response
-   * @throws ApiError
-   */
-  public static getProject(userId: string, projectUuid: string): CancelablePromise<Project> {
-    return __request(OpenAPI, {
-      method: 'GET',
-      url: '/api/projects/{user_id}/{project_uuid}',
-      path: {
-        user_id: userId,
-        project_uuid: projectUuid
-      },
-      errors: {
-        422: `Validation Error`
-      }
-    })
-  }
-
-  /**
-   * Create Project Layer
-   * @param userId
-   * @param projectUuid
-   * @param requestBody
-   * @returns Layer Successful Response
-   * @throws ApiError
-   */
-  public static createProjectLayer(
-    userId: string,
-    projectUuid: string,
-    requestBody: LayerCreate
-  ): CancelablePromise<Layer> {
-    return __request(OpenAPI, {
-      method: 'POST',
-      url: '/api/projects/{user_id}/{project_uuid}/layers',
-      path: {
-        user_id: userId,
-        project_uuid: projectUuid
-      },
-      body: requestBody,
-      mediaType: 'application/json',
-      errors: {
-        422: `Validation Error`
-      }
-    })
-  }
-
-  /**
-   * Update Project Layer
-   * @param userId
-   * @param projectUuid
-   * @param layerUuid
-   * @param requestBody
-   * @returns Layer Successful Response
-   * @throws ApiError
-   */
-  public static updateProjectLayer(
-    userId: string,
-    projectUuid: string,
-    layerUuid: string,
-    requestBody: LayerUpdate
-  ): CancelablePromise<Layer> {
-    return __request(OpenAPI, {
-      method: 'PUT',
-      url: '/api/projects/{user_id}/{project_uuid}/layers/{layer_uuid}',
-      path: {
-        user_id: userId,
-        project_uuid: projectUuid,
-        layer_uuid: layerUuid
-      },
-      body: requestBody,
-      mediaType: 'application/json',
-      errors: {
-        422: `Validation Error`
-      }
-    })
-  }
-
-  /**
-   * Delete Layer
-   * @param userId
-   * @param projectUuid
-   * @param layerUuid
-   * @returns string Successful Response
-   * @throws ApiError
-   */
-  public static deleteLayer(
-    userId: string,
-    projectUuid: string,
-    layerUuid: string
-  ): CancelablePromise<string> {
-    return __request(OpenAPI, {
-      method: 'DELETE',
-      url: '/api/projects/{user_id}/{project_uuid}/layers/{layer_uuid}',
-      path: {
-        user_id: userId,
-        project_uuid: projectUuid,
-        layer_uuid: layerUuid
-      },
-      errors: {
-        422: `Validation Error`
-      }
-    })
-  }
-
-  /**
-   * Get Generation
-   * @param userId
-   * @param projectUuid
-   * @param generationUuid
+   * @param generationUuids
    * @returns Generation Successful Response
    * @throws ApiError
    */
-  public static getGeneration(
+  public static getGenerations(
     userId: string,
-    projectUuid: string,
-    generationUuid: string
-  ): CancelablePromise<Generation> {
+    generationUuids?: Array<string>
+  ): CancelablePromise<Array<Generation>> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/projects/{user_id}/{project_uuid}/generations/{generation_uuid}',
+      url: '/api/generations/{user_id}/{generation_uuid}',
       path: {
-        user_id: userId,
-        project_uuid: projectUuid,
-        generation_uuid: generationUuid
+        user_id: userId
+      },
+      query: {
+        generation_uuids: generationUuids
       },
       errors: {
         422: `Validation Error`
@@ -262,24 +190,21 @@ export class DefaultService {
   }
 
   /**
-   * Generate
+   * Create Generation
    * @param userId
-   * @param projectUuid
    * @param requestBody
-   * @returns GenerationDone Successful Response
+   * @returns Generation Successful Response
    * @throws ApiError
    */
-  public static generate(
+  public static createGeneration(
     userId: string,
-    projectUuid: string,
     requestBody: GenerationCreate
-  ): CancelablePromise<GenerationDone> {
+  ): CancelablePromise<Generation> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/projects/{user_id}/{project_uuid}/generate',
+      url: '/api/generations/{user_id}',
       path: {
-        user_id: userId,
-        project_uuid: projectUuid
+        user_id: userId
       },
       body: requestBody,
       mediaType: 'application/json',

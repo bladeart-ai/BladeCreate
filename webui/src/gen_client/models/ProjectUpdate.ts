@@ -4,6 +4,6 @@
 /* eslint-disable */
 
 export type ProjectUpdate = {
-  name?: string | null
-  layers_order?: Array<string> | null
+  name?: string
+  data?: Record<string, any>
 }

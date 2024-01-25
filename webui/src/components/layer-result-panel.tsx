@@ -6,14 +6,13 @@ const GenerationProgress = observer(({ layer }: { layer: Layer }) => {
   // TODO: figure out UX, build it
   // Thoughts：每个任务单独跟踪进度，一个图层可以对应多种任务
   // 任务可以是单次的，也可以是streaming的
-
   if (!layer.generations) {
     return <></>
   }
 
   return (
     <div>
-      {layer.generations?.map((g) => {
+      {layer.generations.map((g) => {
         if (g.status !== 'SUCCEEDED') {
           return (
             <div key={'generation_progress' + g.uuid}>
@@ -88,13 +87,15 @@ const GenerateResultsArea = observer(({ layer }: { layer: Layer }) => {
 export const LayerResultPanel = observer(() => {
   return (
     <div className="h-full w-full pl-0 pr-1">
-      {cs.selectedIDs.length === 1 && ps.layers[cs.selectedIDs[0]] ? (
-        <>
-          <GenerationProgress layer={ps.layers[cs.selectedIDs[0]]} />
-          <GenerateResultsArea layer={ps.layers[cs.selectedIDs[0]]} />
-        </>
+      {cs.selectedNum === 1 ? (
+        cs.selectedLayers[0] && (
+          <>
+            <GenerationProgress layer={cs.selectedLayers[0]} />
+            <GenerateResultsArea layer={cs.selectedLayers[0]} />
+          </>
+        )
       ) : (
-        <p>选中了{cs.selectedIDs.length}个图层</p>
+        <p>选中了{cs.selectedNum}个图层</p>
       )}
     </div>
   )

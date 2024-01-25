@@ -1,7 +1,7 @@
 # coding=utf-8
-from uuid import UUID
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 import bladecreate.db.sqlalchemy as sql
 from bladecreate.dependencies import get_db, get_osm
@@ -23,16 +23,15 @@ router = APIRouter(
 
 @router.get(
     "/generations/{user_id}/{generation_uuid}",
-    response_model=Generation,
+    response_model=list[Generation],
 )
-async def get_generation(
+async def get_generations(
     user_id: str,
-    generation_uuid: UUID,
+    generation_uuids: Annotated[list[str], Query()] = [],
     db: sql.Session = Depends(get_db),
 ):
-    # Step 1: get the entity from the DB if the task ends
-    res = sql.get_generation(db, user_id, generation_uuid)
-    if res is None:
+    res = sql.get_generations(db, user_id, generation_uuids)
+    if len(res) == 0:
         raise HTTPException(status_code=404, detail="Generation not found")
 
     return res

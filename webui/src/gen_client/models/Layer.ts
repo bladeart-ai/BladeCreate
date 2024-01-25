@@ -6,13 +6,13 @@
 import type { Generation } from './Generation'
 
 export type Layer = {
+  uuid: string
   name?: string | null
   x?: number | null
   y?: number | null
   width?: number | null
   height?: number | null
   rotation?: number | null
-  uuid: string
   image_uuid?: string | null
-  generations?: Array<Generation> | null
+  generations?: Array<Generation>
 }
