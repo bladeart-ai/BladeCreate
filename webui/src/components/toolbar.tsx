@@ -7,7 +7,7 @@ import { useContext, useState } from 'react'
 import { action } from 'mobx'
 import { ImageListType } from 'react-images-uploading'
 import ImageUploading from 'react-images-uploading'
-import { ShrinkDiv, TopBar, UserDropdown } from './layout-top'
+import { ShrinkDiv, TopBar, UserDropdown, ClusterStatusDropdown } from './layout-top'
 import { IconButton } from './buttons'
 
 export const Toolbar = observer(() => {
@@ -22,7 +22,7 @@ export const Toolbar = observer(() => {
         if (!name) {
           name = ''
         }
-        ps.createLayerFromLocalImage(name, imageList[i].data_url)
+        ps.createLayer(undefined, name, imageList[i].data_url)
       })
       setUploadImageBuffer([])
     }
@@ -57,6 +57,7 @@ export const Toolbar = observer(() => {
       <ShrinkDiv />
       <IconButton icon={DownloadIcon} onClick={handleExport} />
       <TextSpan className="p-2" text={Math.floor(cs.scale * 100) + '%'} />
+      <ClusterStatusDropdown />
       <UserDropdown />
     </TopBar>
   )

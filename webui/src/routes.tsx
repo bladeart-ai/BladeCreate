@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import ErrorPage from './pages/error'
-import { AuthenticationPage } from './pages/auth'
-import { CallbackPage } from './pages/callback-page'
 import { Auth0ProviderWithNavigate } from './auth0-provoder-with-navigate'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
@@ -64,26 +62,12 @@ export const routes = [
     element: <Auth0ProviderWithNavigate />,
     errorElement: <ErrorPage />,
     children: [
-      { path: '/login', element: <AuthenticationPage /> },
-      { path: '/callback', element: <CallbackPage /> },
       {
         element: <ProtectedRoute />,
         children: [
           {
             index: true,
-            lazy: () => import('./pages/welcome')
-          },
-          {
-            path: 'models',
-            lazy: () => import('./pages/models')
-          },
-          {
-            path: 'models/:modelUID',
-            lazy: () => import('./pages/model-detail')
-          },
-          {
-            path: 'models/:modelUID/:versionUID',
-            lazy: () => import('./pages/model-detail')
+            lazy: () => import('./pages/projects')
           },
           {
             path: 'projects',

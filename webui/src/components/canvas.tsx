@@ -10,7 +10,7 @@ import { ProjectContext, ProjectContextType } from '@/context/project-context'
 import { Layer } from '@/gen_client'
 
 const TransformableImage = observer(({ layer }: { layer: Layer }) => {
-  const imageURL = ps.image_data[layer.image_uuid || ''] || ''
+  const imageURL = ps.imageData[layer.image_uuid || ''] || ''
   const [image, status] = useImage(imageURL)
 
   if (imageURL == '') console.error('error empty image', toJS(layer))

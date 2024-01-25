@@ -59,10 +59,10 @@ const GenerateResultsArea = observer(({ layer }: { layer: Layer }) => {
     return (
       <div className="relative inline-flex h-full w-full flex-wrap items-start justify-center gap-1 overflow-y-scroll rounded p-1 shadow">
         {g.image_uuids.flatMap((uuid) => {
-          if (ps.image_data[uuid]) {
+          if (ps.imageData[uuid]) {
             return (
               <GenerationImageCard
-                imageSrc={ps.image_data[uuid]}
+                imageSrc={ps.imageData[uuid]}
                 imageUUID={uuid}
                 key={'generation-image-' + uuid}
                 onClick={() => ps.updateLayerImageUUID(layer.uuid, uuid)}

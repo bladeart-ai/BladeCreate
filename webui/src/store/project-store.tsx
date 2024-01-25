@@ -39,7 +39,7 @@ class ProjectStore {
   project: Project | null = null
   layersOrder: Array<string> = []
   layers: Record<string, Layer> = {}
-  image_data: Record<string, string> = {}
+  imageData: Record<string, string> = {}
 
   constructor() {
     makeAutoObservable(this)
@@ -71,7 +71,7 @@ class ProjectStore {
       DefaultService.getImageDataOrUrl(this.userID, imageUUIDs)
         .then(
           action((res) => {
-            this.image_data = { ...this.image_data, ...res.data }
+            this.imageData = { ...this.imageData, ...res.data }
             return res.urls
           })
         )
@@ -84,7 +84,7 @@ class ProjectStore {
                   .then((val) => val.text())
                   .then(
                     action((val) => {
-                      this.image_data[image_uuid] = val
+                      this.imageData[image_uuid] = val
                     })
                   )
               })
@@ -140,9 +140,13 @@ class ProjectStore {
     )
   }
 
-  createLayerFromLocalImage(name: string, imageData: string) {
+  createLayer(
+    layerUUID: string | undefined = undefined,
+    name: string = '',
+    imageData: string | undefined = undefined
+  ) {
     this.lockUI()
-    const layerUUID = uuidv4()
+    if (!layerUUID) layerUUID = uuidv4()
     const newLayer = {
       uuid: layerUUID,
       name: name,
@@ -154,15 +158,20 @@ class ProjectStore {
     } as Layer
     this.layersOrder.unshift(newLayer.uuid)
     this.layers[newLayer.uuid] = newLayer
-    this.image_data[newLayer.uuid] = imageData
-    this.sendUploadImages(newLayer.uuid, imageData).then(
-      action(() =>
-        this.sendUpdateProject({
-          layers_order: this.layersOrder,
-          layers: this.layers
-        } as ProjectData).finally(action(() => this.unlockUI()))
+
+    return this.sendUpdateProject({
+      layers_order: this.layersOrder,
+      layers: this.layers
+    } as ProjectData)
+      .then(
+        action(() => {
+          if (imageData) {
+            this.imageData[newLayer.uuid] = imageData
+            this.sendUploadImages(newLayer.uuid, imageData)
+          }
+        })
       )
-    )
+      .finally(action(() => this.unlockUI()))
   }
 
   updateLayerImageUUID(layerUUID: string, imageUUID: string) {
@@ -239,52 +248,47 @@ class ProjectStore {
     } as ProjectData).finally(action(() => this.unlockUI()))
   }
 
-  generate(outputLayerUUID: string | null, params: GenerationParams) {
+  generate(outputLayerUUID: string | undefined, params: GenerationParams) {
     this.lockUI()
 
-    const callGenerate = action((outputLayerUUID: string) => {
-      return DefaultService.generate(this.userID, this.projectUUID, {
-        output_layer_uuid: outputLayerUUID,
-        params: params
-      }).then(
-        action((val) => {
-          if (val.images) {
-            this.image_data = { ...this.image_data, ...val.images.data }
-          }
+    const createLayer = outputLayerUUID !== undefined
 
-          const g: Generation = { ...val }
+    const callGenerate = action(() => {
+      return DefaultService.createGeneration(this.userID, { params: params }).then(
+        action((g) => {
           if (outputLayerUUID) {
             if (!this.layers[outputLayerUUID].generations) {
               this.layers[outputLayerUUID].generations = []
             }
             this.layers[outputLayerUUID].generations?.unshift(g)
-            this.layers[outputLayerUUID].image_uuid = val.image_uuids[0]
           }
         })
       )
     })
 
-    if (!outputLayerUUID) {
+    if (createLayer) {
       outputLayerUUID = uuidv4()
       const newLayer = {
         uuid: outputLayerUUID,
-        name: 'Generation'
-      }
-      DefaultService.createProjectLayer(this.userID, this.projectUUID, newLayer)
-        .then(
-          action((val) => {
-            this.layers[val.uuid] = newLayer
-            this.layersOrder.unshift(val.uuid)
-          })
-        )
+        name: 'New Layer for Generation',
+        x: cs.props.xPadding,
+        y: cs.props.yPadding
+      } as Layer
+      this.layersOrder.unshift(newLayer.uuid)
+      this.layers[newLayer.uuid] = newLayer
+
+      this.sendUpdateProject({
+        layers_order: this.layersOrder,
+        layers: this.layers
+      } as ProjectData)
         .then(
           action(() => {
-            callGenerate(newLayer.uuid)
+            callGenerate()
           })
         )
         .finally(action(() => this.unlockUI()))
     } else {
-      callGenerate(outputLayerUUID).finally(action(() => this.unlockUI()))
+      callGenerate().finally(action(() => this.unlockUI()))
     }
   }
 

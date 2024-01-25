@@ -24,6 +24,8 @@ export const ProjectsPage = observer(() => {
 
   return (
     <Layout>
+      <h1 className="self-stretch text-3xl font-extrabold leading-10 text-black">{t('welcome')}</h1>
+      <div className="self-stretch text-xl font-normal leading-7 text-black">{t('intro')}</div>
       <div className="inline-flex h-auto w-full items-start justify-start">
         <h1 className="w-full self-stretch text-3xl font-extrabold leading-10 text-black">
           {t('All Projects')}

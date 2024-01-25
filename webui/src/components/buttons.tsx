@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  readonly icon: React.ForwardRefExoticComponent<
+  readonly icon?: React.ForwardRefExoticComponent<
     IconProps & React.RefAttributes<SVGSVGElement>
   > | null
   readonly label?: string
@@ -18,7 +18,7 @@ export interface ButtonProps
 }
 
 export const IconButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ icon, label = '', selected = false, ...props }: ButtonProps, ref) => {
+  ({ icon = null, label = '', selected = false, ...props }: ButtonProps, ref) => {
     return (
       <Button
         className={cn(
@@ -32,6 +32,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {icon ? React.createElement(icon, { className: 'w-4 h-4 relative' }) : null}
         {label && <span className="text-xl font-normal leading-7 text-black">{label}</span>}
+        {props.children}
       </Button>
     )
   }
