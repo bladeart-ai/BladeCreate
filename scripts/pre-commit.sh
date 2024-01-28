@@ -17,3 +17,5 @@ flake8 $(git ls-files "*.py")
 cd ../webui
 
 pnpm format
+
+pnpm lint

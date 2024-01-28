@@ -12,5 +12,6 @@
   "Import Civitai Models": "Import Civitai Models",
   "Upload Model Files": "Upload Model Files",
   "WelcomeUser": "Welcome, {{user}}!",
-  "WelcomeGuestUser": "Welcome, Guest!"
+  "WelcomeGuestUser": "Welcome, Guest!",
+  "Loading": "Loading"
 }

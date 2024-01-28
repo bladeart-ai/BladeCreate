@@ -1,14 +1,26 @@
+import datetime
 import uuid
+from datetime import timedelta
 from typing import Optional
 from uuid import UUID
 
 from pydantic import TypeAdapter
-from sqlalchemy import and_, create_engine, select
+from sqlalchemy import and_, create_engine, or_, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from bladecreate import schemas
-from bladecreate.db.db_schemas import Base, Generation, Project
+from bladecreate.db.db_schemas import Base, GenerationDB, ProjectDB, WorkerDB
 from bladecreate.logging import Logger
+from bladecreate.schemas import (
+    ClusterSnapshot,
+    Generation,
+    GenerationCreate,
+    GenerationTask,
+    Project,
+    ProjectCreate,
+    ProjectData,
+    ProjectUpdate,
+    Worker,
+)
 from bladecreate.settings import settings
 
 logger = Logger.get_logger(__name__)
@@ -22,48 +34,48 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base.metadata.create_all(bind=engine)
 
 
-def select_projects(db: Session, user_id: str, uuids: list[UUID]) -> list[schemas.Project]:
+def select_projects(db: Session, user_id: str, uuids: list[UUID]) -> list[Project]:
     if len(uuids) > 0:
         db_obj = db.scalars(
-            select(Project).where(
+            select(ProjectDB).where(
                 and_(
-                    Project.user_id == user_id,
-                    Project.uuid.in_(uuids),
+                    ProjectDB.user_id == user_id,
+                    ProjectDB.uuid.in_(uuids),
                 )
             )
         ).all()
     else:
-        db_obj = db.scalars(select(Project).where(Project.user_id == user_id)).all()
-    return TypeAdapter(list[schemas.Project]).validate_python(db_obj)
+        db_obj = db.scalars(select(ProjectDB).where(ProjectDB.user_id == user_id)).all()
+    return TypeAdapter(list[Project]).validate_python(db_obj)
 
 
-def create_project(db: Session, user_id: str, body: schemas.ProjectCreate) -> schemas.Project:
+def create_project(db: Session, user_id: str, body: ProjectCreate) -> Project:
     if not body.uuid:
         body.uuid = uuid.uuid4()
 
-    db_obj = Project(
+    db_obj = ProjectDB(
         uuid=body.uuid,
         user_id=user_id,
         name=body.name,
-        data=schemas.ProjectData().model_dump(),
+        data=ProjectData().model_dump(),
     )
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)
-    return TypeAdapter(schemas.Project).validate_python(db_obj)
+    return TypeAdapter(Project).validate_python(db_obj)
 
 
 def update_project(
     db: Session,
     user_id: str,
     project_uuid: UUID,
-    req: schemas.ProjectUpdate,
-) -> schemas.Project:
+    req: ProjectUpdate,
+) -> Project:
     db_obj = db.scalars(
-        select(Project).where(
+        select(ProjectDB).where(
             and_(
-                Project.user_id == user_id,
-                Project.uuid == project_uuid,
+                ProjectDB.user_id == user_id,
+                ProjectDB.uuid == project_uuid,
             )
         )
     ).first()
@@ -77,53 +89,57 @@ def update_project(
 
     db.commit()
     db.refresh(db_obj)
-    return TypeAdapter(schemas.Project).validate_python(db_obj)
+    return TypeAdapter(Project).validate_python(db_obj)
 
 
 def get_generations(
-    db: Session, user_id: str, generation_uuids: list[str]
-) -> list[schemas.Generation]:
+    db: Session, user_id: str, generation_uuids: list[UUID], active_only: bool = False
+) -> list[Generation]:
+    statement = select(GenerationDB)
+
+    if len(user_id) > 0:
+        statement = statement.where(GenerationDB.user_id == user_id)
+
     if len(generation_uuids) > 0:
-        uuid_objs = [UUID(item) for item in generation_uuids]
-        db_obj = db.scalars(
-            select(Generation).where(
-                and_(
-                    Generation.user_id == user_id,
-                    Generation.uuid.in_(uuid_objs),
-                )
-            )
-        ).all()
-    else:
-        db_obj = db.scalars(select(Generation).where(Generation.user_id == user_id)).all()
-    return TypeAdapter(list[schemas.Generation]).validate_python(db_obj)
+        statement = statement.where(GenerationDB.uuid.in_(generation_uuids))
+
+    if active_only:
+        statement = statement.where(GenerationDB.status.in_(["CREATED", "STARTED"]))
+
+    db_obj = db.scalars(statement).all()
+    if db_obj is None:
+        return []
+    return TypeAdapter(list[Generation]).validate_python(db_obj)
 
 
 def pop_most_recent_generation_task(
     db: Session,
-) -> schemas.GenerationTask:
+) -> GenerationTask:
+    since = datetime.datetime.utcnow() - timedelta(minutes=1)
     # TODO: revisit if locking here is implement correctly for concurrency
     db_obj = db.scalars(
-        select(Generation)
+        select(GenerationDB)
         .with_for_update(nowait=True)
-        .where(Generation.status == "CREATED")
-        .order_by(Generation.create_time.asc())
+        .where(or_(GenerationDB.status == "CREATED"))
+        .order_by(GenerationDB.create_time.asc())
     ).first()
     if db_obj is None:
         return None
 
     db_obj.status = "STARTED"
+    db_obj.update_time = datetime.datetime.utcnow()
     db.commit()
     db.refresh(db_obj)
 
-    return TypeAdapter(schemas.GenerationTask).validate_python(db_obj)
+    return TypeAdapter(GenerationTask).validate_python(db_obj)
 
 
 def create_generation(
     db: Session,
     user_id: str,
-    req: schemas.GenerationCreate,
-) -> Optional[schemas.Generation]:
-    db_obj = Generation(
+    req: GenerationCreate,
+) -> Optional[GenerationDB]:
+    db_obj = GenerationDB(
         uuid=req.uuid,
         user_id=user_id,
         status="CREATED",
@@ -133,21 +149,51 @@ def create_generation(
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)
-    return TypeAdapter(schemas.Generation).validate_python(db_obj)
+    return TypeAdapter(Generation).validate_python(db_obj)
 
 
-def update_generation_succeeded(
+def update_generation(
     db: Session,
-    g_uuid: UUID,
-    image_uuids: list[UUID],
-) -> schemas.Generation:
-    db_obj = db.scalars(select(Generation).where(Generation.uuid == g_uuid)).first()
+    g: Generation,
+) -> Generation:
+    db_obj = db.scalars(select(GenerationDB).where(GenerationDB.uuid == g.uuid)).first()
     if db_obj is None:
         return None
 
-    db_obj.status = "SUCCEEDED"
-    db_obj.image_uuids = [item.__str__() for item in image_uuids]
+    db_obj.status = g.status
+    db_obj.update_time = datetime.datetime.utcnow()
+    db_obj.image_uuids = [item.__str__() for item in g.image_uuids]
 
     db.commit()
     db.refresh(db_obj)
-    return TypeAdapter(schemas.Generation).validate_python(db_obj)
+    return TypeAdapter(Generation).validate_python(db_obj)
+
+
+def upsert_worker(db: Session, worker_uuid: UUID, worker_status: str) -> Worker:
+    db_obj = db.scalars(select(WorkerDB).where(WorkerDB.uuid == worker_uuid)).first()
+    if db_obj is None:
+        db_obj = WorkerDB(
+            uuid=worker_uuid,
+            status=worker_status,
+        )
+        db.add(db_obj)
+    else:
+        db_obj.status = worker_status
+        db_obj.heartbeat_time = datetime.datetime.utcnow()
+
+    db.commit()
+    db.refresh(db_obj)
+    return TypeAdapter(Worker).validate_python(db_obj)
+
+
+def get_cluster_snapshot(db: Session) -> ClusterSnapshot:
+    since = datetime.datetime.utcnow() - timedelta(minutes=1)
+    db_obj = db.scalars(
+        select(WorkerDB).where(WorkerDB.status != "exiting").where(WorkerDB.heartbeat_time > since)
+    ).all()
+    if db_obj is None:
+        workers = []
+    else:
+        workers = TypeAdapter(list[Worker]).validate_python(db_obj)
+    logger.info(workers)
+    return ClusterSnapshot(workers=workers, active_jobs=get_generations(db, "", [], True))

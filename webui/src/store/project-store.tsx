@@ -3,7 +3,14 @@ import Konva from 'konva'
 import { action, makeAutoObservable } from 'mobx'
 import { User } from '@auth0/auth0-react'
 import { v4 as uuidv4 } from 'uuid'
-import { DefaultService, GenerationParams, Layer, Project, ProjectData } from '@/gen_client'
+import {
+  DefaultService,
+  Generation,
+  GenerationParams,
+  Layer,
+  Project,
+  ProjectData
+} from '@/gen_client'
 
 interface CanvasProps {
   width: number
@@ -28,8 +35,9 @@ interface StageProps {
 }
 
 class ProjectStore {
-  fetchingMetadata: boolean = true
-  fetchingImages: boolean = true
+  fetching: boolean = true
+  fetchingGenerations: boolean = false
+  fetchingImages: boolean = false
   userLock: boolean = false
 
   user: User | null = null
@@ -39,24 +47,25 @@ class ProjectStore {
   project: Project | null = null
   layersOrder: Array<string> = []
   layers: Record<string, Layer> = {}
+  generations: Record<string, Generation> = {}
   imageData: Record<string, string> = {}
 
   constructor() {
     makeAutoObservable(this)
   }
 
-  get toDisplay() {
+  get toLayersDisplay() {
     return this.layersOrder.map((layerUUID) => this.layers[layerUUID])
   }
 
-  get toDisplayReversed() {
+  get toLayersDisplayReversed() {
     return this.layersOrder
       .map((_, index, array) => array[array.length - 1 - index])
       .map((layerUUID) => this.layers[layerUUID])
   }
 
-  get fetching() {
-    return this.fetchingMetadata || this.fetchingImages
+  get loading() {
+    return this.fetching
   }
 
   lockUI() {
@@ -66,63 +75,108 @@ class ProjectStore {
     this.userLock = false
   }
 
-  fetchImages(imageUUIDs) {
-    if (imageUUIDs.length > 0) {
-      DefaultService.getImageDataOrUrl(this.userID, imageUUIDs)
-        .then(
-          action((res) => {
-            this.imageData = { ...this.imageData, ...res.data }
-            return res.urls
-          })
-        )
-        .then(
-          action((urls) => {
-            Promise.allSettled(
-              Object.keys(urls).map((image_uuid) => {
-                const url = urls[image_uuid] || ''
-                return fetch(url)
-                  .then((val) => val.text())
-                  .then(
-                    action((val) => {
-                      this.imageData[image_uuid] = val
-                    })
-                  )
-              })
-            )
-          })
-        )
-        .then(
-          action(() => {
-            this.fetchingImages = false
-          })
-        )
-    } else {
-      this.fetchingImages = false
+  generationSucceeded(g: Generation) {
+    this.generations[g.uuid] = g
+
+    // Select image if the layer has not selected any image
+    const layer = Object.values(this.layers).find(
+      (l) => !l.image_uuid && l.generation_uuids && l.generation_uuids?.includes(g.uuid)
+    )
+    if (layer) {
+      layer.image_uuid = g.image_uuids[0]
     }
+    this.sendUpdateProject()
+    this.fetchImages(g.image_uuids)
+  }
+
+  fetchGenerations(generationUUIDs: string[]) {
+    if (generationUUIDs.length === 0) return
+    this.fetchingGenerations = true
+    return DefaultService.getGenerations(this.userID, generationUUIDs, false)
+      .then(
+        action((res) => {
+          res.forEach((g) => (this.generations[g.uuid] = g))
+        })
+      )
+      .then(
+        action(() => {
+          this.fetchingGenerations = false
+        })
+      )
+  }
+
+  fetchImages(imageUUIDs: string[]) {
+    if (imageUUIDs.length === 0) return
+    this.fetchingImages = true
+    return DefaultService.getImageDataOrUrl(this.userID, imageUUIDs)
+      .then(
+        action((res) => {
+          this.imageData = { ...this.imageData, ...res.data }
+          return res.urls
+        })
+      )
+      .then(
+        action((urls) => {
+          Promise.allSettled(
+            Object.keys(urls).map((image_uuid) => {
+              const url = urls[image_uuid] || ''
+              return fetch(url)
+                .then((val) => val.text())
+                .then(
+                  action((val) => {
+                    this.imageData[image_uuid] = val
+                  })
+                )
+            })
+          )
+        })
+      )
+      .then(
+        action(() => {
+          this.fetchingImages = false
+        })
+      )
   }
 
   fetch(user: User, projectUUID: string) {
-    this.fetchingMetadata = true
-    this.fetchingImages = true
+    this.fetching = true
     this.userID = user.sub || ''
     this.projectUUID = projectUUID
 
-    DefaultService.getProject(this.userID, projectUUID).then(
-      action((project) => {
-        document.title = project.name
-        this.project = project
-        this.layersOrder = project.data.layers_order || []
-        this.layers = project.data.layers || {}
-        this.fetchingMetadata = false
-
-        const imageUUIDs = Object.values(this.layers).flatMap((layer) => [
-          layer.image_uuid,
-          ...Object.values(layer.generations || []).flatMap((g) => g.image_uuids)
-        ])
-
-        this.fetchImages(imageUUIDs)
-      })
-    )
+    return DefaultService.getProject(this.userID, projectUUID)
+      .then(
+        action((project) => {
+          document.title = project.name
+          this.project = project
+          this.layersOrder = project.data.layers_order || []
+          this.layers = project.data.layers || {}
+        })
+      )
+      .then(
+        action(() => {
+          const generationUUIDs = Object.values(this.layers).flatMap((layer) =>
+            Object.values(layer.generation_uuids || [])
+          )
+          return this.fetchGenerations(generationUUIDs)
+        })
+      )
+      .then(
+        action(() => {
+          const imageUUIDs = Object.values(this.layers).flatMap((layer) => {
+            const layerImageUUIDs = Object.values(this.generations).flatMap((g) => g.image_uuids)
+            if (layer.image_uuid) {
+              layerImageUUIDs.unshift(layer.image_uuid)
+            }
+            return layerImageUUIDs
+          })
+          return this.fetchImages(imageUUIDs)
+        })
+      )
+      .then(
+        action(() => {
+          this.fetching = false
+        })
+      )
   }
 
   sendUploadImages(imageUUID: string, imageData: string) {
@@ -131,11 +185,16 @@ class ProjectStore {
     return DefaultService.uploadImages(this.userID, { data: data })
   }
 
-  sendUpdateProject(data: ProjectData) {
-    return DefaultService.updateProject(this.userID, this.projectUUID, { data: data }).then(
-      action((res) => {
-        this.layers = res.data.layers || {}
-        this.layersOrder = res.data.layers_order || []
+  sendUpdateProject() {
+    return DefaultService.updateProject(this.userID, this.projectUUID, {
+      data: {
+        layers_order: this.layersOrder,
+        layers: this.layers
+      } as ProjectData
+    }).catch(
+      action(() => {
+        // TODO: handle error
+        this.lockUI()
       })
     )
   }
@@ -159,10 +218,7 @@ class ProjectStore {
     this.layersOrder.unshift(newLayer.uuid)
     this.layers[newLayer.uuid] = newLayer
 
-    return this.sendUpdateProject({
-      layers_order: this.layersOrder,
-      layers: this.layers
-    } as ProjectData)
+    return this.sendUpdateProject()
       .then(
         action(() => {
           if (imageData) {
@@ -174,14 +230,10 @@ class ProjectStore {
       .finally(action(() => this.unlockUI()))
   }
 
-  updateLayerImageUUID(layerUUID: string, imageUUID: string) {
+  updateLayerImageUUID(layerUUID: string, imageUUID: string | null) {
     this.lockUI()
-    const newLayer: Layer = { ...this.layers[layerUUID], image_uuid: imageUUID }
-    this.layers[layerUUID] = newLayer
-    this.sendUpdateProject({
-      layers_order: this.layersOrder,
-      layers: this.layers
-    } as ProjectData).finally(action(() => this.unlockUI()))
+    this.layers[layerUUID].image_uuid = imageUUID
+    this.sendUpdateProject().finally(action(() => this.unlockUI()))
   }
 
   transformLayers(
@@ -209,10 +261,7 @@ class ProjectStore {
       this.layers[l.layerUUID] = newLayer
     })
 
-    return this.sendUpdateProject({
-      layers_order: this.layersOrder,
-      layers: this.layers
-    } as ProjectData).finally(action(() => this.unlockUI()))
+    return this.sendUpdateProject().finally(action(() => this.unlockUI()))
   }
 
   moveLayer(startIndex: number, endIndex: number) {
@@ -225,11 +274,9 @@ class ProjectStore {
     const newLayerOrder = this.layersOrder.slice()
     const [removed] = newLayerOrder.splice(startIndex, 1)
     newLayerOrder.splice(endIndex, 0, removed)
+    this.layersOrder = newLayerOrder
 
-    this.sendUpdateProject({
-      layers_order: newLayerOrder,
-      layers: this.layers
-    } as ProjectData).finally(action(() => this.unlockUI()))
+    this.sendUpdateProject().finally(action(() => this.unlockUI()))
   }
 
   deleteLayer(layerUUID: string) {
@@ -242,66 +289,46 @@ class ProjectStore {
     delete this.layers[layerUUID]
     cs.setSelectedIDs(cs.selectedIDs.filter((uuid) => uuid !== layerUUID))
 
-    this.sendUpdateProject({
-      layers_order: this.layersOrder,
-      layers: this.layers
-    } as ProjectData).finally(action(() => this.unlockUI()))
+    this.sendUpdateProject().finally(action(() => this.unlockUI()))
   }
 
   generate(outputLayerUUID: string | undefined, params: GenerationParams) {
     this.lockUI()
 
-    const createLayer = outputLayerUUID !== undefined
-
-    const callGenerate = action(() => {
-      return DefaultService.createGeneration(this.userID, { params: params }).then(
+    DefaultService.createGeneration(this.userID, { params: params })
+      .then(
         action((g) => {
+          this.generations[g.uuid] = g
           if (outputLayerUUID) {
-            if (!this.layers[outputLayerUUID].generations) {
-              this.layers[outputLayerUUID].generations = []
+            if (!this.layers[outputLayerUUID].generation_uuids) {
+              this.layers[outputLayerUUID].generation_uuids = [g.uuid]
+            } else {
+              this.layers[outputLayerUUID].generation_uuids?.unshift(g.uuid)
             }
-            this.layers[outputLayerUUID].generations?.unshift(g)
+            this.layers[outputLayerUUID].image_uuid = null
+            if (!this.layers[outputLayerUUID].width)
+              this.layers[outputLayerUUID].width = params.width
+            if (!this.layers[outputLayerUUID].height)
+              this.layers[outputLayerUUID].height = params.height
+          } else {
+            outputLayerUUID = uuidv4()
+            const newLayer = {
+              uuid: outputLayerUUID,
+              name: 'New Layer for Generation',
+              x: cs.props.xPadding,
+              y: cs.props.yPadding,
+              width: params.width,
+              height: params.height,
+              generation_uuids: [g.uuid]
+            } as Layer
+            this.layersOrder.unshift(newLayer.uuid)
+            this.layers[newLayer.uuid] = newLayer
           }
+
+          return this.sendUpdateProject()
         })
       )
-    })
-
-    if (createLayer) {
-      outputLayerUUID = uuidv4()
-      const newLayer = {
-        uuid: outputLayerUUID,
-        name: 'New Layer for Generation',
-        x: cs.props.xPadding,
-        y: cs.props.yPadding
-      } as Layer
-      this.layersOrder.unshift(newLayer.uuid)
-      this.layers[newLayer.uuid] = newLayer
-
-      this.sendUpdateProject({
-        layers_order: this.layersOrder,
-        layers: this.layers
-      } as ProjectData)
-        .then(
-          action(() => {
-            callGenerate()
-          })
-        )
-        .finally(action(() => this.unlockUI()))
-    } else {
-      callGenerate().finally(action(() => this.unlockUI()))
-    }
-  }
-
-  exportLayersToDataURL(imageLayerRef: React.MutableRefObject<Konva.Layer | null>) {
-    const url = imageLayerRef.current?.toDataURL({
-      mimeType: 'image/png',
-      x: cs.props.xPadding * cs.scale,
-      y: cs.props.yPadding * cs.scale,
-      width: cs.stageProps.workAreaWidth * cs.scale,
-      height: cs.stageProps.workAreaHeight * cs.scale,
-      pixelRatio: 1 / cs.scale
-    }) as string
-    return url
+      .finally(action(() => this.unlockUI()))
   }
 }
 
@@ -314,9 +341,9 @@ class CanvasStore {
 
   sidePanelSwitch: string
 
-  projectStore: ProjectStore
+  ps: ProjectStore
 
-  constructor(ps: ProjectStore) {
+  constructor() {
     makeAutoObservable(this)
     this.props = {
       width: 900,
@@ -332,7 +359,7 @@ class CanvasStore {
     this.scale = 0.5
     this.selectedIDs = []
     this.sidePanelSwitch = 'layers'
-    this.projectStore = ps
+    this.ps = new ProjectStore()
   }
 
   switchSidePanel(to: string) {
@@ -357,11 +384,8 @@ class CanvasStore {
     this.scale = scale
   }
 
-  get selectedNum() {
-    return this.selectedLayers.length
-  }
   get selectedLayers() {
-    return Object.values(ps.layers).filter((l) => this.selectedIDs.includes(l.uuid))
+    return Object.values(this.ps.layers).filter((l) => this.selectedIDs.includes(l.uuid))
   }
   setSelectedIDs(selectedIDs: string[]) {
     if (
@@ -400,7 +424,18 @@ class CanvasStore {
 
     this.setSelectedIDs(newSelectedIDs)
   }
+
+  exportLayersToDataURL(imageLayerRef: React.MutableRefObject<Konva.Layer | null>) {
+    const url = imageLayerRef.current?.toDataURL({
+      mimeType: 'image/png',
+      x: cs.props.xPadding * cs.scale,
+      y: cs.props.yPadding * cs.scale,
+      width: cs.stageProps.workAreaWidth * cs.scale,
+      height: cs.stageProps.workAreaHeight * cs.scale,
+      pixelRatio: 1 / cs.scale
+    }) as string
+    return url
+  }
 }
 
-export const ps = new ProjectStore()
-export const cs = new CanvasStore(ps)
+export const cs = new CanvasStore()

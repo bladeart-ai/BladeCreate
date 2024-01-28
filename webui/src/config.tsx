@@ -51,8 +51,8 @@ console.info('Running environments:', {
   DISABLE_GUEST: DISABLE_GUEST
 })
 
-const API_SERVICE_URL = import.meta.env.VITE_API_SERVICE_URL
+export const API_SERVICE_URL = import.meta.env.VITE_API_SERVICE_URL
 if (!API_SERVICE_URL) {
   throw new Error('Empty API Service URL, please check env variables')
 }
-OpenAPI.BASE = API_SERVICE_URL
+OpenAPI.BASE = 'http://' + API_SERVICE_URL

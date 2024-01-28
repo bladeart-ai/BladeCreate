@@ -1,26 +1,91 @@
 # coding=utf-8
 import concurrent.futures
+import datetime
 import multiprocessing
 import time
 import uuid
 
 import pytest  # noqa: F401
-import socketio
+from pydantic import TypeAdapter
+from websockets.sync.client import connect
 
 import bladecreate.db.sqlalchemy as sql
 from bladecreate.logging import Logger
-from bladecreate.schemas import GenerationCreate, GenerationParams
-from bladecreate.services.generate_worker import GenerateWorker, init_model
-from bladecreate.services.worker import Worker
+from bladecreate.schemas import (
+    ClusterEvent,
+    ClusterSnapshot,
+    Generation,
+    GenerationCreate,
+    GenerationParams,
+    Worker,
+)
+from bladecreate.services.generate_worker import GenerateWorkerRunner, init_model
+from bladecreate.services.worker import WorkerRunner
 from bladecreate.settings import settings, uvicorn_logging
 
 logger = Logger.get_logger(__name__)
 
 
-class TestWorker(Worker):
-    def fetch_and_run_task(self):
-        logger.info(f"Finished task {self.task_limit}")
-        self.send(f"Finished task {self.task_limit}")
+def compare_cluster_events(source: list[ClusterEvent], expected: list[ClusterEvent]):
+    assert len(source) == len(expected)
+
+    for ix in range(len(source)):
+        s, e = source[ix], expected[ix]
+
+        if s.generation_updates is not None and e.generation_updates is not None:
+            assert s.generation_updates.keys() == e.generation_updates.keys()
+            assert [g.status for g in s.generation_updates.values()] == [
+                g.status for g in e.generation_updates.values()
+            ]
+            assert [len(g.image_uuids) for g in s.generation_updates.values()] == [
+                len(g.image_uuids) for g in e.generation_updates.values()
+            ]
+        elif s.generation_updates is not None and e.generation_updates is None:
+            assert False
+        elif s.generation_updates is None and e.generation_updates is not None:
+            assert False
+
+        if s.screenshot is not None and e.screenshot is not None:
+            assert [w.status for w in s.screenshot.workers] == [
+                w.status for w in e.screenshot.workers
+            ]
+            assert [j.status for j in s.screenshot.active_jobs] == [
+                j.status for j in e.screenshot.active_jobs
+            ]
+            assert [len(j.image_uuids) for j in s.screenshot.active_jobs] == [
+                len(j.image_uuids) for j in e.screenshot.active_jobs
+            ]
+        elif s.screenshot is not None and e.screenshot is None:
+            assert False
+        elif s.screenshot is None and e.screenshot is not None:
+            assert False
+
+        if s.worker_update is not None and e.worker_update is not None:
+            assert s.worker_update.status == e.worker_update.status
+        if s.worker_update is not None and e.worker_update is None:
+            assert False
+        if s.worker_update is None and e.worker_update is not None:
+            assert False
+
+
+def clearup_db(db: sql.SessionLocal):
+    # Consume all sstarted task until empty
+    while True:
+        g = sql.pop_most_recent_generation_task(db)
+        if g is None:
+            break
+        else:
+            g.status = "SUCCEEDED"
+            sql.update_generation(db, g)
+            time.sleep(0.1)
+
+    # Wait until all workers are inactive
+    while True:
+        s = sql.get_cluster_snapshot(db)
+        if len(s.workers) == 0:
+            break
+        else:
+            time.sleep(5)
 
 
 def run_server():
@@ -36,56 +101,73 @@ def run_server():
     )
 
 
-def run_test_worker():
-    w = TestWorker(task_limit=5)
+def run_worker_runner():
+    w = WorkerRunner(task_limit=5)
     w.run()
 
 
 def run_generate_worker():
-    w = GenerateWorker(task_limit=5)
+    w = GenerateWorkerRunner(task_limit=5)
     w.run()
 
 
-def run_test_client(expected):
+def run_test_client(expected: list[ClusterEvent]):
     logger = Logger.get_logger("client")
 
-    sio = socketio.SimpleClient()
-    for _ in range(10):
-        try:
-            sio.connect(
-                url="http://localhost:8080/",
-                socketio_path="api/socket.io",
-                namespace="/client",
-                transports=["websocket"],
-            )
-        except Exception:
-            time.sleep(1)
-        else:
-            break
     received = []
-    while True:
-        event, data = sio.receive()
-        logger.debug("Client received %s: %s", event, data)
-        assert event == "worker_event"
-        received.append(data)
-        if data == "Worker is exiting":
-            break
+    with connect("ws://localhost:8080/ws") as websocket:
+        while True:
+            data = websocket.recv()
+            data_obj = TypeAdapter(ClusterEvent).validate_json(data)
+            logger.info(f"Received: {data_obj}")
+            received.append(data_obj)
+            if data_obj.worker_update is not None and data_obj.worker_update.status == "exiting":
+                break
 
-    sio.disconnect()
-    logger.info(f"All client received: {received}")
-    assert received == expected
+    try:
+        compare_cluster_events(received, expected)
+    except Exception as e:
+        logger.error(e)
+        raise e
+    finally:
+        for e in received:
+            logger.info(f"All received: {e}")
 
 
-def test_worker():
+def test_worker(db: sql.SessionLocal):
+    clearup_db(db)
+
     expected = [
-        "Worker is connected",
-        "Worker is initialized",
-        "Finished task 4",
-        "Finished task 3",
-        "Finished task 2",
-        "Finished task 1",
-        "Finished task 0",
-        "Worker is exiting",
+        ClusterEvent(
+            screenshot=ClusterSnapshot(
+                workers=[],
+                active_jobs=[],
+            )
+        ),
+        ClusterEvent(
+            worker_update=Worker(
+                uuid=uuid.uuid4(),
+                create_time=datetime.datetime.now(),
+                update_time=datetime.datetime.now(),
+                status="starting",
+            )
+        ),
+        ClusterEvent(
+            worker_update=Worker(
+                uuid=uuid.uuid4(),
+                create_time=datetime.datetime.now(),
+                update_time=datetime.datetime.now(),
+                status="initialized",
+            )
+        ),
+        ClusterEvent(
+            worker_update=Worker(
+                uuid=uuid.uuid4(),
+                create_time=datetime.datetime.now(),
+                update_time=datetime.datetime.now(),
+                status="exiting",
+            )
+        ),
     ]
 
     server_p = multiprocessing.Process(name="Server", target=run_server)
@@ -94,15 +176,18 @@ def test_worker():
 
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
     future = executor.submit(run_test_client, expected)
+    time.sleep(1)
 
-    worker_p = multiprocessing.Process(name="Worker", target=run_test_worker)
+    worker_p = multiprocessing.Process(name="Worker", target=run_worker_runner)
     worker_p.start()
 
     worker_p.join()
+    res = future.result()
     e = future.exception()
     server_p.terminate()
 
     assert worker_p.exitcode == 0
+    assert res is None
     assert e is None
 
 
@@ -111,56 +196,88 @@ def test_init_model():
 
 
 def test_generate_worker(db: sql.SessionLocal, user_id: str):
-    # Consume all sstarted task until empty
-    while True:
-        g = sql.pop_most_recent_generation_task(db)
-        if g is None:
-            break
+    clearup_db(db)
 
     # Prepare generate task
-    g1 = sql.create_generation(
-        db,
-        user_id,
-        GenerationCreate(
-            uuid=uuid.uuid4(),
-            params=GenerationParams(
-                prompt="haha",
-                negative_prompt="hehe",
-                output_number=3,
-                h_w_ratio="1:1",
-                seeds=[123456],
-            ),
+    g1_req = GenerationCreate(
+        uuid=uuid.uuid4(),
+        params=GenerationParams(
+            prompt="haha",
+            negative_prompt="hehe",
+            output_number=3,
+            height=100,
+            width=100,
+            seeds=[123456],
         ),
     )
-    g2 = sql.create_generation(
-        db,
-        user_id,
-        GenerationCreate(
-            uuid=uuid.uuid4(),
-            params=GenerationParams(
-                prompt="haha2",
-                negative_prompt="hehe2",
-                output_number=1,
-                h_w_ratio="4:3",
-                seeds=[11111],
-            ),
+    g2_req = GenerationCreate(
+        uuid=uuid.uuid4(),
+        params=GenerationParams(
+            prompt="haha2",
+            negative_prompt="hehe2",
+            output_number=1,
+            height=400,
+            width=300,
+            seeds=[11111],
         ),
     )
-    g_get = sql.get_generations(db, user_id, [g1.uuid, g2.uuid])
+    g1 = sql.create_generation(db, user_id, g1_req)
+    g2 = sql.create_generation(db, user_id, g2_req)
+    g_get = sql.get_generations(db, user_id, [g1.uuid, g2.uuid], active_only=False)
     assert g1, g2 == g_get
 
     expected = [
-        "Worker is connected",
-        "Worker is initialized",
-        f"Task {g1.uuid} is Running",
-        f"Task {g1.uuid} is uploading",
-        f"Task {g1.uuid} is succeeding",
-        f"Task {g1.uuid} is succeeded",
-        f"Task {g2.uuid} is Running",
-        f"Task {g2.uuid} is uploading",
-        f"Task {g2.uuid} is succeeding",
-        f"Task {g2.uuid} is succeeded",
-        "Worker is exiting",
+        ClusterEvent(
+            screenshot=ClusterSnapshot(
+                workers=[],
+                active_jobs=[
+                    Generation(
+                        uuid=g1.uuid,
+                        params=g1_req.params,
+                        create_time=datetime.datetime.now(),
+                        update_time=datetime.datetime.now(),
+                        status="CREATED",
+                        image_uuids=[],
+                    ),
+                    Generation(
+                        uuid=g2.uuid,
+                        params=g2_req.params,
+                        create_time=datetime.datetime.now(),
+                        update_time=datetime.datetime.now(),
+                        status="CREATED",
+                        image_uuids=[],
+                    ),
+                ],
+            )
+        ),
+        ClusterEvent(
+            worker_update=Worker(
+                uuid=uuid.uuid4(),
+                create_time=datetime.datetime.now(),
+                update_time=datetime.datetime.now(),
+                status="starting",
+            )
+        ),
+        ClusterEvent(
+            worker_update=Worker(
+                uuid=uuid.uuid4(),
+                create_time=datetime.datetime.now(),
+                update_time=datetime.datetime.now(),
+                status="initialized",
+            )
+        ),
+        ClusterEvent(generation_update=g1),
+        ClusterEvent(generation_update=Generation(**g1, status="SUCCEEDED")),
+        ClusterEvent(generation_update=g2),
+        ClusterEvent(generation_update=Generation(**g2, status="SUCCEEDED")),
+        ClusterEvent(
+            worker_update=Worker(
+                uuid=uuid.uuid4(),
+                create_time=datetime.datetime.now(),
+                update_time=datetime.datetime.now(),
+                status="exiting",
+            )
+        ),
     ]
 
     server_p = multiprocessing.Process(name="Server", target=run_server)
@@ -174,8 +291,10 @@ def test_generate_worker(db: sql.SessionLocal, user_id: str):
     worker_p.start()
 
     worker_p.join()
+    res = future.result()
     e = future.exception()
     server_p.terminate()
 
     assert worker_p.exitcode == 0
+    assert res is None
     assert e is None

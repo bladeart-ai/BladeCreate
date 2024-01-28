@@ -12,11 +12,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { Input } from './ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Slider } from './ui/slider'
-import { TextSpan } from './text'
-import { HWRatioEnum } from '@/gen_client'
-import { cs, ps } from '@/store/project-store'
+import { cs } from '@/store/project-store'
 import { action } from 'mobx'
 import { observer } from 'mobx-react-lite'
 
@@ -24,7 +21,8 @@ export const GeneratePanel = observer(() => {
   const generateFormSchema = z.object({
     prompt: z.string().min(2).max(50),
     negative_prompt: z.string(),
-    h_w_ratio: z.string(),
+    height: z.number().int().positive(),
+    width: z.number().int().positive(),
     output_num: z.number().int().positive().lte(8),
     seeds: z.string()
   })
@@ -33,7 +31,8 @@ export const GeneratePanel = observer(() => {
     defaultValues: {
       prompt: '',
       negative_prompt: '',
-      h_w_ratio: '4:3',
+      width: 400,
+      height: 400,
       output_num: 4,
       seeds: '-1'
     }
@@ -43,17 +42,18 @@ export const GeneratePanel = observer(() => {
     // Create a new layer when:
     //   1. more than one layers are selected;
     //   2. or one layer is selected but is not created from generation.
-    let outputLayerUUID: string | null = null
-    if (cs.selectedIDs.length === 1 && ps.layers) {
-      const found = Object.values(ps.layers).find((item) => item.uuid === cs.selectedIDs[0])
-      if (found?.generations && found?.generations.length > 0) {
+    let outputLayerUUID: string | undefined = undefined
+    if (cs.selectedIDs.length === 1 && cs.ps.layers) {
+      const found = Object.values(cs.ps.layers).find((item) => item.uuid === cs.selectedIDs[0])
+      if (found?.generation_uuids && found?.generation_uuids.length > 0) {
         outputLayerUUID = found.uuid
       }
     }
-    ps.generate(outputLayerUUID, {
+    cs.ps.generate(outputLayerUUID, {
       prompt: values.prompt,
       negative_prompt: values.negative_prompt,
-      h_w_ratio: values.h_w_ratio as HWRatioEnum,
+      height: values.height,
+      width: values.width,
       output_number: values.output_num,
       seeds: values.seeds.split(',').map(Number)
     })
@@ -91,22 +91,44 @@ export const GeneratePanel = observer(() => {
           />
           <FormField
             control={form.control}
-            name="h_w_ratio"
+            name="height"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="pl-2">比例</FormLabel>
-                <Select defaultValue={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="比例" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="1:1">1:1</SelectItem>
-                    <SelectItem value="16:9">16:9</SelectItem>
-                    <SelectItem value="4:3">4:3</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormLabel className="pl-2">{'高度: ' + field.value.toString()}</FormLabel>
+                <FormControl>
+                  <div className="flex flex-row">
+                    <Slider
+                      className="w-full"
+                      defaultValue={[400]}
+                      max={1600}
+                      min={100}
+                      onValueChange={(val) => field.onChange(val[0])}
+                      step={100}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="width"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="pl-2">{'宽度: ' + field.value.toString()}</FormLabel>
+                <FormControl>
+                  <div className="flex flex-row">
+                    <Slider
+                      className="w-full"
+                      defaultValue={[400]}
+                      max={1600}
+                      min={100}
+                      onValueChange={(val) => field.onChange(val[0])}
+                      step={100}
+                    />
+                  </div>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -116,14 +138,14 @@ export const GeneratePanel = observer(() => {
             name="output_num"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="pl-2">张数</FormLabel>
+                <FormLabel className="pl-2">{'张数: ' + field.value.toString()}</FormLabel>
                 <FormControl>
                   <div className="flex flex-row">
-                    <TextSpan className="ml-3 mr-0 w-[10%]" text={field.value.toString()} />
                     <Slider
-                      className="w-[90%]"
+                      className="w-full"
                       defaultValue={[4]}
                       max={8}
+                      min={1}
                       onValueChange={(val) => field.onChange(val[0])}
                       step={1}
                     />

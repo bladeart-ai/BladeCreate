@@ -3,16 +3,14 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { Generation } from './Generation'
-
 export type Layer = {
   uuid: string
-  name?: string | null
+  name: string
   x?: number | null
   y?: number | null
   width?: number | null
   height?: number | null
   rotation?: number | null
   image_uuid?: string | null
-  generations?: Array<Generation>
+  generation_uuids?: Array<string>
 }

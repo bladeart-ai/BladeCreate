@@ -105,5 +105,8 @@ class FileObjectStorageManager(ObjectStorageManager):
         shutil.copy(local_path, dst_path)
 
     def generate_download_url(self, key):
-        with open(self.key_to_storage_path(key), "r") as f:
+        path = self.key_to_storage_path(key)
+        if not os.path.isfile(path):
+            return ""
+        with open(path, "r") as f:
             return f.read()

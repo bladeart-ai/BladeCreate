@@ -3,12 +3,11 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import type { HWRatioEnum } from './HWRatioEnum'
-
 export type GenerationParams = {
   prompt: string
   negative_prompt?: string | null
-  h_w_ratio?: HWRatioEnum | null
+  width: number
+  height: number
   output_number?: number | null
   seeds?: Array<number> | null
 }

@@ -2,13 +2,17 @@
 /* istanbul ignore file */
 /* tslint:disable */
 /* eslint-disable */
+import type { ClusterEvent } from '../models/ClusterEvent'
 import type { Generation } from '../models/Generation'
 import type { GenerationCreate } from '../models/GenerationCreate'
+import type { GenerationTask } from '../models/GenerationTask'
+import type { GenerationTaskUpdate } from '../models/GenerationTaskUpdate'
 import type { ImagesData } from '../models/ImagesData'
 import type { ImagesURLOrData } from '../models/ImagesURLOrData'
 import type { Project } from '../models/Project'
 import type { ProjectCreate } from '../models/ProjectCreate'
 import type { ProjectUpdate } from '../models/ProjectUpdate'
+import type { Worker } from '../models/Worker'
 
 import type { CancelablePromise } from '../core/CancelablePromise'
 import { OpenAPI } from '../core/OpenAPI'
@@ -28,7 +32,7 @@ export class DefaultService {
   ): CancelablePromise<ImagesURLOrData> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/images/{user_id}',
+      url: '/images/{user_id}',
       path: {
         user_id: userId
       },
@@ -51,7 +55,7 @@ export class DefaultService {
   public static uploadImages(userId: string, requestBody: ImagesData): CancelablePromise<any> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/images/{user_id}',
+      url: '/images/{user_id}',
       path: {
         user_id: userId
       },
@@ -76,7 +80,7 @@ export class DefaultService {
   ): CancelablePromise<Array<Project>> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/projects/{user_id}',
+      url: '/projects/{user_id}',
       path: {
         user_id: userId
       },
@@ -102,7 +106,7 @@ export class DefaultService {
   ): CancelablePromise<Project> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/projects/{user_id}',
+      url: '/projects/{user_id}',
       path: {
         user_id: userId
       },
@@ -124,7 +128,7 @@ export class DefaultService {
   public static getProject(userId: string, projectUuid: string): CancelablePromise<Project> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/projects/{user_id}/{project_uuid}',
+      url: '/projects/{user_id}/{project_uuid}',
       path: {
         user_id: userId,
         project_uuid: projectUuid
@@ -150,7 +154,7 @@ export class DefaultService {
   ): CancelablePromise<Project> {
     return __request(OpenAPI, {
       method: 'PUT',
-      url: '/api/projects/{user_id}/{project_uuid}',
+      url: '/projects/{user_id}/{project_uuid}',
       path: {
         user_id: userId,
         project_uuid: projectUuid
@@ -167,21 +171,24 @@ export class DefaultService {
    * Get Generations
    * @param userId
    * @param generationUuids
+   * @param activeOnly
    * @returns Generation Successful Response
    * @throws ApiError
    */
   public static getGenerations(
     userId: string,
-    generationUuids?: Array<string>
+    generationUuids?: Array<string>,
+    activeOnly: boolean = false
   ): CancelablePromise<Array<Generation>> {
     return __request(OpenAPI, {
       method: 'GET',
-      url: '/api/generations/{user_id}/{generation_uuid}',
+      url: '/generations/{user_id}',
       path: {
         user_id: userId
       },
       query: {
-        generation_uuids: generationUuids
+        generation_uuids: generationUuids,
+        active_only: activeOnly
       },
       errors: {
         422: `Validation Error`
@@ -202,7 +209,7 @@ export class DefaultService {
   ): CancelablePromise<Generation> {
     return __request(OpenAPI, {
       method: 'POST',
-      url: '/api/generations/{user_id}',
+      url: '/generations/{user_id}',
       path: {
         user_id: userId
       },
@@ -211,6 +218,84 @@ export class DefaultService {
       errors: {
         422: `Validation Error`
       }
+    })
+  }
+
+  /**
+   * Pop Generation Task
+   * @param workerUuid
+   * @returns any Successful Response
+   * @throws ApiError
+   */
+  public static popGenerationTask(workerUuid: string): CancelablePromise<GenerationTask | null> {
+    return __request(OpenAPI, {
+      method: 'POST',
+      url: '/workers/{worker_uuid}/pop_generation_task',
+      path: {
+        worker_uuid: workerUuid
+      },
+      errors: {
+        422: `Validation Error`
+      }
+    })
+  }
+
+  /**
+   * Update Generation
+   * @param generationUuid
+   * @param requestBody
+   * @returns any Successful Response
+   * @throws ApiError
+   */
+  public static updateGeneration(
+    generationUuid: string,
+    requestBody: GenerationTaskUpdate
+  ): CancelablePromise<any> {
+    return __request(OpenAPI, {
+      method: 'PUT',
+      url: '/generations/{generation_uuid}',
+      path: {
+        generation_uuid: generationUuid
+      },
+      body: requestBody,
+      mediaType: 'application/json',
+      errors: {
+        422: `Validation Error`
+      }
+    })
+  }
+
+  /**
+   * Upsert Worker
+   * @param workerUuid
+   * @param requestBody
+   * @returns any Successful Response
+   * @throws ApiError
+   */
+  public static upsertWorker(workerUuid: string, requestBody: Worker): CancelablePromise<any> {
+    return __request(OpenAPI, {
+      method: 'PUT',
+      url: '/workers/{worker_uuid}',
+      path: {
+        worker_uuid: workerUuid
+      },
+      body: requestBody,
+      mediaType: 'application/json',
+      errors: {
+        422: `Validation Error`
+      }
+    })
+  }
+
+  /**
+   * Get Cluster Snapshot
+   * @returns ClusterEvent Successful Response
+   * @throws ApiError
+   */
+  public static getClusterSnapshot(): CancelablePromise<ClusterEvent> {
+    return __request(OpenAPI, {
+      method: 'GET',
+      url: '/cluster'
     })
   }
 

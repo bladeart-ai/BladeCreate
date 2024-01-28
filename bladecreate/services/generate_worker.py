@@ -1,14 +1,17 @@
 import io
 import uuid
-from contextlib import contextmanager
+from typing import Optional
+
+import httpx
+from pydantic import TypeAdapter
 
 import bladecreate.db.sqlalchemy as sql
 from bladecreate.data_utils import image_bytes_to_inline_data
-from bladecreate.dependencies import get_db, get_osm
 from bladecreate.logging import Logger
 from bladecreate.models.sd import SDXL
 from bladecreate.object_storages.osm import ObjectStorageManager
-from bladecreate.services.worker import Worker
+from bladecreate.schemas import Generation, GenerationTask, GenerationTaskUpdate
+from bladecreate.services.worker import WorkerRunner
 from bladecreate.settings import settings
 
 logger = Logger.get_logger(__name__)
@@ -32,30 +35,42 @@ def init_model():
         raise Exception(f"GPU platform {settings.gpu_platform} is not supported")
 
 
-class GenerateWorker(Worker):
+class GenerateWorkerRunner(WorkerRunner):
     def init_worker(self):
         self.sdxl: SDXL = init_model()
+
+    def pop_task(self, db: sql.SessionLocal) -> Optional[GenerationTask]:
+        return sql.pop_most_recent_generation_task(db)
+
+    def update_task(self, g: Generation):
+        r = httpx.put(
+            self.url + f"/generations/{g.uuid}",
+            json=TypeAdapter(GenerationTaskUpdate).validate_python(g).model_dump(mode="json"),
+        )
+        if r.status_code == 200:
+            return
+        else:
+            raise Exception("Unexpected response of update_task from API server", r)
 
     def handle_fetch_and_run_task(self, db: sql.SessionLocal, osm: ObjectStorageManager):
         sdxl = self.sdxl
         # Step 1: fetch task
-        g = sql.pop_most_recent_generation_task(db)
+        g = self.pop_task(db)
         if g is None:
+            self.worker_model.current_job = None
+            self.send_worker_status_heartbeat(True)
             return
 
-        logger.debug(f"Fetched task successfully {g.uuid}: {g.params}")
-        self.send(f"Task {g.uuid} is Running")
+        logger.debug(f"Started task successfully {g.uuid}: {g.params}")
+        self.worker_model.current_job = g.uuid
+        self.send_worker_status_heartbeat(True)
+        self.update_task(g)
 
         # Step 2: Initialize generation request
-        HW_LOOKUP = {
-            "1:1": {"width": 512, "height": 512},
-            "4:3": {"width": 800, "height": 600},
-            "16:9": {"width": 1600, "height": 900},
-        }
         prompt = g.params.prompt
         negative_prompt = g.params.negative_prompt
-        height = HW_LOOKUP[g.params.h_w_ratio]["height"]
-        width = HW_LOOKUP[g.params.h_w_ratio]["width"]
+        height = g.params.height
+        width = g.params.width
         output_number = g.params.output_number
         if g.params.seeds:
             seeds = [
@@ -75,7 +90,6 @@ class GenerateWorker(Worker):
 
         # Step 3: upload results
         logger.debug(f"Uploading results {g.uuid}: {g.image_uuids}")
-        self.send(f"Task {g.uuid} is uploading")
         image_uuid_to_data = {
             k: image_bytes_to_inline_data(image_uuid_to_bytes[k], "png")
             for k in image_uuid_to_bytes
@@ -91,18 +105,12 @@ class GenerateWorker(Worker):
         )
 
         # Step 4: update generation
-        logger.debug(f"Updating status to SUCCEEDED {g.uuid}")
-        self.send(f"Task {g.uuid} is succeeding")
-        sql.update_generation_succeeded(db, g.uuid, image_uuid_to_data.keys())
-
+        g.status = "SUCCEEDED"
+        g.image_uuids = image_uuid_to_data.keys()
         logger.debug(f"Task {g.uuid} is succeeded")
-        self.send(f"Task {g.uuid} is succeeded")
-
-    def fetch_and_run_task(self):
-        with contextmanager(get_db)() as db, contextmanager(get_osm)() as osm:
-            self.handle_fetch_and_run_task(db, osm)
+        self.update_task(g)
 
 
 if __name__ == "__main__":
-    w = GenerateWorker()
+    w = GenerateWorkerRunner()
     w.run()

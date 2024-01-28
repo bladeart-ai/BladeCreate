@@ -1,23 +1,19 @@
 import { useContext, useEffect, useRef, useState } from 'react'
-import { cs, ps } from '@/store/project-store'
+import { cs } from '@/store/project-store'
 import { Layer as LayerComp, Rect, Stage, Transformer, Image } from 'react-konva'
 import Konva from 'konva'
 import useImage from 'use-image'
 import { Vector2d } from 'konva/lib/types'
-import { action, reaction, toJS } from 'mobx'
+import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { ProjectContext, ProjectContextType } from '@/context/project-context'
 import { Layer } from '@/gen_client'
+import { KonvaGif } from './gif'
+import loadingGif from '@/public/loading.gif?asset'
 
 const TransformableImage = observer(({ layer }: { layer: Layer }) => {
-  const imageURL = ps.imageData[layer.image_uuid || ''] || ''
+  const imageURL = cs.ps.imageData[layer.image_uuid || ''] || ''
   const [image, status] = useImage(imageURL)
-
-  if (imageURL == '') console.error('error empty image', toJS(layer))
-
-  if (status !== 'loaded') {
-    return <></>
-  }
 
   let x = layer.x
   let y = layer.y
@@ -33,21 +29,53 @@ const TransformableImage = observer(({ layer }: { layer: Layer }) => {
   }
 
   // Initialize the image size
-  if (!layer.width && !layer.height && image?.naturalWidth && image?.naturalHeight) {
-    width = image?.naturalWidth
-    height = image?.naturalHeight
+  if (!layer.width && !layer.height) {
+    if (image?.naturalWidth && image?.naturalHeight) {
+      width = image?.naturalWidth
+      height = image?.naturalHeight
 
-    // Need resize natural size to fit within the stage
-    let resizeScale = 1
-    if (image.naturalWidth > cs.stageProps.workAreaWidth) {
-      resizeScale = cs.stageProps.workAreaWidth / image.naturalWidth
-    }
-    if (image.naturalHeight > cs.stageProps.workAreaHeight) {
-      resizeScale = Math.min(resizeScale, cs.stageProps.workAreaHeight / image.naturalHeight)
-    }
+      // Need resize natural size to fit within the stage
+      let resizeScale = 1
+      if (image.naturalWidth > cs.stageProps.workAreaWidth) {
+        resizeScale = cs.stageProps.workAreaWidth / image.naturalWidth
+      }
+      if (image.naturalHeight > cs.stageProps.workAreaHeight) {
+        resizeScale = Math.min(resizeScale, cs.stageProps.workAreaHeight / image.naturalHeight)
+      }
 
-    width = width * resizeScale
-    height = height * resizeScale
+      width = width * resizeScale
+      height = height * resizeScale
+    } else {
+      width = cs.stageProps.workAreaWidth
+      height = cs.stageProps.workAreaHeight
+    }
+  }
+
+  if (status !== 'loaded' || imageURL === '') {
+    return (
+      <KonvaGif
+        url={loadingGif}
+        draggable
+        id={'image_' + layer.uuid}
+        onDragEnd={action((e) => {
+          cs.ps.transformLayers([
+            {
+              layerUUID: layer.uuid,
+              x: e.target.x(),
+              y: e.target.y(),
+              width: null,
+              height: null,
+              rotation: null
+            }
+          ])
+        })}
+        rotation={layer.rotation || undefined}
+        x={x || undefined}
+        y={y || undefined}
+        width={width || undefined}
+        height={height || undefined}
+      />
+    )
   }
 
   return (
@@ -57,7 +85,7 @@ const TransformableImage = observer(({ layer }: { layer: Layer }) => {
       id={'image_' + layer.uuid}
       image={image}
       onDragEnd={action((e) => {
-        ps.transformLayers([
+        cs.ps.transformLayers([
           {
             layerUUID: layer.uuid,
             x: e.target.x(),
@@ -112,25 +140,23 @@ export const Canvas = observer(() => {
     []
   )
 
-  // Redraw layer when an image is selected
+  // Redraw layer when an image is selected or image is changed
   // Put redrawing transformer in the React execution flow
   useEffect(
     () =>
-      reaction(
-        () => cs.selectedIDs,
-        (selectedIDs) => {
-          // we need to attach transformer manually
-          const nodes = selectedIDs.flatMap((UID) => {
-            const node = stageRef.current?.findOne('#image_' + UID)
-            if (!node) {
-              return []
-            }
-            return [node]
-          })
-          trRef.current?.setNodes(nodes)
-          trRef.current?.getLayer()?.batchDraw()
-        }
-      ),
+      autorun(() => {
+        // TODO: fix bug that when change image UUID the transformer is not redrawn.
+        // we need to attach transformer manually
+        const nodes = cs.selectedLayers.flatMap((l) => {
+          const node = stageRef.current?.findOne('#image_' + l.uuid)
+          if (!node) {
+            return []
+          }
+          return [node]
+        })
+        trRef.current?.setNodes(nodes)
+        trRef.current?.getLayer()?.batchDraw()
+      }),
     []
   )
 
@@ -313,13 +339,13 @@ export const Canvas = observer(() => {
           rotation: number | null
         }[]
 
-        ps.transformLayers(transforms)
+        cs.ps.transformLayers(transforms)
       }),
       10
     )
   })
 
-  // TODO: 使用自已做的滚动条，原生滚动条有点问题
+  // TODO: Rewrite scrolling because native scrolling has bugs
   return (
     <div
       className="relative flex h-full w-full justify-center overflow-scroll border border-pink-200"
@@ -353,7 +379,7 @@ export const Canvas = observer(() => {
               y={cs.stageProps.workAreaY}
             />
 
-            {ps.toDisplayReversed.map((layer) => (
+            {cs.ps.toLayersDisplayReversed.map((layer) => (
               <TransformableImage key={'image_' + layer.uuid} layer={layer} />
             ))}
           </LayerComp>
@@ -370,9 +396,8 @@ export const Canvas = observer(() => {
                 }
                 return newBox
               }}
-              // anchorStroke='rgb(244,114,182)' // Tailwind Pink 400
-              // borderStroke='rgb(244,114,182)' // Tailwind Pink 400
-
+              anchorStroke="rgb(244,114,182)" // Tailwind Pink 400
+              borderStroke="rgb(244,114,182)" // Tailwind Pink 400
               style={cs.selectedIDs.length > 0 ? {} : { display: 'none' }}
             />
 

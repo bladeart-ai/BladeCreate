@@ -10,12 +10,18 @@ export const SidePanelSwitch = observer(() => {
       <IconButton
         icon={LayersIcon}
         selected={cs.sidePanelSwitch == 'layers'}
-        onClick={action(() => cs.switchSidePanel('layers'))}
+        onClick={action(() =>
+          cs.sidePanelSwitch === 'layers' ? cs.switchSidePanel('') : cs.switchSidePanel('layers')
+        )}
       />
       <IconButton
         icon={LightningBoltIcon}
         selected={cs.sidePanelSwitch == 'generate'}
-        onClick={action(() => cs.switchSidePanel('generate'))}
+        onClick={action(() =>
+          cs.sidePanelSwitch === 'generate'
+            ? cs.switchSidePanel('')
+            : cs.switchSidePanel('generate')
+        )}
       />
     </div>
   )

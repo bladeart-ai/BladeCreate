@@ -4,6 +4,7 @@ import { AuthContext, AuthContextType } from '@/context/auth-context'
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuPortal,
   DropdownMenuRadioGroup,
@@ -17,47 +18,55 @@ import {
 import React, { useContext } from 'react'
 import { IconButton, LogoButton } from './buttons'
 import { Loader2 } from 'lucide-react'
+import { csts } from '@/store/cluster-store'
+import { GoDotFill } from 'react-icons/go'
+import { observer } from 'mobx-react-lite'
 
-export const ClusterStatusDropdown = () => {
-  const authCtx = useContext(AuthContext) as AuthContextType
-  const { i18n } = useTranslation()
+export const ClusterStatusDropdown = observer(() => {
+  const { t } = useTranslation()
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <IconButton>
-          <Loader2 className="animate-spin" />
+          {csts.status === 'busy' ? (
+            <Loader2 className="animate-spin" color="green" />
+          ) : csts.status === 'idle' ? (
+            <GoDotFill color="green" />
+          ) : (
+            <GoDotFill color="red" />
+          )}
         </IconButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel>
-          {authCtx.user.sub === 'guest' ? (
-            <Trans i18nKey="WelcomeGuestUser" />
-          ) : (
-            <Trans i18nKey="WelcomeUser" values={{ user: authCtx.user.name }} />
-          )}
+          {csts.wsStatus +
+            ' to the cluster: ' +
+            (csts.status === 'busy'
+              ? t('Busy')
+              : csts.status === 'idle'
+                ? t('Idle')
+                : t('Loading'))}
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <span>Languages</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuPortal>
-            <DropdownMenuSubContent>
-              <DropdownMenuRadioGroup
-                value={i18n.resolvedLanguage}
-                onValueChange={(val) => i18n.changeLanguage(val)}
-              >
-                <DropdownMenuRadioItem value="en">EN</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="zh">中文</DropdownMenuRadioItem>
-              </DropdownMenuRadioGroup>
-            </DropdownMenuSubContent>
-          </DropdownMenuPortal>
-        </DropdownMenuSub>
+        <DropdownMenuLabel>{'Active Workers: ' + csts.workersStatus.length}</DropdownMenuLabel>
+        {csts.workersStatus.length > 0 && <DropdownMenuSeparator />}
+        {csts.workersStatus.map((wk) => (
+          <DropdownMenuItem key={'worker_dropdown' + wk.uuid}>
+            {'Worker ' + wk.uuid + ': ' + wk.status}
+          </DropdownMenuItem>
+        ))}
+        {csts.activeJobs.length > 0 && <DropdownMenuSeparator />}
+
+        <DropdownMenuLabel>{'Active Jobs: ' + csts.activeJobs.length}</DropdownMenuLabel>
+        {csts.activeJobs.map((j) => (
+          <DropdownMenuItem key={'cluster_job_dropdown' + j.uuid}>
+            {j.uuid + ': ' + j.status}
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )
-}
+})
 
 export function UserDropdown() {
   const authCtx = useContext(AuthContext) as AuthContextType

@@ -1,102 +1,82 @@
 import { Generation, Layer } from '@/gen_client'
-import { cs, ps } from '@/store/project-store'
+import { borderColor } from '@/lib/color-utils'
+import { cn } from '@/lib/utils'
+import { cs } from '@/store/project-store'
 import { observer } from 'mobx-react-lite'
-
-const GenerationProgress = observer(({ layer }: { layer: Layer }) => {
-  // TODO: figure out UX, build it
-  // Thoughts：每个任务单独跟踪进度，一个图层可以对应多种任务
-  // 任务可以是单次的，也可以是streaming的
-  if (!layer.generations) {
-    return <></>
-  }
-
-  return (
-    <div>
-      {layer.generations.map((g) => {
-        if (g.status !== 'SUCCEEDED') {
-          return (
-            <div key={'generation_progress' + g.uuid}>
-              <p>生成中...</p>
-            </div>
-          )
-        }
-        return <div key={'generation_progress' + g.uuid} />
-      })}
-    </div>
-  )
-})
+import loadingGif from '@/public/loading.gif?asset'
+import { action } from 'mobx'
 
 function GenerationImageCard({
   imageUUID,
   imageSrc,
+  selected,
   onClick
 }: {
-  readonly imageUUID: string
+  readonly imageUUID: string | undefined
   readonly imageSrc: string
+  readonly selected: boolean
   readonly onClick: React.MouseEventHandler<HTMLDivElement>
 }) {
   return (
-    <div
-      className="border-1 relative h-96 w-full gap-2 overflow-hidden rounded-lg border shadow"
+    <img
+      alt={'generation-image-card-' + imageUUID}
+      className={cn(
+        'relative h-full w-full rounded-lg shadow object-contain hover:scale-110 border-4 ',
+        selected ? borderColor(true) : borderColor(false)
+      )}
+      key={'generation-image-card-' + imageUUID}
+      src={imageSrc}
       onClick={onClick}
-    >
-      <img
-        alt={'generation-image-card-' + imageUUID}
-        className="absolute inset-x-0 top-0 h-full w-full object-contain hover:scale-110"
-        key={'generation-image-card-' + imageUUID}
-        src={imageSrc}
-      />
-    </div>
+    />
   )
 }
 
-const GenerateResultsArea = observer(({ layer }: { layer: Layer }) => {
-  if (!layer.generations) {
-    return <p>不存在生成结果</p>
-  }
+export const LayerResultPanel = observer(() => {
+  const GenerateResult = observer(({ layer, g }: { layer: Layer; g: Generation }) => {
+    const imageUUIDs = g.image_uuids.filter((uuid) => cs.ps.imageData[uuid] !== undefined)
+    if (imageUUIDs.length === 0) {
+      return (
+        <div className="relative inline-flex h-fit w-full flex-wrap items-start justify-center gap-1 rounded p-1 shadow">
+          <GenerationImageCard
+            imageSrc={loadingGif}
+            imageUUID={undefined}
+            selected={layer.image_uuid === undefined}
+            key={'generation-image-undefined'}
+            onClick={() => cs.ps.updateLayerImageUUID(layer.uuid, null)}
+          />
+        </div>
+      )
+    }
 
-  const GenerateResult = observer(({ g }: { g: Generation }) => {
     return (
-      <div className="relative inline-flex h-full w-full flex-wrap items-start justify-center gap-1 overflow-y-scroll rounded p-1 shadow">
-        {g.image_uuids.flatMap((uuid) => {
-          if (ps.imageData[uuid]) {
-            return (
-              <GenerationImageCard
-                imageSrc={ps.imageData[uuid]}
-                imageUUID={uuid}
-                key={'generation-image-' + uuid}
-                onClick={() => ps.updateLayerImageUUID(layer.uuid, uuid)}
-              />
-            )
-          }
-          return
-        })}
+      <div className="relative inline-flex h-fit w-full flex-wrap items-start justify-center gap-1 rounded p-1 shadow">
+        {imageUUIDs.map((uuid) => (
+          <GenerationImageCard
+            imageSrc={cs.ps.imageData[uuid]}
+            imageUUID={uuid}
+            selected={layer.image_uuid === uuid}
+            key={'generation-image-' + uuid}
+            onClick={action(() => cs.ps.updateLayerImageUUID(layer.uuid, uuid))}
+          />
+        ))}
       </div>
     )
   })
 
   return (
-    <div>
-      {layer.generations
-        ?.filter((g) => g.status === 'SUCCEEDED')
-        .map((g) => <GenerateResult g={g} key={'GenerateResult-' + g.uuid} />)}
-    </div>
-  )
-})
-
-export const LayerResultPanel = observer(() => {
-  return (
-    <div className="h-full w-full pl-0 pr-1">
-      {cs.selectedNum === 1 ? (
-        cs.selectedLayers[0] && (
-          <>
-            <GenerationProgress layer={cs.selectedLayers[0]} />
-            <GenerateResultsArea layer={cs.selectedLayers[0]} />
-          </>
-        )
-      ) : (
-        <p>选中了{cs.selectedNum}个图层</p>
-      )}
+    <div className="inline-flex h-full w-full flex-col overflow-y-scroll pl-0 pr-1">
+      {cs.selectedLayers.length === 1 &&
+        cs.selectedLayers[0].generation_uuids &&
+        cs.selectedLayers[0].generation_uuids.map(
+          (gUUID) =>
+            cs.ps.generations[gUUID] && (
+              <GenerateResult
+                key={'GenerateResult-' + gUUID}
+                layer={cs.selectedLayers[0]}
+                g={cs.ps.generations[gUUID]}
+              />
+            )
+        )}
     </div>
   )
 })

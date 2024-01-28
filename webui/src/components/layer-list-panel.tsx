@@ -9,7 +9,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { cs, ps } from '@/store/project-store'
+import { cs } from '@/store/project-store'
 import { observer, Observer } from 'mobx-react-lite'
 import { action } from 'mobx'
 import { Layer } from '@/gen_client'
@@ -27,7 +27,7 @@ export function LayerListPanel() {
       return
     }
 
-    ps.moveLayer(result.source.index, result.destination.index)
+    cs.ps.moveLayer(result.source.index, result.destination.index)
   }
 
   function LayerItemDropdownMenu({ layer }: { readonly layer: Layer }) {
@@ -42,7 +42,7 @@ export function LayerListPanel() {
           <DropdownMenuItem
             className="py-0"
             onClick={action(() => {
-              ps.deleteLayer(layer.uuid)
+              cs.ps.deleteLayer(layer.uuid)
             })}
           >
             <TrashIcon className="m-2.5" />
@@ -115,7 +115,7 @@ export function LayerListPanel() {
                     className={snapshot.isDraggingOver ? 'bg-pink-100/90' : ''}
                     ref={provided.innerRef}
                   >
-                    {ps.toDisplay.map((layerSnapshot, index) => (
+                    {cs.ps.toLayersDisplay.map((layerSnapshot, index) => (
                       <DraggableLayerItem
                         index={index}
                         key={'DraggableLayerItem-' + layerSnapshot.uuid}

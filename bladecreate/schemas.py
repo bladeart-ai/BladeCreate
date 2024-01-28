@@ -1,13 +1,8 @@
 from datetime import datetime
-from enum import Enum
 from typing import Any, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
-
-
-class ImagesData(BaseModel):
-    data: dict[UUID, str]
 
 
 class ImagesURLOrData(BaseModel):
@@ -15,16 +10,15 @@ class ImagesURLOrData(BaseModel):
     data: dict[UUID, str]
 
 
-class HWRatioEnum(str, Enum):
-    val1 = "1:1"
-    val2 = "4:3"
-    val3 = "16:9"
+class ImagesData(BaseModel):
+    data: dict[UUID, str]
 
 
 class GenerationParams(BaseModel):
     prompt: str
     negative_prompt: Optional[str] = ""
-    h_w_ratio: Optional[HWRatioEnum] = "4:3"
+    width: int
+    height: int
     output_number: Optional[int] = 1
     seeds: Optional[list[int]] = None
 
@@ -52,8 +46,8 @@ class GenerationTask(Generation):
     user_id: str
 
 
-class GenerationDone(Generation):
-    images: Optional[ImagesURLOrData] = None
+class GenerationTaskUpdate(Generation):
+    pass
 
 
 class Layer(BaseModel):
@@ -61,7 +55,7 @@ class Layer(BaseModel):
 
     uuid: UUID
 
-    name: Optional[str] = None
+    name: str
     x: Optional[float] = None
     y: Optional[float] = None
     width: Optional[float] = None
@@ -69,7 +63,7 @@ class Layer(BaseModel):
     rotation: Optional[float] = None
 
     image_uuid: Optional[UUID] = None
-    generations: list[Generation] = []
+    generation_uuids: list[UUID] = []
 
 
 class ProjectData(BaseModel):
@@ -100,3 +94,23 @@ class ProjectCreate(BaseModel):
 class ProjectUpdate(BaseModel):
     name: str = ""
     data: dict[str, Any] = {}  # Not typed to make openapi generator not generate duplicate types
+
+
+class Worker(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    uuid: UUID
+    create_time: datetime
+    update_time: datetime
+    status: str
+    current_job: Optional[UUID] = None
+
+
+class ClusterSnapshot(BaseModel):
+    workers: list[Worker]
+    active_jobs: list[Generation]
+
+
+class ClusterEvent(BaseModel):
+    screenshot: Optional[ClusterSnapshot] = None
+    worker_update: Optional[Worker] = None
+    generation_update: Optional[Generation] = None

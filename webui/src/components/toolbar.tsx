@@ -1,13 +1,13 @@
 import { TextSpan } from '@/components/text'
 import { DownloadIcon, UploadIcon } from '@radix-ui/react-icons'
-import { cs, ps } from '@/store/project-store'
+import { cs } from '@/store/project-store'
 import { observer } from 'mobx-react-lite'
 import { ProjectContext, ProjectContextType } from '@/context/project-context'
 import { useContext, useState } from 'react'
 import { action } from 'mobx'
 import { ImageListType } from 'react-images-uploading'
 import ImageUploading from 'react-images-uploading'
-import { ShrinkDiv, TopBar, UserDropdown, ClusterStatusDropdown } from './layout-top'
+import { ClusterStatusDropdown, ShrinkDiv, TopBar, UserDropdown } from './layout-top'
 import { IconButton } from './buttons'
 
 export const Toolbar = observer(() => {
@@ -22,16 +22,16 @@ export const Toolbar = observer(() => {
         if (!name) {
           name = ''
         }
-        ps.createLayer(undefined, name, imageList[i].data_url)
+        cs.ps.createLayer(undefined, name, imageList[i].data_url)
       })
       setUploadImageBuffer([])
     }
   )
 
   const handleExport = action(() => {
-    const url = ps.exportLayersToDataURL(ctx.imagesLayerRef)
+    const url = cs.exportLayersToDataURL(ctx.imagesLayerRef)
     const link = document.createElement('a')
-    link.download = ps.project?.name + '.png'
+    link.download = cs.ps.project?.name + '.png'
     link.href = url
     document.body.appendChild(link)
     link.click()

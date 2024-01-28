@@ -3,7 +3,7 @@ import { Canvas } from '../components/canvas'
 import { Toolbar } from '@/components/toolbar'
 import { LayerListPanel } from '../components/layer-list-panel'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
-import { cs, ps } from '@/store/project-store'
+import { cs } from '@/store/project-store'
 import { LoaderDiv } from '@/components/page-loader'
 import { useContext, useEffect } from 'react'
 import { observer } from 'mobx-react-lite'
@@ -25,10 +25,10 @@ export const ProjectPage = observer(() => {
   useEffect(() => {
     if (!projectUUID) return
 
-    ps.fetch(authCtx.user, projectUUID)
+    cs.ps.fetch(authCtx.user, projectUUID)
   }, [authCtx.user, projectUUID])
 
-  if (ps.fetching) return <LoaderDiv />
+  if (cs.ps.loading) return <LoaderDiv />
 
   return (
     <ProjectContextProvider>
