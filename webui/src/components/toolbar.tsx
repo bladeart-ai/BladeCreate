@@ -1,5 +1,5 @@
 import { TextSpan } from '@/components/text'
-import { DownloadIcon, UploadIcon } from '@radix-ui/react-icons'
+import { DownloadIcon, LayersIcon, LightningBoltIcon, UploadIcon } from '@radix-ui/react-icons'
 import { cs } from '@/store/project-store'
 import { observer } from 'mobx-react-lite'
 import { ProjectContext, ProjectContextType } from '@/context/project-context'
@@ -40,6 +40,22 @@ export const Toolbar = observer(() => {
 
   return (
     <TopBar>
+      <IconButton
+        icon={LayersIcon}
+        selected={cs.sidePanelSwitch == 'layers'}
+        onClick={action(() =>
+          cs.sidePanelSwitch === 'layers' ? cs.switchSidePanel('') : cs.switchSidePanel('layers')
+        )}
+      />
+      <IconButton
+        icon={LightningBoltIcon}
+        selected={cs.sidePanelSwitch == 'generate'}
+        onClick={action(() =>
+          cs.sidePanelSwitch === 'generate'
+            ? cs.switchSidePanel('')
+            : cs.switchSidePanel('generate')
+        )}
+      />
       <ShrinkDiv />
       <ImageUploading
         dataURLKey="data_url"

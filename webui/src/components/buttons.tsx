@@ -43,7 +43,7 @@ export function LogoButton() {
   return (
     <Link className="h-fit w-fit" to="/">
       <Button
-        className="Logo inline-flex h-full w-24 flex-col items-start justify-start gap-2.5 p-2.5"
+        className="Logo inline-flex h-12 w-24 flex-col items-start justify-start gap-1 p-2.5"
         key=""
         variant="ghost"
       >

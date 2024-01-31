@@ -73,8 +73,10 @@ export function UserDropdown() {
   const { i18n } = useTranslation()
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Auth0Avatar />
+      <DropdownMenuTrigger asChild>
+        <IconButton>
+          <Auth0Avatar />
+        </IconButton>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel>
@@ -108,7 +110,7 @@ export function UserDropdown() {
 
 export function TopBar({ children }: { readonly children?: React.ReactNode }) {
   return (
-    <nav className="fixed top-0 z-50 inline-flex h-12 w-full items-center justify-start gap-1 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="fixed top-0 z-50 inline-flex h-12 w-full items-center justify-start border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <LogoButton />
       {children}
     </nav>

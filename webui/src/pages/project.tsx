@@ -10,7 +10,6 @@ import { observer } from 'mobx-react-lite'
 import { ProjectContextProvider } from '@/context/project-context'
 import { AuthContext, AuthContextType } from '@/context/auth-context'
 import { LayerResultPanel } from '@/components/layer-result-panel'
-import { SidePanelSwitch } from '@/components/side-panel-switch'
 import { GeneratePanel } from '@/components/generate-panel'
 
 function CanvasPanelResizeHandle() {
@@ -34,7 +33,6 @@ export const ProjectPage = observer(() => {
     <ProjectContextProvider>
       <Toolbar />
       <PanelGroup autoSaveId="bladecreate" className="fixed pt-12" direction="horizontal">
-        <SidePanelSwitch />
         {cs.sidePanelSwitch == 'layers' && (
           <>
             <Panel
