@@ -40,24 +40,20 @@ export const ClusterStatusDropdown = observer(() => {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel>
-          {csts.wsStatus +
-            ' to the cluster: ' +
-            (csts.status === 'busy'
-              ? t('Busy')
-              : csts.status === 'idle'
-                ? t('Idle')
-                : t('Loading'))}
+          {csts.status === 'busy' ? t('Busy') : csts.status === 'idle' ? t('Idle') : t('Loading')}
         </DropdownMenuLabel>
-        <DropdownMenuLabel>{'Active Workers: ' + csts.workersStatus.length}</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          {t('Active Workers') + ': ' + csts.workersStatus.length}
+        </DropdownMenuLabel>
         {csts.workersStatus.length > 0 && <DropdownMenuSeparator />}
         {csts.workersStatus.map((wk) => (
           <DropdownMenuItem key={'worker_dropdown' + wk.uuid}>
-            {'Worker ' + wk.uuid + ': ' + wk.status}
+            {t('Worker') + ' ' + wk.uuid + ': ' + wk.status}
           </DropdownMenuItem>
         ))}
+        {csts.workersStatus.length > 0 && <DropdownMenuSeparator />}
         {csts.activeJobs.length > 0 && <DropdownMenuSeparator />}
-
-        <DropdownMenuLabel>{'Active Jobs: ' + csts.activeJobs.length}</DropdownMenuLabel>
+        <DropdownMenuLabel>{t('Active Jobs') + ': ' + csts.activeJobs.length}</DropdownMenuLabel>
         {csts.activeJobs.map((j) => (
           <DropdownMenuItem key={'cluster_job_dropdown' + j.uuid}>
             {j.uuid + ': ' + j.status}
@@ -70,7 +66,7 @@ export const ClusterStatusDropdown = observer(() => {
 
 export function UserDropdown() {
   const authCtx = useContext(AuthContext) as AuthContextType
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -89,7 +85,7 @@ export function UserDropdown() {
         <DropdownMenuSeparator />
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
-            <span>Languages</span>
+            <span>{t('Languages')}</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
             <DropdownMenuSubContent>

@@ -33,7 +33,7 @@ export const ProjectsPage = observer(() => {
         <div className="inline-flex h-auto w-1/3 items-start justify-start gap-2">
           <Button
             onClick={action(() => {
-              projectsStore.createProject()
+              projectsStore.createProject(t('Untitled'))
             })}
           >
             {t('New Project')}

@@ -16,8 +16,11 @@ import { Slider } from './ui/slider'
 import { cs } from '@/store/project-store'
 import { action } from 'mobx'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 
 export const GeneratePanel = observer(() => {
+  const { t } = useTranslation()
+
   const generateFormSchema = z.object({
     prompt: z.string().min(2).max(50),
     negative_prompt: z.string(),
@@ -68,9 +71,9 @@ export const GeneratePanel = observer(() => {
             name="prompt"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="pl-2">正向提示词</FormLabel>
+                <FormLabel className="pl-2">{t('Prompt')}</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="正向提示词" {...field} />
+                  <Textarea placeholder={t('Prompt')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -81,9 +84,9 @@ export const GeneratePanel = observer(() => {
             name="negative_prompt"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="pl-2">反向提示词</FormLabel>
+                <FormLabel className="pl-2">{t('Negative Prompt')}</FormLabel>
                 <FormControl>
-                  <Textarea placeholder="反向提示词" {...field} />
+                  <Textarea placeholder={t('Negative Prompt')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -94,7 +97,9 @@ export const GeneratePanel = observer(() => {
             name="height"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="pl-2">{'高度: ' + field.value.toString()}</FormLabel>
+                <FormLabel className="pl-2">
+                  {t('Height') + ': ' + field.value.toString()}
+                </FormLabel>
                 <FormControl>
                   <div className="flex flex-row">
                     <Slider
@@ -116,7 +121,7 @@ export const GeneratePanel = observer(() => {
             name="width"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="pl-2">{'宽度: ' + field.value.toString()}</FormLabel>
+                <FormLabel className="pl-2">{t('Width') + ': ' + field.value.toString()}</FormLabel>
                 <FormControl>
                   <div className="flex flex-row">
                     <Slider
@@ -138,7 +143,9 @@ export const GeneratePanel = observer(() => {
             name="output_num"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="pl-2">{'张数: ' + field.value.toString()}</FormLabel>
+                <FormLabel className="pl-2">
+                  {t('Output Number') + ': ' + field.value.toString()}
+                </FormLabel>
                 <FormControl>
                   <div className="flex flex-row">
                     <Slider
@@ -160,13 +167,13 @@ export const GeneratePanel = observer(() => {
             name="seeds"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="pl-2">种子</FormLabel>
+                <FormLabel className="pl-2">{t('Seed')}</FormLabel>
                 <FormControl>
                   <Input
                     type="string"
                     {...field}
                     onChange={(event) => field.onChange(+event.target.value)}
-                    placeholder="种子"
+                    placeholder={t('Seed')}
                   />
                 </FormControl>
                 <FormMessage />
@@ -174,7 +181,7 @@ export const GeneratePanel = observer(() => {
             )}
           />
           <div className="flex gap-2.5">
-            <Button type="submit">生成</Button>
+            <Button type="submit">{t('Generate')}</Button>
           </div>
         </form>
       </Form>

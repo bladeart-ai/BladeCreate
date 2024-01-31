@@ -14,6 +14,7 @@ import { observer, Observer } from 'mobx-react-lite'
 import { action } from 'mobx'
 import { Layer } from '@/gen_client'
 import { color } from '../lib/color-utils'
+import { useTranslation } from 'react-i18next'
 
 export function LayerListPanel() {
   // References:
@@ -31,6 +32,8 @@ export function LayerListPanel() {
   }
 
   function LayerItemDropdownMenu({ layer }: { readonly layer: Layer }) {
+    const { t } = useTranslation()
+
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -46,7 +49,7 @@ export function LayerListPanel() {
             })}
           >
             <TrashIcon className="m-2.5" />
-            <TextSpan text="删除" />
+            <TextSpan text={t('Delete')} />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -99,11 +102,6 @@ export function LayerListPanel() {
 
   return (
     <div className="inline-flex h-full w-full flex-col">
-      <div className="justify start inline-flex h-12 w-full items-center self-stretch pl-2">
-        <TextSpan text="所有图层" />
-        <div className="shrink grow basis-0 self-stretch" />
-      </div>
-
       <div className="relative overflow-y-scroll">
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="droppable">

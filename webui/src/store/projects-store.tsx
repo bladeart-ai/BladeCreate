@@ -33,8 +33,8 @@ class ProjectsStore {
     )
   }
 
-  createProject() {
-    const newProject = { uuid: uuidv4(), name: 'New Project' }
+  createProject(name: string) {
+    const newProject = { uuid: uuidv4(), name: name }
     this.projects.unshift({
       ...newProject,
 
