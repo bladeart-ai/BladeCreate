@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from bladecreate.logging import Logger
 from bladecreate.services.generate_router import router as generate_router
+from bladecreate.services.generate_worker import GenerateWorkerRunner
 from bladecreate.services.image_router import router as image_router
 from bladecreate.services.project_router import router as crud_router
 from bladecreate.settings import settings, uvicorn_logging
@@ -42,19 +43,35 @@ async def health_check():
     return
 
 
+def run_generate_worker():
+    w = GenerateWorkerRunner()
+    w.run()
+
+
 if __name__ == "__main__":
-    if settings.server.reload:
-        uvicorn.run(
-            "bladecreate.app:app",
-            host=settings.server.host,
-            port=settings.server.port,
-            reload=True,
-            log_config=uvicorn_logging,
-        )
-    else:
-        uvicorn.run(
-            app,
-            host=settings.server.host,
-            port=settings.server.port,
-            log_config=uvicorn_logging,
-        )
+    worker_p = multiprocessing.Process(
+        name="BladeCreate Generate Worker", target=run_generate_worker
+    )
+    worker_p.start()
+
+    try:
+        if settings.server.reload:
+            uvicorn.run(
+                "bladecreate.app:app",
+                host=settings.server.host,
+                port=settings.server.port,
+                reload=True,
+                log_config=uvicorn_logging,
+            )
+        else:
+            uvicorn.run(
+                app,
+                host=settings.server.host,
+                port=settings.server.port,
+                log_config=uvicorn_logging,
+            )
+    except Exception as e:
+        worker_p.terminate()
+        raise e
+    finally:
+        worker_p.join()

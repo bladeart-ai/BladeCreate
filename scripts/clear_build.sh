@@ -3,4 +3,4 @@
 rm -rf bladecreate.egg-info/
 rm -rf build/
 rm -rf dist/
-rm app.spec
+rm *.spec
