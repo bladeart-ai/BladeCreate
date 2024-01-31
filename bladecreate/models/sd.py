@@ -1,5 +1,9 @@
+from typing import Callable, Optional
+
 import PIL
 import PIL.Image
+
+from bladecreate.schemas import GenerationParams
 
 
 class SDXL:
@@ -15,12 +19,6 @@ class SDXL:
         pass
 
     def generate(
-        self,
-        prompt: str,
-        negative_prompt: str,
-        height: int,
-        width: int,
-        output_number: int,
-        seeds: list[int],
+        self, params: GenerationParams, caller_callback: Optional[Callable[[int], None]] = None
     ) -> list[PIL.Image.Image]:
         pass

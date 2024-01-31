@@ -47,9 +47,7 @@ class ClusterStore {
       this.generations.unshift(data)
     }
 
-    if (data.status === 'SUCCEEDED') {
-      cs.ps.generationSucceeded(data)
-    }
+    cs.ps.updateGeneration(data)
   }
   startWS() {
     this.wsStatus = 'connecting'

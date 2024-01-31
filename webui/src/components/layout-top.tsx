@@ -51,12 +51,13 @@ export const ClusterStatusDropdown = observer(() => {
             {t('Worker') + ' ' + wk.uuid + ': ' + wk.status}
           </DropdownMenuItem>
         ))}
-        {csts.workersStatus.length > 0 && <DropdownMenuSeparator />}
         {csts.activeJobs.length > 0 && <DropdownMenuSeparator />}
         <DropdownMenuLabel>{t('Active Jobs') + ': ' + csts.activeJobs.length}</DropdownMenuLabel>
         {csts.activeJobs.map((j) => (
           <DropdownMenuItem key={'cluster_job_dropdown' + j.uuid}>
             {j.uuid + ': ' + j.status}
+            {j.elapsed_secs && ' ' + t('Elapsed Secs') + ': ' + Math.round(j.elapsed_secs) + 's'}
+            {j.percentage && ' ' + t('Percentage') + ': ' + Math.floor(j.percentage * 100) + '%'}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

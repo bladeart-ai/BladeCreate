@@ -1,3 +1,5 @@
+import signal
+import sys
 import time
 import uuid
 from datetime import datetime, timedelta
@@ -57,7 +59,7 @@ class WorkerRunner:
         if r.status_code == 200:
             return
         else:
-            raise Exception("Unexpected response of update_status from API server", r.content)
+            raise Exception("Unexpected response of update_status from API server", r.text)
 
     def init_worker(self):
         pass
@@ -70,6 +72,16 @@ class WorkerRunner:
         self.handle_fetch_and_run_task(dep.db, dep.osm)
 
     def run(self):
+        def sigint_handler(signal, frame):
+            try:
+                self.update_status("exiting")
+            except Exception:
+                pass
+            logger.info(f"Interrupted signal {signal}")
+            sys.exit(signal)
+
+        signal.signal(signal.SIGINT, sigint_handler)
+
         self.update_status("starting")
         self.init_worker()
         self.update_status("initialized")
@@ -87,6 +99,7 @@ class WorkerRunner:
 
             except Exception as e:
                 logger.exception(e)
+                logger.info("Retrying in 5 seconds")
                 time.sleep(5)
                 continue
 

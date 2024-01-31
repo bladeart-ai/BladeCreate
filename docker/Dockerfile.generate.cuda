@@ -12,7 +12,7 @@ RUN pip3 install -r requirements/shared-requirements.txt
 COPY bladecreate /workdir/
 RUN pip3 install -e .
 
-ENV BC_ENV="dev"
+ENV BC_ENV="prod"
 ENV BC_GPU_PLATFORM=cuda
 ENV BC_SERVER__PORT=8081
 

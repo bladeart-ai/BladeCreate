@@ -1,4 +1,4 @@
 #!/bin/sh
-export BC_GPU_PLATFORM=mac
+export BC_ENV=dev
 
 python -m bladecreate.services.generate_worker

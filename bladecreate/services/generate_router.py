@@ -11,7 +11,6 @@ from fastapi import (
     WebSocket,
     WebSocketDisconnect,
 )
-from pydantic import TypeAdapter
 
 import bladecreate.db.sqlalchemy as sql
 from bladecreate.dependencies import AppDependencies
@@ -31,7 +30,7 @@ logger = Logger.get_logger(__name__)
 # Disable Worker heartbeat logging
 class EndpointFilter(logging.Filter):
     def filter(self, record: logging.LogRecord) -> bool:
-        return record.getMessage().find("/workers") == -1
+        return record.getMessage().find("/workers") == -1 or record.levelname != "INFO"
 
 
 logging.getLogger("uvicorn.access").addFilter(EndpointFilter())
@@ -102,12 +101,11 @@ async def update_generation(
     body: GenerationTaskUpdate,
     dep: AppDependencies = Depends(AppDependencies),
 ):
-    g_req = TypeAdapter(Generation).validate_python(body)
-    g = sql.update_generation(dep.db, g_req)
+    g = sql.update_generation(dep.db, body)
     if g is None:
         raise HTTPException(status_code=404, detail="Generation not found")
 
-    await dep.dispatch_event(ClusterEvent(generation_update=g))
+    await dep.dispatch_event(ClusterEvent(generation_update=body))
 
 
 @router.put("/workers/{worker_uuid}")

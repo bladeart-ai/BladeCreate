@@ -75,18 +75,20 @@ class ProjectStore {
     this.userLock = false
   }
 
-  generationSucceeded(g: Generation) {
+  updateGeneration(g: Generation) {
     this.generations[g.uuid] = g
 
-    // Select image if the layer has not selected any image
-    const layer = Object.values(this.layers).find(
-      (l) => !l.image_uuid && l.generation_uuids && l.generation_uuids?.includes(g.uuid)
-    )
-    if (layer) {
-      layer.image_uuid = g.image_uuids[0]
+    if (g.status == 'SUCCEEDED') {
+      // Select image if the layer has not selected any image
+      const layer = Object.values(this.layers).find(
+        (l) => !l.image_uuid && l.generation_uuids && l.generation_uuids?.includes(g.uuid)
+      )
+      if (layer) {
+        layer.image_uuid = g.image_uuids[0]
+      }
+      this.sendUpdateProject()
+      this.fetchImages(g.image_uuids)
     }
-    this.sendUpdateProject()
-    this.fetchImages(g.image_uuids)
   }
 
   fetchGenerations(generationUUIDs: string[]) {
@@ -140,6 +142,7 @@ class ProjectStore {
 
   fetch(user: User, projectUUID: string) {
     this.fetching = true
+    this.user = user
     this.userID = user.sub || ''
     this.projectUUID = projectUUID
 
@@ -175,6 +178,13 @@ class ProjectStore {
       .then(
         action(() => {
           this.fetching = false
+        }),
+        action(() => {
+          console.error('Cannot fetch, retrying in 5 seconds')
+          setTimeout(
+            action(() => cs.ps.fetch(user, projectUUID)),
+            5000
+          )
         })
       )
   }

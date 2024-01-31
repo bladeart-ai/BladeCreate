@@ -16,15 +16,6 @@ logger = Logger.get_logger(__name__)
 logger.info(f"Settings: {settings.model_dump_json(indent=2)}")
 
 
-# Check if it is frozen (running from pyinstaller-built bundle)
-if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
-    logger.info("running in a PyInstaller bundle")
-    multiprocessing.freeze_support()
-else:
-    logger.info("running in a unbundled Python process")
-    pass
-
-
 app = FastAPI(generate_unique_id_function=lambda route: f"{route.name}")
 app.add_middleware(
     CORSMiddleware,
@@ -49,10 +40,20 @@ def run_generate_worker():
 
 
 if __name__ == "__main__":
-    worker_p = multiprocessing.Process(
-        name="BladeCreate Generate Worker", target=run_generate_worker
-    )
-    worker_p.start()
+    # Check if it is frozen (running from pyinstaller-built bundle)
+    # This has to be called right here.
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        logger.info("running in a PyInstaller bundle")
+        multiprocessing.freeze_support()
+    else:
+        logger.info("running in a unbundled Python process")
+        pass
+
+    if settings.server.worker:
+        worker_p = multiprocessing.Process(
+            name="BladeCreate Generate Worker", target=run_generate_worker
+        )
+        worker_p.start()
 
     try:
         if settings.server.reload:
@@ -71,7 +72,9 @@ if __name__ == "__main__":
                 log_config=uvicorn_logging,
             )
     except Exception as e:
-        worker_p.terminate()
+        if settings.server.worker:
+            worker_p.terminate()
         raise e
     finally:
-        worker_p.join()
+        if settings.server.worker:
+            worker_p.join()

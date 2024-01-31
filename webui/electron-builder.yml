@@ -3,8 +3,8 @@ productName: BladeCreate
 directories:
   buildResources: build
 extraResources:
-  - from: ../dist/py
-    to: py
+  - from: ../dist/bladecreate_app
+    to: bladecreate_app
     filter:
       - '**/*'
 files:

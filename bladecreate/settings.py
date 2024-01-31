@@ -54,7 +54,12 @@ class StoragePaths(BaseModel):
 class GPUPlatformEnum(str, Enum):
     CUDA = "cuda"
     MAC = "mac"
+    AUTO = "auto"
     NONE = ""
+
+    @property
+    def is_auto(self):
+        return self == GPUPlatformEnum.AUTO
 
     @property
     def is_cuda(self):
@@ -69,10 +74,12 @@ class Server(BaseModel):
     host: str = Field(default="0.0.0.0")
     port: int = Field(default=8080)
     reload: bool = Field(default=True)
+    worker: bool = Field(default=False)
+    gpu_platform: Optional[GPUPlatformEnum] = Field(default=GPUPlatformEnum.AUTO)
 
 
 class Settings(BaseSettings):
-    env: EnvEnum = Field(default=EnvEnum.dev)
+    env: EnvEnum = Field(default=EnvEnum.prod)
     logging: Logging = Field(default=Logging())
 
     database: Union[SQLiteDatabase, PostgresDatabase] = Field(
@@ -81,7 +88,6 @@ class Settings(BaseSettings):
     local_object_storage: FileStorage = Field(default=FileStorage())
     remote_object_storage: Optional[S3Storage] = Field(default=None)
     storage_paths: StoragePaths = Field(default=StoragePaths())
-    gpu_platform: Optional[GPUPlatformEnum] = Field(default=None)
     server: Server = Field(default=Server())
 
     model_config = SettingsConfigDict(env_prefix="BC_", env_nested_delimiter="__")
@@ -118,6 +124,7 @@ class Settings(BaseSettings):
         if self.env == EnvEnum.prod:
             self.server.host = "127.0.0.1"
             self.server.reload = False
+            self.server.worker = True
             self.logging = Logging(level="info")
         self.set_hf()
 

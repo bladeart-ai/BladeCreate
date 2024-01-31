@@ -16,10 +16,11 @@ class ImagesData(BaseModel):
 
 class GenerationParams(BaseModel):
     prompt: str
-    negative_prompt: Optional[str] = ""
+    negative_prompt: str = ""
     width: int
     height: int
-    output_number: Optional[int] = 1
+    output_number: int = 1
+    inference_steps: int = 10
     seeds: Optional[list[int]] = None
 
 
@@ -34,6 +35,8 @@ class Generation(GenerationBase):
     create_time: datetime
     update_time: datetime
     status: str
+    elapsed_secs: Optional[float] = None
+    percentage: Optional[float] = None
 
     image_uuids: list[UUID]
 
@@ -113,4 +116,4 @@ class ClusterSnapshot(BaseModel):
 class ClusterEvent(BaseModel):
     screenshot: Optional[ClusterSnapshot] = None
     worker_update: Optional[Worker] = None
-    generation_update: Optional[Generation] = None
+    generation_update: Optional[GenerationTaskUpdate] = None

@@ -27,7 +27,8 @@ export const GeneratePanel = observer(() => {
     height: z.number().int().positive(),
     width: z.number().int().positive(),
     output_num: z.number().int().positive().lte(8),
-    seeds: z.string()
+    seeds: z.string(),
+    inference_steps: z.number().int().positive()
   })
   const form = useForm({
     resolver: zodResolver(generateFormSchema),
@@ -37,7 +38,8 @@ export const GeneratePanel = observer(() => {
       width: 400,
       height: 400,
       output_num: 4,
-      seeds: '-1'
+      seeds: '-1',
+      inference_steps: 10
     }
   })
 
@@ -58,6 +60,7 @@ export const GeneratePanel = observer(() => {
       height: values.height,
       width: values.width,
       output_number: values.output_num,
+      inference_steps: values.inference_steps,
       seeds: values.seeds.split(',').map(Number)
     })
   })
@@ -175,6 +178,30 @@ export const GeneratePanel = observer(() => {
                     onChange={(event) => field.onChange(+event.target.value)}
                     placeholder={t('Seed')}
                   />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="inference_steps"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="pl-2">
+                  {t('Inference Steps') + ': ' + field.value.toString()}
+                </FormLabel>
+                <FormControl>
+                  <div className="flex flex-row">
+                    <Slider
+                      className="w-full"
+                      defaultValue={[10]}
+                      max={50}
+                      min={1}
+                      onValueChange={(val) => field.onChange(val[0])}
+                      step={1}
+                    />
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>

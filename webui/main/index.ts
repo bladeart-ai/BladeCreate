@@ -3,10 +3,9 @@ import { join } from 'path'
 import child_process from 'child_process'
 import fs from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-// import icon from '../src/public/favicon.svg?asset'
 
 const MODE = import.meta.env.MODE
-const PY_DIST_PATH = import.meta.env.MAIN_VITE_PY_DIST_PATH || 'py/py'
+const PY_DIST_PATH = import.meta.env.MAIN_VITE_PY_DIST_PATH || 'bladecreate_app/bladecreate_app'
 
 let pyProc: child_process.ChildProcess | null = null
 
@@ -30,11 +29,12 @@ const createPyProc = () => {
   console.log('Looking for py dist paths:', possibilities)
   for (const path of possibilities) {
     if (fs.existsSync(path)) {
+      console.log('Used path:', path)
       pyDistPath = path
     }
   }
 
-  const port = '8081'
+  const port = '8080'
   // TODO: check if port is used
 
   if (pyDistPath) {

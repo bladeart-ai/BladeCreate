@@ -1,3 +1,5 @@
 #!/bin/sh
 
-cd webui && pnpm exec electron-builder --mac --config
+cd webui
+pnpm build-e
+pnpm electron-builder --mac --config

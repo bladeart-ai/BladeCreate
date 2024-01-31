@@ -15,6 +15,7 @@ from bladecreate.schemas import (
     Generation,
     GenerationCreate,
     GenerationTask,
+    GenerationTaskUpdate,
     Project,
     ProjectCreate,
     ProjectData,
@@ -154,7 +155,7 @@ def create_generation(
 
 def update_generation(
     db: Session,
-    g: Generation,
+    g: GenerationTaskUpdate,
 ) -> Generation:
     db_obj = db.scalars(select(GenerationDB).where(GenerationDB.uuid == g.uuid)).first()
     if db_obj is None:
@@ -173,8 +174,7 @@ def upsert_worker(db: Session, worker_uuid: UUID, worker_status: str) -> Worker:
     db_obj = db.scalars(select(WorkerDB).where(WorkerDB.uuid == worker_uuid)).first()
     if db_obj is None:
         db_obj = WorkerDB(
-            uuid=worker_uuid,
-            status=worker_status,
+            uuid=worker_uuid, status=worker_status, heartbeat_time=datetime.datetime.utcnow()
         )
         db.add(db_obj)
     else:

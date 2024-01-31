@@ -5,6 +5,8 @@ import { cs } from '@/store/project-store'
 import { observer } from 'mobx-react-lite'
 import loadingGif from '@/public/loading.gif?asset'
 import { action } from 'mobx'
+import { TextSpan } from './text'
+import { useTranslation } from 'react-i18next'
 
 function GenerationImageCard({
   imageUUID,
@@ -21,7 +23,7 @@ function GenerationImageCard({
     <img
       alt={'generation-image-card-' + imageUUID}
       className={cn(
-        'relative h-full w-full rounded-lg shadow object-contain hover:scale-110 border-4 ',
+        'relative h-fit w-full rounded-lg shadow object-contain hover:scale-110 border-4 ',
         selected ? borderColor(true) : borderColor(false)
       )}
       key={'generation-image-card-' + imageUUID}
@@ -32,6 +34,8 @@ function GenerationImageCard({
 }
 
 export const LayerResultPanel = observer(() => {
+  const { t } = useTranslation()
+
   const GenerateResult = observer(({ layer, g }: { layer: Layer; g: Generation }) => {
     const imageUUIDs = g.image_uuids.filter((uuid) => cs.ps.imageData[uuid] !== undefined)
     if (imageUUIDs.length === 0) {
@@ -44,6 +48,12 @@ export const LayerResultPanel = observer(() => {
             key={'generation-image-undefined'}
             onClick={() => cs.ps.updateLayerImageUUID(layer.uuid, null)}
           />
+          {g.elapsed_secs && (
+            <TextSpan text={t('Elapsed') + ': ' + Math.round(g.elapsed_secs) + 's'} />
+          )}
+          {g.percentage && (
+            <TextSpan text={t('Percentage') + ': ' + Math.floor(g.percentage * 100) + '%'} />
+          )}
         </div>
       )
     }

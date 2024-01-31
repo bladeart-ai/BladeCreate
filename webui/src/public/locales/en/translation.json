@@ -9,6 +9,9 @@
   "Worker": "Worker",
   "Loading": "Loading",
   "Idle": "Idle",
+  "Busy": "Busy",
+  "Elapsed Secs": "Elapsed Secs",
+  "Percentage": "Percentage",
   "Log In": "Log In",
   "Log Out": "Log Out",
   "Sign Up": "Sign Up",
@@ -25,5 +28,6 @@
   "Width": "Width",
   "Output Number": "Output Number",
   "Seed": "Seed",
+  "Inference Steps": "Inference Steps",
   "Generate": "Generate"
 }

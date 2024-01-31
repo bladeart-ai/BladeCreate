@@ -1,11 +1,14 @@
 import os
+from typing import Callable, Optional
 
 import PIL
 import PIL.Image
+import torch
 from diffusers import StableDiffusionPipeline, StableDiffusionXLPipeline
 
 from bladecreate.logging import Logger
 from bladecreate.models.sd import SDXL
+from bladecreate.schemas import GenerationParams
 from bladecreate.settings import settings
 
 logger = Logger.get_logger(__name__)
@@ -53,24 +56,33 @@ class MacSDXL(SDXL):
         logger.info(f"Pipeline is loaded")
 
         # Run a test generate to initialize everything
-        self.generate("haha", "", 128, 128, 1, [-1])
+        self.generate(
+            GenerationParams(
+                prompt="haha",
+                negative_prompt="",
+                width=128,
+                height=128,
+                output_number=1,
+                inference_steps=4,
+                seeds=[-1],
+            )
+        )
 
     def generate(
-        self,
-        prompt: str,
-        negative_prompt: str,
-        height: int,
-        width: int,
-        output_number: int,
-        seeds: list[int],
+        self, params: GenerationParams, caller_callback: Optional[Callable[[int], None]] = None
     ) -> list[PIL.Image.Image]:
+        def callback(steps: int, timestep: int, latents: torch.FloatTensor):
+            if caller_callback is not None:
+                caller_callback(steps)
+
         images = self.pipeline(
-            prompt=prompt,
-            negative_prompt=negative_prompt,
-            height=height,
-            width=width,
-            num_images_per_prompt=1,
-            num_inference_steps=4,
+            prompt=params.prompt,
+            negative_prompt=params.negative_prompt,
+            height=params.height,
+            width=params.width,
+            num_images_per_prompt=1,  # this has to be 1
+            num_inference_steps=params.inference_steps,
+            callback=callback,
         ).images
 
         return images

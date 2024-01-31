@@ -5,9 +5,10 @@
 
 export type GenerationParams = {
   prompt: string
-  negative_prompt?: string | null
+  negative_prompt?: string
   width: number
   height: number
-  output_number?: number | null
+  output_number?: number
+  inference_steps?: number
   seeds?: Array<number> | null
 }

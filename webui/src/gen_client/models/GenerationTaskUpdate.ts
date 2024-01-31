@@ -11,5 +11,7 @@ export type GenerationTaskUpdate = {
   create_time: string
   update_time: string
   status: string
+  elapsed_secs?: number | null
+  percentage?: number | null
   image_uuids: Array<string>
 }

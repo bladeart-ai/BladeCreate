@@ -9,6 +9,9 @@
   "Worker": "任务执行器",
   "Loading": "加载中",
   "Idle": "空闲",
+  "Busy": "忙碌",
+  "Elapsed Secs": "已用时",
+  "Percentage": "进度",
   "Log In": "登陆",
   "Log Out": "登出",
   "Sign Up": "注册",
@@ -25,5 +28,6 @@
   "Width": "宽度",
   "Output Number": "输出数量",
   "Seed": "种子",
+  "Inference Steps": "推理步数",
   "Generate": "生成"
 }
