@@ -29,6 +29,13 @@ class ProjectsStore {
       action((projects) => {
         this.projects = projects
         this.fetching = false
+      }),
+      action(() => {
+        console.error('Cannot fetch, retrying in 5 seconds')
+        setTimeout(
+          action(() => projectsStore.fetch(user)),
+          5000
+        )
       })
     )
   }

@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow } from 'electron'
 import { join } from 'path'
 import child_process from 'child_process'
 import fs from 'fs'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { electronApp, is } from '@electron-toolkit/utils'
 
 const MODE = import.meta.env.MODE
 const PY_DIST_PATH = import.meta.env.MAIN_VITE_PY_DIST_PATH || 'bladecreate_app/bladecreate_app'
@@ -102,9 +102,11 @@ app.whenReady().then(() => {
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
+  // app.on('browser-window-created', (_, window) => {
+  //   optimizer.watchWindowShortcuts(window)
+  // })
+
+  createPyProc()
 
   createWindow()
 
@@ -113,8 +115,6 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
-
-  createPyProc()
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
