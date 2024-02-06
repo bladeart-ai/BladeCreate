@@ -2,6 +2,10 @@
 
 git submodule update --init --recursive --remote
 
+dart format .
+
+flutter analyze
+
 cd bladecreate
 
 black $(git ls-files "*.py")
@@ -13,9 +17,3 @@ isort --check-only $(git ls-files "*.py")
 black --check $(git ls-files "*.py")
 
 flake8 $(git ls-files "*.py")
-
-cd ../webui
-
-pnpm format
-
-pnpm lint

@@ -1,0 +1,3 @@
+[submodule "packages/flutter_drawing_board"]
+	path = packages/flutter_drawing_board
+	url = git@github.com:shiyuann/flutter_drawing_board.git

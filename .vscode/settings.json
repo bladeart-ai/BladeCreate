@@ -8,7 +8,7 @@
   },
   "isort.args": ["--profile", "black"],
   "python.analysis.autoImportCompletions": true,
-  "editor.defaultFormatter": "ms-python.black-formatter",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "python.terminal.activateEnvInCurrentTerminal": false,
   "editor.wordWrap": "on",
@@ -42,5 +42,6 @@
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "python.terminal.activateEnvironment": true
+  "python.terminal.activateEnvironment": true,
+  "files.autoSave": "afterDelay"
 }

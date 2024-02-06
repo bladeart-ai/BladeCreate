@@ -1,0 +1,15 @@
+targets:
+  $default:
+    sources:
+      - swaggers/**
+      - lib/**
+    builders:
+      chopper_generator:
+        options:
+          header: "//Generated code"
+      swagger_dart_code_generator:
+        options:
+          input_folder: "lib/"
+          output_folder: "lib/swagger_generated_code/"
+          input_urls: 
+            - url: "http://localhost:8080/openapi.json"
