@@ -91,12 +91,16 @@ class ProjectCreate(BaseModel):
     uuid: Optional[UUID] = None
 
     name: str
-    data: dict[str, Any] = {}  # Not typed to make openapi generator not generate duplicate types
+    data: dict[
+        str, Any
+    ] = {}  # Not typed ProjectData to make openapi generator not generate duplicate types
 
 
 class ProjectUpdate(BaseModel):
-    name: str = ""
-    data: dict[str, Any] = {}  # Not typed to make openapi generator not generate duplicate types
+    name: Optional[str] = ""
+    data: Optional[
+        dict[str, Any]
+    ] = None  # Not typed ProjectData to make openapi generator not generate duplicate types
 
 
 class Worker(BaseModel):

@@ -58,7 +58,7 @@ def create_project(db: Session, user_id: str, body: ProjectCreate) -> Project:
         uuid=body.uuid,
         user_id=user_id,
         name=body.name,
-        data=ProjectData().model_dump(),
+        data=TypeAdapter(ProjectData).validate_python(body.data).model_dump(),
     )
     db.add(db_obj)
     db.commit()
@@ -83,13 +83,34 @@ def update_project(
     if db_obj is None:
         return None
 
-    if req.name:
+    if req.name is not None:
         db_obj.name = req.name
-    if req.data:
+    if req.data is not None:
         db_obj.data = req.data
 
     db.commit()
     db.refresh(db_obj)
+    return TypeAdapter(Project).validate_python(db_obj)
+
+
+def delete_project(
+    db: Session,
+    user_id: str,
+    project_uuid: UUID,
+) -> Project:
+    db_obj = db.scalars(
+        select(ProjectDB).where(
+            and_(
+                ProjectDB.user_id == user_id,
+                ProjectDB.uuid == project_uuid,
+            )
+        )
+    ).first()
+    if db_obj is None:
+        return None
+
+    db.delete(db_obj)
+    db.commit()
     return TypeAdapter(Project).validate_python(db_obj)
 
 

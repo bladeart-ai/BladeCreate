@@ -6,7 +6,7 @@ dart format .
 
 flutter analyze
 
-cd bladecreate
+cd backend
 
 black $(git ls-files "*.py")
 

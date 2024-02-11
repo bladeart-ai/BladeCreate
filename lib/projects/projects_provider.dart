@@ -30,7 +30,6 @@ class ProjectsProvider extends ChangeNotifier {
     );
 
     if (resp.error != null) {
-      // Handle server rejection or error
       throw Exception(resp.error);
     } else {
       projects = resp.body!;
@@ -44,12 +43,36 @@ class ProjectsProvider extends ChangeNotifier {
         userId: userId,
         body: ProjectCreate(uuid: projectUUID, name: "Untitled", data: {}));
     if (resp.error != null) {
-      // Handle server rejection or error
       throw Exception(resp.error);
     } else {
       projects.add(resp.body!);
       notifyListeners();
       return projectUUID;
+    }
+  }
+
+  Future<dynamic> renameProject(String projectUUID, String newName) async {
+    final resp = await api.projectsUserIdProjectUuidPut(
+        userId: userId,
+        projectUuid: projectUUID,
+        body: ProjectUpdate(name: newName));
+    if (resp.error != null) {
+      throw Exception(resp.error);
+    } else {
+      projects[projects.indexWhere((p) => resp.body!.uuid == p.uuid)] =
+          resp.body!;
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteProject(String projectUUID) async {
+    final resp = await api.projectsUserIdProjectUuidDelete(
+        userId: userId, projectUuid: projectUUID);
+    if (resp.error != null) {
+      throw Exception(resp.error);
+    } else {
+      projects.removeWhere((p) => resp.body!.uuid == p.uuid);
+      notifyListeners();
     }
   }
 }

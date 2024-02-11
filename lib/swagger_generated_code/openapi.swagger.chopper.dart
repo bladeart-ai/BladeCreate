@@ -114,6 +114,20 @@ class _$Openapi extends Openapi {
   }
 
   @override
+  Future<Response<Project>> _projectsUserIdProjectUuidDelete({
+    required String? userId,
+    required String? projectUuid,
+  }) {
+    final Uri $url = Uri.parse('/projects/${userId}/${projectUuid}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+    );
+    return client.send<Project, Project>($request);
+  }
+
+  @override
   Future<Response<List<Generation>>> _generationsUserIdGet({
     required String? userId,
     List<String>? generationUuids,

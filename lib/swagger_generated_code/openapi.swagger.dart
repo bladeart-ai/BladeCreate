@@ -179,6 +179,28 @@ abstract class Openapi extends ChopperService {
     @Body() required ProjectUpdate? body,
   });
 
+  ///Delete Project
+  ///@param user_id
+  ///@param project_uuid
+  Future<chopper.Response<Project>> projectsUserIdProjectUuidDelete({
+    required String? userId,
+    required String? projectUuid,
+  }) {
+    generatedMapping.putIfAbsent(Project, () => Project.fromJsonFactory);
+
+    return _projectsUserIdProjectUuidDelete(
+        userId: userId, projectUuid: projectUuid);
+  }
+
+  ///Delete Project
+  ///@param user_id
+  ///@param project_uuid
+  @Delete(path: '/projects/{user_id}/{project_uuid}')
+  Future<chopper.Response<Project>> _projectsUserIdProjectUuidDelete({
+    @Path('user_id') required String? userId,
+    @Path('project_uuid') required String? projectUuid,
+  });
+
   ///Get Generations
   ///@param user_id
   ///@param generation_uuids
@@ -1477,9 +1499,9 @@ class ProjectUpdate {
   Map<String, dynamic> toJson() => _$ProjectUpdateToJson(this);
 
   @JsonKey(name: 'name')
-  final String? name;
+  final dynamic name;
   @JsonKey(name: 'data')
-  final Object? data;
+  final dynamic data;
   static const fromJsonFactory = _$ProjectUpdateFromJson;
 
   @override
@@ -1503,12 +1525,12 @@ class ProjectUpdate {
 }
 
 extension $ProjectUpdateExtension on ProjectUpdate {
-  ProjectUpdate copyWith({String? name, Object? data}) {
+  ProjectUpdate copyWith({dynamic name, dynamic data}) {
     return ProjectUpdate(name: name ?? this.name, data: data ?? this.data);
   }
 
   ProjectUpdate copyWithWrapped(
-      {Wrapped<String?>? name, Wrapped<Object?>? data}) {
+      {Wrapped<dynamic>? name, Wrapped<dynamic>? data}) {
     return ProjectUpdate(
         name: (name != null ? name.value : this.name),
         data: (data != null ? data.value : this.data));

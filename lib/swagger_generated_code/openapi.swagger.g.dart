@@ -263,7 +263,7 @@ Map<String, dynamic> _$ProjectDataToJson(ProjectData instance) =>
 
 ProjectUpdate _$ProjectUpdateFromJson(Map<String, dynamic> json) =>
     ProjectUpdate(
-      name: json['name'] as String?,
+      name: json['name'],
       data: json['data'],
     );
 

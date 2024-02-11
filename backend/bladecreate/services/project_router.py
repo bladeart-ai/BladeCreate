@@ -57,3 +57,15 @@ async def update_project(
     if res is None:
         raise HTTPException(status_code=404, detail="Project not found")
     return res
+
+
+@router.delete("/projects/{user_id}/{project_uuid}", response_model=Project)
+async def delete_project(
+    user_id: str,
+    project_uuid: UUID,
+    dep: AppDependencies = Depends(AppDependencies),
+):
+    res = sql.delete_project(dep.db, user_id, project_uuid)
+    if res is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return res
