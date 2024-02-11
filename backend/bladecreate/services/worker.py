@@ -29,7 +29,7 @@ class WorkerRunner:
             uuid=uuid.uuid4(),
             create_time=datetime.utcnow(),
             update_time=datetime.utcnow(),
-            status="starting",
+            status="STARTING",
         )
         self.closing = False
 
@@ -74,7 +74,7 @@ class WorkerRunner:
     def run(self):
         def sigint_handler(signal, frame):
             try:
-                self.update_status("exiting")
+                self.update_status("EXITING")
             except Exception:
                 pass
             logger.info(f"Interrupted signal {signal}")
@@ -82,9 +82,9 @@ class WorkerRunner:
 
         signal.signal(signal.SIGINT, sigint_handler)
 
-        self.update_status("starting")
+        self.update_status("STARTING")
         self.init_worker()
-        self.update_status("initialized")
+        self.update_status("INITIALIZED")
 
         while not self.closing:
             try:
@@ -103,5 +103,5 @@ class WorkerRunner:
                 time.sleep(5)
                 continue
 
-        self.update_status("exiting")
+        self.update_status("EXITING")
         logger.info("Worker status: exited")

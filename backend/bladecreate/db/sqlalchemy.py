@@ -210,7 +210,7 @@ def upsert_worker(db: Session, worker_uuid: UUID, worker_status: str) -> Worker:
 def get_cluster_snapshot(db: Session) -> ClusterSnapshot:
     since = datetime.datetime.utcnow() - timedelta(minutes=1)
     db_obj = db.scalars(
-        select(WorkerDB).where(WorkerDB.status != "exiting").where(WorkerDB.heartbeat_time > since)
+        select(WorkerDB).where(WorkerDB.status != "EXITING").where(WorkerDB.heartbeat_time > since)
     ).all()
     if db_obj is None:
         workers = []

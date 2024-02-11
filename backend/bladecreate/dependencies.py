@@ -50,11 +50,11 @@ class AppDependencies:
             last_event = self.__class__.wsLastEvents[ws]
             if (
                 last_event is not None
-                and last_event.worker_update is not None
-                and event.worker_update is not None
-                and last_event.worker_update.uuid == event.worker_update.uuid
-                and last_event.worker_update.status == event.worker_update.status
-                and last_event.worker_update.current_job == event.worker_update.current_job
+                and last_event.workerUpdate is not None
+                and event.workerUpdate is not None
+                and last_event.workerUpdate.uuid == event.workerUpdate.uuid
+                and last_event.workerUpdate.status == event.workerUpdate.status
+                and last_event.workerUpdate.currentJob == event.workerUpdate.currentJob
             ):
                 continue
 

@@ -33,6 +33,7 @@ class MacSDXL(SDXL):
             settings.local_object_storage.path,
             settings.storage_paths.pretrain_models.format(pretrain_model_id="mac-sdxl-1.0"),
         )
+        logger.info(f"Cached models: {str(converted_model_directory)}")
         compute_unit = "CPU_AND_GPU"
 
         SDP = StableDiffusionXLPipeline if "xl" in model_version else StableDiffusionPipeline

@@ -1,3 +1,4 @@
+import 'package:bladecreate/cluster/cluster.dart';
 import 'package:bladecreate/projects/project_card_list.dart';
 import 'package:flutter/material.dart';
 import 'package:bladecreate/style.dart';
@@ -9,10 +10,10 @@ class ProjectsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: AppStyle.highlight,
           leading: const Image(
               image: AssetImage("assets/logo.png"), fit: BoxFit.contain),
           leadingWidth: 120,
+          actions: const [ClusterStatusDropdown()],
         ),
         body: const SafeArea(
             child: SingleChildScrollView(

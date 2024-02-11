@@ -1,6 +1,6 @@
 import 'package:bladecreate/canvas/canvas.dart';
 import 'package:bladecreate/projects/project_card.dart';
-import 'package:bladecreate/projects/projects_provider.dart';
+import 'package:bladecreate/projects/projects_repo.dart';
 import 'package:bladecreate/widgets/error_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:bladecreate/style.dart';
@@ -12,11 +12,11 @@ class ProjectCardList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(create: (context) {
-      final p = ProjectsProvider();
+      final p = ProjectsRepo();
       wrapFutureWithShowingErrorBanner(context, () => p.fetchProjects(),
           text: "Fetching Projects Error", dismissable: false);
       return p;
-    }, child: Consumer<ProjectsProvider>(
+    }, child: Consumer<ProjectsRepo>(
       builder: (_, p, child) {
         return Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

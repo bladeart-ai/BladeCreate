@@ -20,6 +20,7 @@ class BladeCreateApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'BladeCreate',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: AppStyle.primary),

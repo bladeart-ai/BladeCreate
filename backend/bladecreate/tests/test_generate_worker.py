@@ -60,11 +60,11 @@ def compare_cluster_events(source: list[ClusterEvent], expected: list[ClusterEve
         elif s.screenshot is None and e.screenshot is not None:
             assert False
 
-        if s.worker_update is not None and e.worker_update is not None:
-            assert s.worker_update.status == e.worker_update.status
-        if s.worker_update is not None and e.worker_update is None:
+        if s.workerUpdate is not None and e.workerUpdate is not None:
+            assert s.workerUpdate.status == e.workerUpdate.status
+        if s.workerUpdate is not None and e.workerUpdate is None:
             assert False
-        if s.worker_update is None and e.worker_update is not None:
+        if s.workerUpdate is None and e.workerUpdate is not None:
             assert False
 
 
@@ -121,7 +121,7 @@ def run_test_client(expected: list[ClusterEvent]):
             data_obj = TypeAdapter(ClusterEvent).validate_json(data)
             logger.info(f"Received: {data_obj}")
             received.append(data_obj)
-            if data_obj.worker_update is not None and data_obj.worker_update.status == "exiting":
+            if data_obj.workerUpdate is not None and data_obj.workerUpdate.status == "EXITING":
                 break
 
     try:
@@ -145,27 +145,27 @@ def test_worker(db: sql.SessionLocal):
             )
         ),
         ClusterEvent(
-            worker_update=Worker(
+            workerUpdate=Worker(
                 uuid=uuid.uuid4(),
                 create_time=datetime.datetime.now(),
                 update_time=datetime.datetime.now(),
-                status="starting",
+                status="STARTING",
             )
         ),
         ClusterEvent(
-            worker_update=Worker(
+            workerUpdate=Worker(
                 uuid=uuid.uuid4(),
                 create_time=datetime.datetime.now(),
                 update_time=datetime.datetime.now(),
-                status="initialized",
+                status="INITIALIZED",
             )
         ),
         ClusterEvent(
-            worker_update=Worker(
+            workerUpdate=Worker(
                 uuid=uuid.uuid4(),
                 create_time=datetime.datetime.now(),
                 update_time=datetime.datetime.now(),
-                status="exiting",
+                status="EXITING",
             )
         ),
     ]
@@ -251,31 +251,31 @@ def test_generate_worker(db: sql.SessionLocal, user_id: str):
             )
         ),
         ClusterEvent(
-            worker_update=Worker(
+            workerUpdate=Worker(
                 uuid=uuid.uuid4(),
                 create_time=datetime.datetime.now(),
                 update_time=datetime.datetime.now(),
-                status="starting",
+                status="STARTING",
             )
         ),
         ClusterEvent(
-            worker_update=Worker(
+            workerUpdate=Worker(
                 uuid=uuid.uuid4(),
                 create_time=datetime.datetime.now(),
                 update_time=datetime.datetime.now(),
-                status="initialized",
+                status="INITIALIZED",
             )
         ),
-        ClusterEvent(generation_update=g1),
-        ClusterEvent(generation_update=Generation(**g1, status="SUCCEEDED")),
-        ClusterEvent(generation_update=g2),
-        ClusterEvent(generation_update=Generation(**g2, status="SUCCEEDED")),
+        ClusterEvent(generationUpdate=g1),
+        ClusterEvent(generationUpdate=Generation(**g1, status="SUCCEEDED")),
+        ClusterEvent(generationUpdate=g2),
+        ClusterEvent(generationUpdate=Generation(**g2, status="SUCCEEDED")),
         ClusterEvent(
-            worker_update=Worker(
+            workerUpdate=Worker(
                 uuid=uuid.uuid4(),
                 create_time=datetime.datetime.now(),
                 update_time=datetime.datetime.now(),
-                status="exiting",
+                status="EXITING",
             )
         ),
     ]

@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:bladecreate/settings.dart';
 import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:retry/retry.dart';
 import 'package:uuid/uuid.dart';
 
-class ProjectsProvider extends ChangeNotifier {
-  final api = Openapi.create(baseUrl: Uri.parse("http://localhost:8080"));
+class ProjectsRepo extends ChangeNotifier {
+  final api = Openapi.create(baseUrl: Uri.parse(Settings.apiURL));
   var uuid = const Uuid();
-  final userId = "guest";
+  final userId = Settings.guestUserId;
 
   late Future<void> fetchProjectsFuture;
   List<Project> projects = [];
@@ -22,10 +23,13 @@ class ProjectsProvider extends ChangeNotifier {
   }
 
   Future<void> _fetchProjects() async {
-    final resp = await const RetryOptions(maxAttempts: 1).retry(
+    final resp = await RetryOptions(
+            maxDelay: Duration(seconds: Settings.reconnectDelaySecs),
+            maxAttempts: Settings.maxRetryAttempts)
+        .retry(
       () => api
           .projectsUserIdGet(userId: userId)
-          .timeout(const Duration(seconds: 5)),
+          .timeout(Duration(seconds: Settings.timeoutSecs)),
       retryIf: (e) => e is SocketException || e is TimeoutException,
     );
 

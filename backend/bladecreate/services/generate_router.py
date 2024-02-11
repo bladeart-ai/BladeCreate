@@ -105,7 +105,7 @@ async def update_generation(
     if g is None:
         raise HTTPException(status_code=404, detail="Generation not found")
 
-    await dep.dispatch_event(ClusterEvent(generation_update=body))
+    await dep.dispatch_event(ClusterEvent(generationUpdate=body))
 
 
 @router.put("/workers/{worker_uuid}")
@@ -118,7 +118,7 @@ async def upsert_worker(
     if g is None:
         raise HTTPException(status_code=404, detail="Generation not found")
 
-    await dep.dispatch_event(ClusterEvent(worker_update=body))
+    await dep.dispatch_event(ClusterEvent(workerUpdate=body))
 
 
 @router.get("/cluster", response_model=ClusterEvent)

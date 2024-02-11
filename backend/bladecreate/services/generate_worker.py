@@ -74,15 +74,15 @@ class GenerateWorkerRunner(WorkerRunner):
         # Step 1: fetch task
         g = self.pop_task(db)
         if g is None:
-            self.worker_model.current_job = None
+            self.worker_model.currentJob = None
             self.send_worker_status_heartbeat(True)
             return
 
         logger.debug(f"Started task successfully {g.uuid}: {g.params}")
-        self.worker_model.current_job = g.uuid
+        self.worker_model.currentJob = g.uuid
         self.send_worker_status_heartbeat(True)
         elapsed_time = datetime.utcnow() - start_time
-        g.elapsed_secs = elapsed_time.total_seconds()
+        g.elapsedSecs = elapsed_time.total_seconds()
         g.percentage = 0
         self.update_task(GenerationTaskUpdate(**(g.model_dump())))
 
@@ -100,7 +100,7 @@ class GenerateWorkerRunner(WorkerRunner):
         def callback(steps: int):
             if steps % 5 == 0:
                 elapsed_time = datetime.utcnow() - start_time
-                g.elapsed_secs = elapsed_time.total_seconds()
+                g.elapsedSecs = elapsed_time.total_seconds()
                 g.percentage = steps * 1.0 / g.params.inference_steps
                 self.update_task(GenerationTaskUpdate(**(g.model_dump())))
 
@@ -132,7 +132,7 @@ class GenerateWorkerRunner(WorkerRunner):
         g.status = "SUCCEEDED"
         g.image_uuids = image_uuid_to_data.keys()
         elapsed_time = datetime.utcnow() - start_time
-        g.elapsed_secs = elapsed_time.total_seconds()
+        g.elapsedSecs = elapsed_time.total_seconds()
         g.percentage = 1
         self.update_task(GenerationTaskUpdate(**(g.model_dump())))
 

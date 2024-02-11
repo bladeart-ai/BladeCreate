@@ -1,12 +1,10 @@
 import 'package:bladecreate/canvas/canvas.dart';
-import 'package:bladecreate/projects/projects_provider.dart';
+import 'package:bladecreate/projects/projects_repo.dart';
 import 'package:bladecreate/style.dart';
 import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
 import 'package:bladecreate/widgets/error_banner.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animated_icons/useanimations.dart';
 import 'package:provider/provider.dart';
-import 'package:lottie/lottie.dart';
 
 class ProjectCard extends StatefulWidget {
   const ProjectCard({super.key, required this.project});
@@ -17,28 +15,16 @@ class ProjectCard extends StatefulWidget {
   State<ProjectCard> createState() => _ProjectCardState();
 }
 
-class _ProjectCardState extends State<ProjectCard>
-    with TickerProviderStateMixin {
-  late AnimationController _menuController;
-
+class _ProjectCardState extends State<ProjectCard> {
   final TextEditingController _pNameController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-
-    _menuController =
-        AnimationController(vsync: this, duration: const Duration(seconds: 1));
-  }
-
-  @override
   void dispose() {
-    _menuController.dispose();
-
     super.dispose();
+    _pNameController.dispose();
   }
 
-  _buildRenameConfirmationDialog(BuildContext context, ProjectsProvider p) {
+  _buildRenameConfirmationDialog(BuildContext context, ProjectsRepo p) {
     _pNameController.text = widget.project.name;
 
     return showDialog<void>(
@@ -80,7 +66,7 @@ class _ProjectCardState extends State<ProjectCard>
     );
   }
 
-  _buildDeleteConfirmationDialog(BuildContext context, ProjectsProvider p) {
+  _buildDeleteConfirmationDialog(BuildContext context, ProjectsRepo p) {
     return showDialog<void>(
       context: context,
       builder: (context) {
@@ -107,19 +93,11 @@ class _ProjectCardState extends State<ProjectCard>
   }
 
   _buildDropdownMenu() {
-    return Consumer<ProjectsProvider>(builder: (_, p, child) {
+    return Consumer<ProjectsRepo>(builder: (_, p, child) {
       return MenuAnchor(
-        onClose: () {
-          _menuController.reverse();
-        },
-        onOpen: () {
-          _menuController.reset();
-          _menuController.animateTo(0.6);
-        },
         builder:
             (BuildContext context, MenuController controller, Widget? child) {
           return IconButton(
-            splashRadius: 50,
             onPressed: () {
               if (controller.isOpen) {
                 controller.close();
@@ -127,8 +105,7 @@ class _ProjectCardState extends State<ProjectCard>
                 controller.open();
               }
             },
-            icon: Lottie.asset(Useanimations.menuV3,
-                controller: _menuController, fit: BoxFit.fitHeight),
+            icon: const Icon(Icons.menu, color: AppStyle.highlight),
           );
         },
         menuChildren: [

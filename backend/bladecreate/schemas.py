@@ -35,7 +35,9 @@ class Generation(GenerationBase):
     create_time: datetime
     update_time: datetime
     status: str
-    elapsed_secs: Optional[float] = None
+    elapsedSecs: Optional[
+        float
+    ] = None  # Use camelcase for this field because of a dart swagger code generator bug.
     percentage: Optional[float] = None
 
     image_uuids: list[UUID]
@@ -109,7 +111,9 @@ class Worker(BaseModel):
     create_time: datetime
     update_time: datetime
     status: str
-    current_job: Optional[UUID] = None
+    currentJob: Optional[
+        UUID
+    ] = None  # Use camelcase for this field because of a dart swagger code generator bug.
 
 
 class ClusterSnapshot(BaseModel):
@@ -119,5 +123,9 @@ class ClusterSnapshot(BaseModel):
 
 class ClusterEvent(BaseModel):
     screenshot: Optional[ClusterSnapshot] = None
-    worker_update: Optional[Worker] = None
-    generation_update: Optional[GenerationTaskUpdate] = None
+    workerUpdate: Optional[
+        Worker
+    ] = None  # Use camelcase for this field because of a dart swagger code generator bug.
+    generationUpdate: Optional[
+        GenerationTaskUpdate
+    ] = None  # Use camelcase for this field because of a dart swagger code generator bug.

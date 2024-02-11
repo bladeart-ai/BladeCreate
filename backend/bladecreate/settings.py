@@ -2,7 +2,7 @@ import os
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import BaseModel, Field, FilePath, NewPath, model_validator
+from pydantic import BaseModel, DirectoryPath, Field, FilePath, NewPath, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -36,7 +36,9 @@ class PostgresDatabase(BaseModel):
 
 
 class FileStorage(BaseModel):
-    path: Union[NewPath, FilePath] = Field(default="/tmp/bladecreate/", union_mode="left_to_right")
+    path: Union[NewPath, DirectoryPath] = Field(
+        default="/tmp/bladecreate/", union_mode="left_to_right"
+    )
 
 
 class S3Storage(BaseModel):
