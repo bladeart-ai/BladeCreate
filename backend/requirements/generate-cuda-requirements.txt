@@ -1,4 +1,0 @@
-torch
-diffusers[torch]
-transformers
-xformers

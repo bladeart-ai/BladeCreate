@@ -1,5 +1,0 @@
-torch
-diffusers[torch]
-transformers
-
-git+https://github.com/bladeart-ai/ml-stable-diffusion.git

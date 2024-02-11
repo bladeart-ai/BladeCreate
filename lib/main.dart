@@ -1,9 +1,15 @@
 import 'package:bladecreate/canvas/canvas.dart';
 import 'package:bladecreate/style.dart';
 import 'package:bladecreate/projects/projects_page.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:serious_python/serious_python.dart';
 
 void main() {
+  if (!kDebugMode) {
+    SeriousPython.run("assets/backend.zip", appFileName: "main.pyc");
+  }
+
   runApp(const BladeCreateApp());
 }
 

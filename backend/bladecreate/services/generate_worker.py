@@ -137,6 +137,11 @@ class GenerateWorkerRunner(WorkerRunner):
         self.update_task(GenerationTaskUpdate(**(g.model_dump())))
 
 
-if __name__ == "__main__":
+def run_generate_worker():
     w = GenerateWorkerRunner()
     w.run()
+
+
+if __name__ == "__main__":
+    logger.info("Running from generate_worker.py")
+    run_generate_worker()

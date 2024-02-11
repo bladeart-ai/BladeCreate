@@ -9,17 +9,19 @@ import 'package:uuid/uuid.dart';
 
 class ProjectsProvider extends ChangeNotifier {
   final api = Openapi.create(baseUrl: Uri.parse("http://localhost:8080"));
-  var uuid = Uuid();
+  var uuid = const Uuid();
   final userId = "guest";
 
-  late Future<void> initFuture;
+  late Future<void> fetchProjectsFuture;
   List<Project> projects = [];
 
-  init() {
-    initFuture = fetchProjects();
+  Future<void> fetchProjects() async {
+    notifyListeners();
+    fetchProjectsFuture = _fetchProjects();
+    return fetchProjectsFuture;
   }
 
-  Future<void> fetchProjects() async {
+  Future<void> _fetchProjects() async {
     final resp = await const RetryOptions(maxAttempts: 1).retry(
       () => api
           .projectsUserIdGet(userId: userId)

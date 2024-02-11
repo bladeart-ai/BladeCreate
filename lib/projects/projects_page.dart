@@ -60,7 +60,8 @@ class ProjectsPage extends StatelessWidget {
     return ChangeNotifierProvider(
         create: (context) {
           final p = ProjectsProvider();
-          p.init();
+          wrapFutureWithShowingErrorBanner(context, () => p.fetchProjects(),
+              text: "Fetching Projects Error", dismissable: false);
           return p;
         },
         child: Scaffold(
@@ -103,11 +104,11 @@ class ProjectsPage extends StatelessWidget {
                           IconButton(
                               onPressed: () => wrapFutureWithShowingErrorBanner(
                                   context,
-                                  p.createProject().then((projectUUID) {
-                                    Navigator.pushNamed(context, "project",
-                                        arguments:
-                                            CanvasPageArguments(projectUUID));
-                                  }),
+                                  () => p.createProject().then((projectUUID) {
+                                        Navigator.pushNamed(context, "project",
+                                            arguments: CanvasPageArguments(
+                                                projectUUID));
+                                      }),
                                   text: "Creating Project Error"),
                               icon: const Icon(Icons.add))
                         ]),
@@ -115,9 +116,7 @@ class ProjectsPage extends StatelessWidget {
                           height: 15,
                         ),
                         FutureBuilder(
-                            future: wrapFutureWithShowingErrorBanner(
-                                context, p.initFuture,
-                                text: "Fetching Projects Error"),
+                            future: p.fetchProjectsFuture,
                             builder: (BuildContext context,
                                 AsyncSnapshot<void> snapshot) {
                               if (snapshot.connectionState !=

@@ -49,6 +49,10 @@ dependencies:
   # Types
   uuid: ^4.3.3
 
+  # ML
+  serious_python:
+    path: packages/serious-python/src/serious_python
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -78,6 +82,7 @@ flutter:
 
   assets:
     - assets/logo.png
+    - assets/backend.zip
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

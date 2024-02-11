@@ -1,3 +1,3 @@
 #!/bin/sh
 
-pyinstaller --noconfirm --distpath dist --workpath build --onedir --name bladecreate_app bladecreate/app.py
+rm -f assets/backend.zip && dart run serious_python:main package --asset assets/backend.zip --exclude build,dist backend

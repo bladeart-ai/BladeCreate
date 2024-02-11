@@ -124,7 +124,7 @@ class Settings(BaseSettings):
         if self.env == EnvEnum.prod:
             self.server.host = "127.0.0.1"
             self.server.reload = False
-            self.server.worker = True
+            # self.server.worker = True
             self.logging = Logging(level="info")
         self.set_hf()
 
