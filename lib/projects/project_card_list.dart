@@ -1,7 +1,7 @@
-import 'package:bladecreate/canvas/canvas.dart';
+import 'package:bladecreate/project/project_page.dart';
 import 'package:bladecreate/projects/project_card.dart';
-import 'package:bladecreate/projects/projects_repo.dart';
-import 'package:bladecreate/widgets/error_banner.dart';
+import 'package:bladecreate/projects/projects_provider.dart';
+import 'package:bladecreate/widgets/error_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:bladecreate/style.dart';
 import 'package:provider/provider.dart';
@@ -12,11 +12,10 @@ class ProjectCardList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(create: (context) {
-      final p = ProjectsRepo();
-      wrapFutureWithShowingErrorBanner(context, () => p.fetchProjects(),
-          text: "Fetching Projects Error", dismissable: false);
+      final p = ProjectsProvider();
+      p.fetchProjects();
       return p;
-    }, child: Consumer<ProjectsRepo>(
+    }, child: Consumer<ProjectsProvider>(
       builder: (_, p, child) {
         return Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -33,7 +32,7 @@ class ProjectCardList extends StatelessWidget {
                         context,
                         () => p.createProject().then((projectUUID) {
                               Navigator.pushNamed(context, "project",
-                                  arguments: CanvasPageArguments(projectUUID));
+                                  arguments: ProjectPageArguments(projectUUID));
                             }),
                         text: "Creating Project Error"),
                     icon: const Icon(Icons.add))
@@ -48,7 +47,8 @@ class ProjectCardList extends StatelessWidget {
                     if (snapshot.connectionState != ConnectionState.done) {
                       return const CircularProgressIndicator();
                     } else if (snapshot.hasError) {
-                      return Text("Error: ${snapshot.error}");
+                      return FutureErrorDialog(
+                          f: p.fetchProjects, error: snapshot.error!);
                     }
                     return Wrap(
                       direction: Axis.horizontal,

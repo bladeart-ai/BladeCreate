@@ -1,8 +1,8 @@
-import 'package:bladecreate/canvas/canvas.dart';
-import 'package:bladecreate/projects/projects_repo.dart';
+import 'package:bladecreate/project/project_page.dart';
+import 'package:bladecreate/projects/projects_provider.dart';
 import 'package:bladecreate/style.dart';
 import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
-import 'package:bladecreate/widgets/error_banner.dart';
+import 'package:bladecreate/widgets/error_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +24,7 @@ class _ProjectCardState extends State<ProjectCard> {
     _pNameController.dispose();
   }
 
-  _buildRenameConfirmationDialog(BuildContext context, ProjectsRepo p) {
+  _buildRenameConfirmationDialog(BuildContext context, ProjectsProvider p) {
     _pNameController.text = widget.project.name;
 
     return showDialog<void>(
@@ -66,7 +66,7 @@ class _ProjectCardState extends State<ProjectCard> {
     );
   }
 
-  _buildDeleteConfirmationDialog(BuildContext context, ProjectsRepo p) {
+  _buildDeleteConfirmationDialog(BuildContext context, ProjectsProvider p) {
     return showDialog<void>(
       context: context,
       builder: (context) {
@@ -93,7 +93,7 @@ class _ProjectCardState extends State<ProjectCard> {
   }
 
   _buildDropdownMenu() {
-    return Consumer<ProjectsRepo>(builder: (_, p, child) {
+    return Consumer<ProjectsProvider>(builder: (_, p, child) {
       return MenuAnchor(
         builder:
             (BuildContext context, MenuController controller, Widget? child) {
@@ -128,7 +128,7 @@ class _ProjectCardState extends State<ProjectCard> {
       child: InkWell(
         onTap: () {
           Navigator.pushNamed(context, "project",
-              arguments: CanvasPageArguments(widget.project.uuid));
+              arguments: ProjectPageArguments(widget.project.uuid));
         },
         child: Container(
             alignment: Alignment.center,

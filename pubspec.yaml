@@ -49,6 +49,7 @@ dependencies:
 
   # Types
   uuid: ^4.3.3
+  meta: ^1.7.0
 
   # ML
   serious_python:

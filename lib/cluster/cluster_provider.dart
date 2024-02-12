@@ -11,7 +11,7 @@ enum WSStatus { connected, disconnected }
 
 enum ClusterStatus { unready, busy, idle }
 
-class ClusterRepo extends ChangeNotifier {
+class ClusterProvider extends ChangeNotifier {
   late WebSocketChannel ws;
 
   WSStatus wsStatus = WSStatus.disconnected;

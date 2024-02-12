@@ -1,4 +1,4 @@
-import 'package:bladecreate/canvas/canvas.dart';
+import 'package:bladecreate/project/project_page.dart';
 import 'package:bladecreate/style.dart';
 import 'package:bladecreate/projects/projects_page.dart';
 import 'package:flutter/foundation.dart';
@@ -28,7 +28,7 @@ class BladeCreateApp extends StatelessWidget {
       ),
       initialRoute: "/",
       routes: {
-        "project": (context) => const CanvasPage(),
+        "project": (context) => const ProjectPage(),
         "/": (context) => const ProjectsPage(),
       },
     );

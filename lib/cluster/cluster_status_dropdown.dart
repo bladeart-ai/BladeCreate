@@ -1,4 +1,4 @@
-import 'package:bladecreate/cluster/cluster_repo.dart';
+import 'package:bladecreate/cluster/cluster_provider.dart';
 import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_icon/animated_icon.dart';
@@ -10,6 +10,8 @@ class ClusterStatusDropdown extends StatelessWidget {
   Widget _buildStatusIcon(ClusterStatus status, Function onTap) {
     if (status == ClusterStatus.busy) {
       return AnimateIcon(
+        height: 30,
+        width: 30,
         onTap: onTap,
         iconType: IconType.continueAnimation,
         color: Colors.green,
@@ -17,6 +19,8 @@ class ClusterStatusDropdown extends StatelessWidget {
       );
     } else if (status == ClusterStatus.idle) {
       return AnimateIcon(
+        height: 30,
+        width: 30,
         onTap: onTap,
         iconType: IconType.animatedOnHover,
         color: Colors.green,
@@ -24,6 +28,8 @@ class ClusterStatusDropdown extends StatelessWidget {
       );
     }
     return AnimateIcon(
+      height: 30,
+      width: 30,
       onTap: onTap,
       iconType: IconType.animatedOnHover,
       color: Colors.red,
@@ -52,10 +58,10 @@ class ClusterStatusDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(create: (context) {
-      final cr = ClusterRepo();
+      final cr = ClusterProvider();
       cr.connect();
       return cr;
-    }, child: Consumer<ClusterRepo>(builder: (_, cr, child) {
+    }, child: Consumer<ClusterProvider>(builder: (_, cr, child) {
       return MenuAnchor(
         builder:
             (BuildContext context, MenuController controller, Widget? child) {

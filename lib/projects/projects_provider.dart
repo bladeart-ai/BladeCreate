@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:retry/retry.dart';
 import 'package:uuid/uuid.dart';
 
-class ProjectsRepo extends ChangeNotifier {
+class ProjectsProvider extends ChangeNotifier {
   final api = Openapi.create(baseUrl: Uri.parse(Settings.apiURL));
   var uuid = const Uuid();
   final userId = Settings.guestUserId;
