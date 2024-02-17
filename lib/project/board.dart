@@ -1,102 +1,74 @@
-library stack_board;
-
+import 'package:bladecreate/project/layer/image_layer.dart';
+import 'package:bladecreate/project/layer/transform_box_provider.dart';
 import 'package:bladecreate/project/project_provider.dart';
+import 'package:bladecreate/style.dart';
+import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_drawing_board/helpers.dart';
 import 'package:provider/provider.dart';
-import 'operat_state.dart';
 
-import 'layer/adaptive_text_case.dart';
-import 'layer/layer_case.dart';
-import 'case_style.dart';
-import 'layer/adaptive_text.dart';
-import 'layer/layer.dart';
+import 'layer/transform_box.dart';
 
-// TODO:
 // Ideal class hierachy:
-// Board: contains list of Transformable
-// Transformable: contains (LayerGroup -> Layer) or Layer
-// Layer - build(): if editing -> Widget
-//                  if not editing -> Widget
+// Board: contains list of EditableLayer
+// EditableLayer: contains (LayerContentGroup -> LayerContent) or LayerContent
+// LayerContent - build(): if editing -> Widget
+//                         if not editing -> Widget
 class Board extends StatefulWidget {
-  Board({
+  const Board({
     super.key,
   });
 
   @override
   BoardState createState() => BoardState();
-
-  final Widget? background = ColoredBox(color: Colors.grey[100]!);
-
-  final CaseStyle? caseStyle = const CaseStyle(
-    borderColor: Colors.grey,
-    iconColor: Colors.white,
-  );
-
-  final bool tapToCancelAllItem = false;
 }
 
 class BoardState extends State<Board> with SafeState<Board> {
-  /// 所有item的操作状态
-  OperatState? _operatState;
-
-  /// 生成唯一Key
-  Key _getKey(int? id) => Key('StackBoardItem$id');
-
   @override
   Widget build(BuildContext context) {
-    return Consumer<ProjectProvider>(
-      builder: (context, model, child) {
-        if (widget.background == null) {
-          return Stack(
-            fit: StackFit.expand,
-            children: model.layers
-                .map((LayerModel box) => _buildItem(model, box))
-                .toList(),
-          );
-        } else {
-          return Stack(
-            fit: StackFit.expand,
-            children: <Widget>[
-              widget.background!,
-              ...model.layers.map((LayerModel box) => _buildItem(model, box)),
-            ],
-          );
-        }
-
-        // if (widget.tapToCancelAllItem) {
-        //   return GestureDetector(
-        //     onTap: _unFocus,
-        //     child: child,
-        //   );
-        // }
+    return Consumer2<ProjectProvider, TransformBoxProvider>(
+      builder: (context, p, tp, child) {
+        return GestureDetector(
+            onTap: () {
+              p.unSelect();
+              tp.unselectLayer();
+            },
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Container(color: AppStyle.background),
+                ...p.orderedLayers.map((layer) => _buildLayer(p, tp, layer)),
+                TransformBox(
+                  onMove: (x, y) => p.setSelectedLayer(x: x, y: y),
+                  onRotate: (angle) => p.setSelectedLayer(rotation: angle),
+                  onScale: (x, y, width, height) => p.setSelectedLayer(
+                      x: x, y: y, width: width, height: height),
+                ),
+              ],
+            ));
       },
     );
   }
 
-  /// 构建项
-  Widget _buildItem(ProjectProvider model, LayerModel item) {
-    Widget child;
-
-    if (item is AdaptiveText) {
-      child = AdaptiveTextCase(
-        key: _getKey(item.id),
-        adaptiveText: item,
-        onDel: () => model.removeLayer(item.id),
-        onTap: () => model.moveLayerToTop(item.id),
-        operatState: _operatState,
-      );
-    } else {
-      child = ItemCase(
-        key: _getKey(item.id),
-        onDel: () => model.removeLayer(item.id),
-        onTap: () => model.moveLayerToTop(item.id),
-        caseStyle: item.caseStyle,
-        operatState: _operatState,
-        child: item.child,
-      );
-    }
-
-    return child;
+  Widget _buildLayer(ProjectProvider p, TransformBoxProvider tp, Layer l) {
+    return Positioned(
+      top: l.y ?? 0.0,
+      left: l.x ?? 0.0,
+      height: l.height ?? 0.0,
+      width: l.width ?? 0.0,
+      child: Transform.rotate(
+        angle: l.rotation ?? 0.0,
+        child: GestureDetector(
+          onTap: () {
+            p.select(l.uuid);
+            tp.selectLayer(l);
+          },
+          child: ImageLayerContent(
+            m: ImageLayerModel(
+                'https://avatars.githubusercontent.com/u/47586449?s=200&v=4'),
+          ),
+        ),
+      ),
+    );
   }
 }

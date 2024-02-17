@@ -1,12 +1,11 @@
 import 'package:bladecreate/project/project_provider.dart';
-import 'package:bladecreate/project/layer/adaptive_text.dart';
-import 'package:bladecreate/project/layer/layer.dart';
 import 'package:bladecreate/cluster/cluster_status_dropdown.dart';
+import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class ProjectToolbar extends StatelessWidget {
-  const ProjectToolbar({super.key});
+class LayerToolbar extends StatelessWidget {
+  const LayerToolbar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,22 +32,25 @@ class ProjectToolbar extends StatelessWidget {
             ),
             IconButton(
               onPressed: () {
-                p.addLayer(const AdaptiveText(
-                  'Flutter Candies',
-                  tapToEdit: true,
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ));
+                p.addLayer(Layer(
+                    uuid: uuid.v4(),
+                    name: "name",
+                    width: 100.0,
+                    height: 100.0));
               },
               icon: const Icon(Icons.border_color),
             ),
             IconButton(
               onPressed: () {
-                p.addLayer(LayerModel(
-                  child: Image.network(
-                      'https://avatars.githubusercontent.com/u/47586449?s=200&v=4'),
-                ));
+                p.addLayer(Layer(
+                    uuid: uuid.v4(),
+                    name: "name",
+                    x: 300.0,
+                    y: 300.0,
+                    width: 100.0,
+                    height: 100.0));
               },
-              icon: const Icon(Icons.image),
+              icon: const Icon(Icons.border_color),
             ),
           ])),
           Expanded(

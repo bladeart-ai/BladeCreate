@@ -1,5 +1,3 @@
-import 'package:bladecreate/project/case_style.dart';
-import 'package:bladecreate/project/layer/layer.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:async';
 import 'dart:io';
@@ -10,23 +8,25 @@ import 'package:flutter/widgets.dart';
 import 'package:retry/retry.dart';
 import 'package:uuid/uuid.dart';
 
+var uuid = const Uuid();
+
 class ProjectProvider extends ChangeNotifier {
   ProjectProvider({required this.projectUUID});
 
   // Data fetching
   final api = Openapi.create(baseUrl: Uri.parse(Settings.apiURL));
-  var uuid = const Uuid();
+
   final userId = Settings.guestUserId;
   final String projectUUID;
   late Future<void> fetchProjectFuture;
 
   // Cached data
   late Project project;
-  List<LayerModel> layers = [];
-  List<int> selected = [];
+  List<String> layersOrder = [];
+  Map<String, Layer> layers = {};
+  String? selectedLayerUUID;
 
-  // Temporary Status
-  final CaseStyle caseStyle = const CaseStyle();
+  Iterable<Layer> get orderedLayers => layersOrder.map((e) => layers[e]!);
 
   Future<void> fetchProject() async {
     notifyListeners();
@@ -50,36 +50,66 @@ class ProjectProvider extends ChangeNotifier {
       throw Exception(resp.error);
     } else {
       project = resp.body!;
+      layersOrder = project.data.layersOrder!;
+      layers =
+          project.data.layers!.map((k, v) => MapEntry<String, Layer>(k, v));
       notifyListeners();
     }
   }
 
-  void addLayer<T extends LayerModel>(LayerModel item) {
-    if (layers.contains(item)) throw 'duplicate id';
-
-    layers.add(item.copyWith(
-      id: item.id ?? layers.length,
-      caseStyle: item.caseStyle ?? caseStyle,
-    ));
+  void addLayer(Layer l) {
+    layersOrder.add(l.uuid);
+    layers[l.uuid] = l;
     notifyListeners();
   }
 
-  void removeLayer(int? id) {
-    layers.removeWhere((LayerModel b) => b.id == id);
+  void removeLayer(String uuid) {
+    layersOrder.remove(uuid);
+    layers.remove(uuid);
     notifyListeners();
   }
 
-  void moveLayerToTop(int? id) {
-    if (id == null) return;
-
-    final LayerModel item = layers.firstWhere((LayerModel i) => i.id == id);
-    layers.removeWhere((LayerModel i) => i.id == id);
-    layers.add(item);
+  void moveLayerToTop(String uuid) {
+    final ix = layersOrder.indexWhere((String e) => e == uuid);
+    if (ix == -1) return;
+    final removed = layersOrder.removeAt(ix);
+    layersOrder.add(removed);
     notifyListeners();
+  }
+
+  void setSelectedLayer({
+    double? x,
+    double? y,
+    double? width,
+    double? height,
+    double? rotation,
+  }) {
+    if (selectedLayerUUID == null) return;
+
+    final selectedLayer = layers[selectedLayerUUID!]!;
+    layers[selectedLayerUUID!] = Layer(
+      name: selectedLayer.name,
+      uuid: selectedLayer.uuid,
+      x: x ?? selectedLayer.x,
+      y: y ?? selectedLayer.y,
+      rotation: rotation ?? selectedLayer.rotation,
+      width: width ?? selectedLayer.width,
+      height: height ?? selectedLayer.height,
+    );
+    notifyListeners();
+  }
+
+  void select(String uuid) {
+    if (selectedLayerUUID != uuid) {
+      selectedLayerUUID = uuid;
+      notifyListeners();
+    }
   }
 
   void unSelect() {
-    selected.clear();
-    notifyListeners();
+    if (selectedLayerUUID != null) {
+      selectedLayerUUID = null;
+      notifyListeners();
+    }
   }
 }
