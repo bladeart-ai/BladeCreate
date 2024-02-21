@@ -30,7 +30,7 @@ class ProjectPage extends StatelessWidget {
                   providers: [
                     ChangeNotifierProvider(create: (context) {
                       final p = ProjectProvider(projectUUID: args.projectUUID);
-                      p.fetchProject();
+                      p.load();
                       return p;
                     }),
                     ChangeNotifierProvider(
@@ -38,7 +38,7 @@ class ProjectPage extends StatelessWidget {
                   ],
                   child: Consumer<ProjectProvider>(builder: (_, p, child) {
                     return FutureBuilder(
-                        future: p.fetchProjectFuture,
+                        future: p.loadFuture,
                         builder: (BuildContext context,
                             AsyncSnapshot<void> snapshot) {
                           if (snapshot.connectionState !=
@@ -46,8 +46,9 @@ class ProjectPage extends StatelessWidget {
                             return const CircularProgressIndicator();
                           } else if (snapshot.hasError) {
                             return FutureErrorDialog(
-                              f: p.fetchProject,
+                              f: p.load,
                               error: snapshot.error!,
+                              stackTrace: snapshot.stackTrace!,
                               returnable: true,
                             );
                           }

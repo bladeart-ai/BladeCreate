@@ -1150,11 +1150,11 @@ class Layer {
   const Layer({
     required this.uuid,
     required this.name,
-    this.x,
-    this.y,
-    this.width,
-    this.height,
-    this.rotation,
+    required this.x,
+    required this.y,
+    required this.width,
+    required this.height,
+    required this.rotation,
     this.imageUuid,
     this.generationUuids,
   });
@@ -1169,15 +1169,15 @@ class Layer {
   @JsonKey(name: 'name')
   final String name;
   @JsonKey(name: 'x')
-  final dynamic x;
+  final double x;
   @JsonKey(name: 'y')
-  final dynamic y;
+  final double y;
   @JsonKey(name: 'width')
-  final dynamic width;
+  final double width;
   @JsonKey(name: 'height')
-  final dynamic height;
+  final double height;
   @JsonKey(name: 'rotation')
-  final dynamic rotation;
+  final double rotation;
   @JsonKey(name: 'imageUuid')
   final dynamic imageUuid;
   @JsonKey(name: 'generation_uuids', defaultValue: <String>[])
@@ -1232,11 +1232,11 @@ extension $LayerExtension on Layer {
   Layer copyWith(
       {String? uuid,
       String? name,
-      dynamic x,
-      dynamic y,
-      dynamic width,
-      dynamic height,
-      dynamic rotation,
+      double? x,
+      double? y,
+      double? width,
+      double? height,
+      double? rotation,
       dynamic imageUuid,
       List<String>? generationUuids}) {
     return Layer(
@@ -1254,11 +1254,11 @@ extension $LayerExtension on Layer {
   Layer copyWithWrapped(
       {Wrapped<String>? uuid,
       Wrapped<String>? name,
-      Wrapped<dynamic>? x,
-      Wrapped<dynamic>? y,
-      Wrapped<dynamic>? width,
-      Wrapped<dynamic>? height,
-      Wrapped<dynamic>? rotation,
+      Wrapped<double>? x,
+      Wrapped<double>? y,
+      Wrapped<double>? width,
+      Wrapped<double>? height,
+      Wrapped<double>? rotation,
       Wrapped<dynamic>? imageUuid,
       Wrapped<List<String>?>? generationUuids}) {
     return Layer(

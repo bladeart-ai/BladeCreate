@@ -23,16 +23,12 @@ async def get_image_data_or_url(
     data = {}
     urls = {}
     for image_uuid in image_uuids:
-        url = dep.osm.generate_download_url(
+        data[image_uuid] = dep.osm.load_object_to_str(
             settings.storage_paths.images.format(
                 user_id=user_id,
                 image_uuid=image_uuid,
             )
         )
-        if url.startswith("data"):
-            data[image_uuid] = url
-        else:
-            urls[image_uuid] = url
 
     return ImagesURLOrData(urls=urls, data=data)
 

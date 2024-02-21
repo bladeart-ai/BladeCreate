@@ -193,11 +193,11 @@ Map<String, dynamic> _$ImagesURLOrDataToJson(ImagesURLOrData instance) =>
 Layer _$LayerFromJson(Map<String, dynamic> json) => Layer(
       uuid: json['uuid'] as String,
       name: json['name'] as String,
-      x: json['x'],
-      y: json['y'],
-      width: json['width'],
-      height: json['height'],
-      rotation: json['rotation'],
+      x: (json['x'] as num).toDouble(),
+      y: (json['y'] as num).toDouble(),
+      width: (json['width'] as num).toDouble(),
+      height: (json['height'] as num).toDouble(),
+      rotation: (json['rotation'] as num).toDouble(),
       imageUuid: json['imageUuid'],
       generationUuids: (json['generation_uuids'] as List<dynamic>?)
               ?.map((e) => e as String)

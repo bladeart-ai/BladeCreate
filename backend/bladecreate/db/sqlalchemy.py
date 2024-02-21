@@ -130,7 +130,7 @@ def get_generations(
 
     db_obj = db.scalars(statement).all()
     if db_obj is None:
-        return []
+        return None
     return TypeAdapter(list[Generation]).validate_python(db_obj)
 
 

@@ -42,10 +42,14 @@ dependencies:
   flutter_drawing_board:
     path: packages/flutter_drawing_board
 
+  # OS dependent
+  image_picker: ^1.0.7
+
   # API Client
   chopper: ^6.1.1
   json_annotation: ^4.8.0
   retry: ^3.1.2
+  http: ^1.2.1
 
   # Types
   uuid: ^4.3.3
@@ -85,6 +89,7 @@ flutter:
 
   assets:
     - assets/logo.png
+    - assets/loading.gif
     - assets/backend.zip
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -1,11 +1,25 @@
 import 'package:bladecreate/project/project_provider.dart';
 import 'package:bladecreate/cluster/cluster_status_dropdown.dart';
-import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
+import 'package:bladecreate/widgets/error_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class LayerToolbar extends StatelessWidget {
   const LayerToolbar({super.key});
+
+  addLayer(BuildContext context, ProjectProvider p) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      final imageData = await image.readAsBytes();
+      if (context.mounted) {
+        wrapFutureWithShowingErrorBanner(
+            context, () => p.addLayerFromBytes(image.name, imageData),
+            text: "Add Layer Error");
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,26 +45,8 @@ class LayerToolbar extends StatelessWidget {
               icon: const Icon(Icons.layers),
             ),
             IconButton(
-              onPressed: () {
-                p.addLayer(Layer(
-                    uuid: uuid.v4(),
-                    name: "name",
-                    width: 100.0,
-                    height: 100.0));
-              },
-              icon: const Icon(Icons.border_color),
-            ),
-            IconButton(
-              onPressed: () {
-                p.addLayer(Layer(
-                    uuid: uuid.v4(),
-                    name: "name",
-                    x: 300.0,
-                    y: 300.0,
-                    width: 100.0,
-                    height: 100.0));
-              },
-              icon: const Icon(Icons.border_color),
+              onPressed: () => addLayer(context, p),
+              icon: const Icon(Icons.image_outlined),
             ),
           ])),
           Expanded(

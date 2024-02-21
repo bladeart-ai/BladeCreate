@@ -61,13 +61,13 @@ class Layer(BaseModel):
     uuid: UUID
 
     name: str
-    x: Optional[float] = None
-    y: Optional[float] = None
-    width: Optional[float] = None
-    height: Optional[float] = None
-    rotation: Optional[float] = None
+    x: float
+    y: float
+    width: float
+    height: float
+    rotation: float
 
-    image_uuid: Optional[UUID] = None
+    imageUuid: Optional[UUID] = None
     generation_uuids: list[UUID] = []
 
 

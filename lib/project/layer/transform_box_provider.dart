@@ -44,17 +44,19 @@ class TransformBoxProvider extends ChangeNotifier {
 
   void selectLayer(Layer l) {
     display = true;
-    size = Size(l.width ?? 0.0, l.height ?? 0.0);
-    pos = Offset(l.x ?? 0.0, l.y ?? 0.0);
-    rotation = l.rotation ?? 0.0;
+    size = Size(l.width, l.height);
+    pos = Offset(l.x, l.y);
+    rotation = l.rotation;
     notifyListeners();
   }
 
   void unselectLayer() {
-    display = false;
-    size = const Size(0.0, 0.0);
-    pos = const Offset(0.0, 0.0);
-    notifyListeners();
+    if (display) {
+      display = false;
+      size = const Size(0.0, 0.0);
+      pos = const Offset(0.0, 0.0);
+      notifyListeners();
+    }
   }
 
   void move(Offset rotatedD) {

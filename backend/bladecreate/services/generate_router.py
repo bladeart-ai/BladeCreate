@@ -66,7 +66,7 @@ async def get_generations(
     dep: AppDependencies = Depends(AppDependencies),
 ):
     res = sql.get_generations(dep.db, user_id, generation_uuids, active_only)
-    if len(res) == 0:
+    if len(res) != len(generation_uuids):
         raise HTTPException(status_code=404, detail="Generation not found")
 
     return res

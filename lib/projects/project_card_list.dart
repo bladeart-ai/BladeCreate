@@ -48,7 +48,10 @@ class ProjectCardList extends StatelessWidget {
                       return const CircularProgressIndicator();
                     } else if (snapshot.hasError) {
                       return FutureErrorDialog(
-                          f: p.fetchProjects, error: snapshot.error!);
+                        f: p.fetchProjects,
+                        error: snapshot.error!,
+                        stackTrace: snapshot.stackTrace!,
+                      );
                     }
                     return Wrap(
                       direction: Axis.horizontal,

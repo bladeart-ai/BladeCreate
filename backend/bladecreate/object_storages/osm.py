@@ -118,5 +118,5 @@ class ObjectStorageManager:
                 if exception:
                     raise exception
 
-    def generate_download_url(self, key) -> str:
+    def load_object_to_str(self, key) -> str:
         pass

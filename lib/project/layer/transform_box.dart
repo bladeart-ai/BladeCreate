@@ -9,11 +9,13 @@ class TransformBox extends StatelessWidget {
     this.onMove,
     this.onScale,
     this.onRotate,
+    this.onDelete,
   });
 
   final Function(double x, double y)? onMove;
   final Function(double x, double y, double width, double height)? onScale;
   final Function(double angle)? onRotate;
+  final Function()? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +24,7 @@ class TransformBox extends StatelessWidget {
 
       return Stack(children: [
         _border(p),
+        _deleteButton(p),
         _rotateButton(p),
         _scaleButton(p),
         ...p.sizersPos.map((e) => _sizerButton(p, e)),
@@ -52,6 +55,30 @@ class TransformBox extends StatelessWidget {
                 color: AppStyle.borderColor,
                 width: AppStyle.borderWidth,
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _deleteButton(TransformBoxProvider p) {
+    return Positioned(
+      left: p.topRight.dx - AppStyle.smallIconSize / 2,
+      top: p.topRight.dy - AppStyle.smallIconSize / 2,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.resizeUpLeftDownRight,
+        child: GestureDetector(
+          onTap: () {
+            if (onDelete != null) {
+              onDelete!();
+            }
+            p.unselectLayer();
+          },
+          child: _operateButton(
+            const RotatedBox(
+              quarterTurns: 1,
+              child: Icon(Icons.clear),
             ),
           ),
         ),

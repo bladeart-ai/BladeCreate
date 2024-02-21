@@ -104,7 +104,7 @@ class FileObjectStorageManager(ObjectStorageManager):
             raise Exception("key exists")
         shutil.copy(local_path, dst_path)
 
-    def generate_download_url(self, key):
+    def load_object_to_str(self, key):
         path = self.key_to_storage_path(key)
         if not os.path.isfile(path):
             return ""

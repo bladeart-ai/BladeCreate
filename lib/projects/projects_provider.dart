@@ -45,7 +45,10 @@ class ProjectsProvider extends ChangeNotifier {
     final projectUUID = uuid.v4();
     final resp = await api.projectsUserIdPost(
         userId: userId,
-        body: ProjectCreate(uuid: projectUUID, name: "Untitled", data: {}));
+        body: ProjectCreate(
+            uuid: projectUUID,
+            name: "Untitled ${projects.length + 1}",
+            data: {}));
     if (resp.error != null) {
       throw Exception(resp.error);
     } else {
