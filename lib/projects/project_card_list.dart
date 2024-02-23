@@ -58,7 +58,12 @@ class ProjectCardList extends StatelessWidget {
                       spacing: 15,
                       runSpacing: 15,
                       children: (p.projects)
-                          .map<Widget>((p) => ProjectCard(project: p))
+                          .map<Widget>((project) => ProjectCard(
+                                project: project,
+                                renameFunc: (newName) =>
+                                    p.renameProject(project.uuid, newName),
+                                deleteFunc: () => p.deleteProject(project.uuid),
+                              ))
                           .toList(),
                     );
                   }),

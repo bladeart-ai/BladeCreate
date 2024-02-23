@@ -1,10 +1,10 @@
 import 'dart:typed_data';
-
 import 'package:bladecreate/project/layer/transform_box_provider.dart';
 import 'package:bladecreate/project/project_provider.dart';
 import 'package:bladecreate/style.dart';
 import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
 import 'package:flutter/material.dart';
+
 import 'package:provider/provider.dart';
 
 import 'layer/transform_box.dart';
@@ -26,8 +26,17 @@ class Board extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Container(color: AppStyle.background),
-              ...p.orderedLayers.map((layer) => _buildLayer(p, tp, layer)),
+              RepaintBoundary(
+                key: p.boardKey,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Container(color: AppStyle.background),
+                    ...p.orderedLayers
+                        .map((layer) => _buildLayer(p, tp, layer)),
+                  ],
+                ),
+              ),
               TransformBox(
                 onMove: (x, y) => p.setSelectedLayer(x: x, y: y),
                 onRotate: (angle) => p.setSelectedLayer(rotation: angle),

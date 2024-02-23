@@ -1,10 +1,11 @@
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:bladecreate/data/remote_data.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:async';
-
+import 'package:flutter/rendering.dart' as rendering;
 import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
+import 'package:flutter/widgets.dart';
 import 'package:uuid/uuid.dart';
 
 var uuid = const Uuid();
@@ -50,6 +51,7 @@ class ProjectProvider extends ChangeNotifier {
   Uint8List? imageOf(String imageUuid) => imageData[imageUuid];
 
   // Board states
+  GlobalKey boardKey = GlobalKey();
   final defaultHeight = 200.0;
   String? selectedLayerUUID;
 
@@ -107,22 +109,25 @@ class ProjectProvider extends ChangeNotifier {
     imageData[layerUuid] = bytes;
 
     await remote.uploadImageData({layerUuid: bytes});
-    decodeImageFromList(bytes, (res) async {
-      Size size = initLayerSize(res.width.toDouble(), res.height.toDouble());
-      await addLayer(
-        Layer(
-          uuid: layerUuid,
-          name: name,
-          x: 0.0,
-          y: 0.0,
-          width: size.width,
-          height: size.height,
-          rotation: 0.0,
-          imageUuid: layerUuid,
-          generationUuids: [],
-        ),
-      );
-    });
+    ui.decodeImageFromList(
+      bytes,
+      (res) async {
+        Size size = initLayerSize(res.width.toDouble(), res.height.toDouble());
+        await addLayer(
+          Layer(
+            uuid: layerUuid,
+            name: name,
+            x: 0.0,
+            y: 0.0,
+            width: size.width,
+            height: size.height,
+            rotation: 0.0,
+            imageUuid: layerUuid,
+            generationUuids: [],
+          ),
+        );
+      },
+    );
   }
 
   Future removeLayer(String uuid) async {
@@ -205,5 +210,15 @@ class ProjectProvider extends ChangeNotifier {
       selectedLayerUUID = null;
       notifyListeners();
     }
+  }
+
+  Future<Uint8List> takeScreenShotAsPNG() async {
+    rendering.RenderRepaintBoundary boundary = boardKey.currentContext!
+        .findRenderObject()! as rendering.RenderRepaintBoundary;
+    final ui.Image image = await boundary.toImage();
+    final ByteData? byteData =
+        await image.toByteData(format: ui.ImageByteFormat.png);
+    final Uint8List pngBytes = byteData!.buffer.asUint8List();
+    return pngBytes;
   }
 }

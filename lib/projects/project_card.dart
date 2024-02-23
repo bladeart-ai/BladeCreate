@@ -1,124 +1,19 @@
+import 'package:bladecreate/project/project_dropdown_menu.dart';
 import 'package:bladecreate/project/project_page.dart';
-import 'package:bladecreate/projects/projects_provider.dart';
 import 'package:bladecreate/style.dart';
 import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
-import 'package:bladecreate/widgets/error_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-class ProjectCard extends StatefulWidget {
-  const ProjectCard({super.key, required this.project});
+class ProjectCard extends StatelessWidget {
+  const ProjectCard(
+      {super.key,
+      required this.project,
+      required this.renameFunc,
+      required this.deleteFunc});
 
   final Project project;
-
-  @override
-  State<ProjectCard> createState() => _ProjectCardState();
-}
-
-class _ProjectCardState extends State<ProjectCard> {
-  final TextEditingController _pNameController = TextEditingController();
-
-  @override
-  void dispose() {
-    super.dispose();
-    _pNameController.dispose();
-  }
-
-  _buildRenameConfirmationDialog(BuildContext context, ProjectsProvider p) {
-    _pNameController.text = widget.project.name;
-
-    return showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                TextField(
-                    autofocus: true,
-                    controller: _pNameController,
-                    decoration: const InputDecoration(
-                      labelText: "Project Name",
-                      hintText: "Project Name",
-                    )),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("Cancel"),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: const Text("Rename"),
-              onPressed: () {
-                wrapFutureWithShowingErrorBanner(
-                    context,
-                    () => p.renameProject(
-                        widget.project.uuid, _pNameController.text),
-                    text: "Renaming Project Error");
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  _buildDeleteConfirmationDialog(BuildContext context, ProjectsProvider p) {
-    return showDialog<void>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Do you confirm deleting this project?"),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("Cancel"),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: const Text("Delete"),
-              onPressed: () {
-                wrapFutureWithShowingErrorBanner(
-                    context, () => p.deleteProject(widget.project.uuid),
-                    text: "Deleting Project Error");
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  _buildDropdownMenu() {
-    return Consumer<ProjectsProvider>(builder: (_, p, child) {
-      return MenuAnchor(
-        builder:
-            (BuildContext context, MenuController controller, Widget? child) {
-          return IconButton(
-            onPressed: () {
-              if (controller.isOpen) {
-                controller.close();
-              } else {
-                controller.open();
-              }
-            },
-            icon: const Icon(Icons.menu, color: AppStyle.highlight),
-          );
-        },
-        menuChildren: [
-          IconButton(
-              onPressed: () => _buildRenameConfirmationDialog(context, p),
-              icon: const Icon(Icons.edit)),
-          IconButton(
-              onPressed: () => _buildDeleteConfirmationDialog(context, p),
-              icon: const Icon(Icons.delete))
-        ],
-      );
-    });
-  }
+  final Function(String newName) renameFunc;
+  final Function deleteFunc;
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +23,7 @@ class _ProjectCardState extends State<ProjectCard> {
       child: InkWell(
         onTap: () {
           Navigator.pushNamed(context, "project",
-              arguments: ProjectPageArguments(widget.project.uuid));
+              arguments: ProjectPageArguments(project.uuid));
         },
         child: Container(
             alignment: Alignment.center,
@@ -153,13 +48,17 @@ class _ProjectCardState extends State<ProjectCard> {
               Expanded(
                   flex: 10,
                   child: Text(
-                    widget.project.name,
+                    project.name,
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                     style: AppStyle.backgroundedText,
                   )),
               const Spacer(flex: 1),
-              _buildDropdownMenu(),
+              ProjectDropDownMenu(
+                project: project,
+                renameFunc: renameFunc,
+                deleteFunc: deleteFunc,
+              ),
             ])),
       ),
     );
