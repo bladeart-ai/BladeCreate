@@ -50,15 +50,15 @@ dependencies:
   json_annotation: ^4.8.0
   retry: ^3.1.2
   http: ^1.2.1
+  web_socket_channel: ^2.4.0
 
-  # Types
+  # Types utlities
   uuid: ^4.3.3
   meta: ^1.7.0
 
-  # ML
+  # Backend process
   serious_python:
     path: packages/serious-python/src/serious_python
-  web_socket_channel: ^2.4.0
 
 dev_dependencies:
   flutter_test:

@@ -2,7 +2,7 @@ import 'package:bladecreate/project/board.dart';
 import 'package:bladecreate/project/layer/transform_box_provider.dart';
 import 'package:bladecreate/project/project_provider.dart';
 import 'package:bladecreate/project/generate_toolbar.dart';
-import 'package:bladecreate/project/layer_toolbar.dart';
+import 'package:bladecreate/project/top_toolbar.dart';
 import 'package:bladecreate/widgets/error_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -34,7 +34,8 @@ class ProjectPage extends StatelessWidget {
                       return p;
                     }),
                     ChangeNotifierProvider(
-                        create: (_) => TransformBoxProvider()),
+                      create: (_) => TransformBoxProvider(),
+                    ),
                   ],
                   child: Consumer<ProjectProvider>(builder: (_, p, child) {
                     return FutureBuilder(
@@ -54,17 +55,20 @@ class ProjectPage extends StatelessWidget {
                           }
                           return Stack(children: [
                             Positioned(
-                                width: constraints.maxWidth,
-                                height: constraints.maxHeight,
-                                child: const Board()),
+                              width: constraints.maxWidth,
+                              height: constraints.maxHeight,
+                              child: const Board(),
+                            ),
                             Positioned(
-                                width: constraints.maxWidth,
-                                top: 0,
-                                child: const LayerToolbar()),
+                              width: constraints.maxWidth,
+                              top: 0,
+                              child: const TopToolbar(),
+                            ),
                             Positioned(
-                                width: constraints.maxWidth,
-                                bottom: 0,
-                                child: const GenerateToolbar()),
+                              width: constraints.maxWidth,
+                              bottom: 0,
+                              child: const GenerateToolbar(),
+                            ),
                           ]);
                         });
                   }));

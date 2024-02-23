@@ -5,21 +5,15 @@ import 'package:bladecreate/project/project_provider.dart';
 import 'package:bladecreate/style.dart';
 import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_drawing_board/helpers.dart';
 import 'package:provider/provider.dart';
 
 import 'layer/transform_box.dart';
 
-class Board extends StatefulWidget {
+class Board extends StatelessWidget {
   const Board({
     super.key,
   });
 
-  @override
-  BoardState createState() => BoardState();
-}
-
-class BoardState extends State<Board> with SafeState<Board> {
   @override
   Widget build(BuildContext context) {
     return Consumer2<ProjectProvider, TransformBoxProvider>(
@@ -44,6 +38,7 @@ class BoardState extends State<Board> with SafeState<Board> {
                   height: height,
                 ),
                 onDelete: () => p.removeSelectedLayer(),
+                onChangeDone: () => p.updateProject(),
               ),
             ],
           ),

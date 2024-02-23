@@ -10,12 +10,33 @@ import 'package:uuid/uuid.dart';
 var uuid = const Uuid();
 
 class ProjectProvider extends ChangeNotifier {
-  ProjectProvider({required this.projectUUID});
+  ProjectProvider({required this.projectUUID}) {
+    timer = Timer.periodic(
+      const Duration(seconds: 5),
+      (_) => updateProject(modfied: false),
+    );
+  }
+
+  @override
+  void dispose() {
+    timer.cancel();
+    remote.updateProject(
+      projectUUID,
+      ProjectUpdate(data: projectData),
+    );
+    super.dispose();
+  }
 
   final remote = RemoteDataStore();
 
   final String projectUUID;
   late Future<void> loadFuture;
+
+  // Saved state
+  late Timer timer;
+  int updatesAfterSaved = 0;
+  DateTime lastSaved = DateTime.now();
+  bool get unSaved => updatesAfterSaved > 0;
 
   // Cached data
   late Project project;
@@ -25,13 +46,12 @@ class ProjectProvider extends ChangeNotifier {
   Map<String, Uint8List> imageData = {};
   ProjectData get projectData =>
       ProjectData(layersOrder: layersOrder, layers: layers);
+  Iterable<Layer> get orderedLayers => layersOrder.map((e) => layers[e]!);
+  Uint8List? imageOf(String imageUuid) => imageData[imageUuid];
 
   // Board states
   final defaultHeight = 200.0;
   String? selectedLayerUUID;
-
-  Iterable<Layer> get orderedLayers => layersOrder.map((e) => layers[e]!);
-  Uint8List? imageOf(String imageUuid) => imageData[imageUuid];
 
   Future<void> load() async {
     notifyListeners();
@@ -53,12 +73,28 @@ class ProjectProvider extends ChangeNotifier {
     return loadFuture;
   }
 
+  Future updateProject({bool modfied = true}) async {
+    final now = DateTime.now();
+    if (modfied) updatesAfterSaved++;
+    notifyListeners();
+    if (unSaved &&
+        (now.difference(lastSaved).inSeconds > 30 || updatesAfterSaved >= 5)) {
+      lastSaved = now;
+      updatesAfterSaved = 0;
+      notifyListeners();
+      return remote.updateProject(
+        projectUUID,
+        ProjectUpdate(data: projectData),
+      );
+    }
+  }
+
   Future addLayer(Layer l) async {
     layersOrder.add(l.uuid);
     layers[l.uuid] = l;
 
     notifyListeners();
-    return remote.updateProject(projectUUID, ProjectUpdate(data: projectData));
+    return updateProject();
   }
 
   Size initLayerSize(double oriWidth, double oriHeight) {
@@ -94,7 +130,7 @@ class ProjectProvider extends ChangeNotifier {
     layers.remove(uuid);
 
     notifyListeners();
-    return remote.updateProject(projectUUID, ProjectUpdate(data: projectData));
+    return updateProject();
   }
 
   Future moveLayerToTop(String uuid) async {
@@ -104,7 +140,7 @@ class ProjectProvider extends ChangeNotifier {
     layersOrder.add(removed);
 
     notifyListeners();
-    return remote.updateProject(projectUUID, ProjectUpdate(data: projectData));
+    return updateProject();
   }
 
   Future setLayer({
@@ -114,6 +150,7 @@ class ProjectProvider extends ChangeNotifier {
     double? width,
     double? height,
     double? rotation,
+    update = false,
   }) async {
     final l = layers[layerUuid];
     if (l == null) return;
@@ -130,7 +167,7 @@ class ProjectProvider extends ChangeNotifier {
     );
 
     notifyListeners();
-    return remote.updateProject(projectUUID, ProjectUpdate(data: projectData));
+    if (update) return updateProject();
   }
 
   Future setSelectedLayer({

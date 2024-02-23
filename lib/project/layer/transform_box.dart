@@ -10,12 +10,14 @@ class TransformBox extends StatelessWidget {
     this.onScale,
     this.onRotate,
     this.onDelete,
+    this.onChangeDone,
   });
 
   final Function(double x, double y)? onMove;
   final Function(double x, double y, double width, double height)? onScale;
   final Function(double angle)? onRotate;
   final Function()? onDelete;
+  final Function()? onChangeDone;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +49,11 @@ class TransformBox extends StatelessWidget {
             p.move(dud.delta);
             if (onMove != null) {
               onMove!(p.pos.dx, p.pos.dy);
+            }
+          },
+          onPanEnd: (_) {
+            if (onChangeDone != null) {
+              onChangeDone!();
             }
           },
           child: Container(
@@ -99,6 +106,11 @@ class TransformBox extends StatelessWidget {
               onScale!(p.pos.dx, p.pos.dy, p.size.width, p.size.height);
             }
           },
+          onPanEnd: (_) {
+            if (onChangeDone != null) {
+              onChangeDone!();
+            }
+          },
           child: _operateButton(
             const RotatedBox(
               quarterTurns: 1,
@@ -118,6 +130,11 @@ class TransformBox extends StatelessWidget {
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
           onPanUpdate: (dud) {},
+          onPanEnd: (_) {
+            if (onChangeDone != null) {
+              onChangeDone!();
+            }
+          },
           child: _operateButton(
             const RotatedBox(
               quarterTurns: 1,
@@ -140,6 +157,11 @@ class TransformBox extends StatelessWidget {
             p.rotate(dud.globalPosition);
             if (onRotate != null) {
               onRotate!(p.rotation);
+            }
+          },
+          onPanEnd: (_) {
+            if (onChangeDone != null) {
+              onChangeDone!();
             }
           },
           child: _operateButton(

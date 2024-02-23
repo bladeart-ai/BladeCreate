@@ -9,8 +9,8 @@ class GenerateToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ProjectProvider>(
       builder: (context, model, child) => Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           IconButton(
             onPressed: () {},
