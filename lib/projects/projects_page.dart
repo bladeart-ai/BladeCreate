@@ -1,7 +1,9 @@
+import 'package:bladecreate/cluster/cluster_provider.dart';
 import 'package:bladecreate/cluster/cluster_status_menu.dart';
 import 'package:bladecreate/projects/project_card_list.dart';
 import 'package:flutter/material.dart';
 import 'package:bladecreate/style.dart';
+import 'package:provider/provider.dart';
 
 class ProjectsPage extends StatelessWidget {
   const ProjectsPage({super.key});
@@ -13,7 +15,15 @@ class ProjectsPage extends StatelessWidget {
           leading: const Image(
               image: AssetImage("assets/logo.png"), fit: BoxFit.contain),
           leadingWidth: 120,
-          actions: const [ClusterStatusMenu()],
+          actions: [
+            ChangeNotifierProvider(
+                create: (context) {
+                  final cp = ClusterProvider();
+                  cp.connect();
+                  return cp;
+                },
+                child: const ClusterStatusMenu())
+          ],
         ),
         body: const SafeArea(
             child: SingleChildScrollView(

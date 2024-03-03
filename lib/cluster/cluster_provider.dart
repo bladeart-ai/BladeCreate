@@ -14,10 +14,19 @@ enum ClusterStatus { unready, busy, idle }
 class ClusterProvider extends ChangeNotifier {
   late WebSocketChannel ws;
 
+  StreamController<Generation> generationStreamCtr =
+      StreamController.broadcast();
+
   WSStatus wsStatus = WSStatus.disconnected;
   ClusterEvent? wsLastEvent;
   List<Worker> workers = [];
   List<Generation> tasks = [];
+
+  @override
+  void dispose() {
+    generationStreamCtr.close();
+    super.dispose();
+  }
 
   ClusterStatus get status {
     if (wsStatus == WSStatus.disconnected) {
@@ -72,6 +81,8 @@ class ClusterProvider extends ChangeNotifier {
         } else {
           tasks.insert(0, newG);
         }
+
+        generationStreamCtr.sink.add(newG);
       }
       notifyListeners();
     }, onError: (e) async {

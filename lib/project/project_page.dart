@@ -1,4 +1,6 @@
+import 'package:bladecreate/cluster/cluster_provider.dart';
 import 'package:bladecreate/project/board.dart';
+import 'package:bladecreate/project/layer_history_card_list.dart';
 import 'package:bladecreate/project/layer/transform_box_provider.dart';
 import 'package:bladecreate/project/project_provider.dart';
 import 'package:bladecreate/project/generate_toolbar.dart';
@@ -29,17 +31,25 @@ class ProjectPage extends StatelessWidget {
               return MultiProvider(
                   providers: [
                     ChangeNotifierProvider(create: (context) {
+                      final cp = ClusterProvider();
+                      cp.connect();
+                      return cp;
+                    }),
+                    ChangeNotifierProvider(create: (context) {
+                      final cp =
+                          Provider.of<ClusterProvider>(context, listen: false);
                       final p = ProjectProvider(projectUUID: args.projectUUID);
                       p.load();
+                      p.watchGenerationStream(cp.generationStreamCtr);
                       return p;
                     }),
                     ChangeNotifierProvider(
                       create: (_) => TransformBoxProvider(),
                     ),
                   ],
-                  child: Consumer<ProjectProvider>(builder: (_, p, child) {
+                  child: Consumer<ProjectProvider>(builder: (_, pp, child) {
                     return FutureBuilder(
-                        future: p.loadFuture,
+                        future: pp.loadFuture,
                         builder: (BuildContext context,
                             AsyncSnapshot<void> snapshot) {
                           if (snapshot.connectionState !=
@@ -47,17 +57,23 @@ class ProjectPage extends StatelessWidget {
                             return const CircularProgressIndicator();
                           } else if (snapshot.hasError) {
                             return FutureErrorDialog(
-                              f: p.load,
+                              f: pp.load,
                               error: snapshot.error!,
                               stackTrace: snapshot.stackTrace!,
                               returnable: true,
                             );
                           }
+
                           return Stack(children: [
                             Positioned(
                               width: constraints.maxWidth,
                               height: constraints.maxHeight,
                               child: const Board(),
+                            ),
+                            Positioned(
+                              height: constraints.maxHeight,
+                              right: 0,
+                              child: const LayerHistoryCardList(),
                             ),
                             Positioned(
                               width: constraints.maxWidth,

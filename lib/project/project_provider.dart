@@ -51,11 +51,39 @@ class ProjectProvider extends ChangeNotifier {
       ProjectData(layersOrder: layersOrder, layers: layers);
   Iterable<Layer> get orderedLayers => layersOrder.map((e) => layers[e]!);
   Uint8List? imageOf(String imageUuid) => imageData[imageUuid];
+  Uint8List? layerImage(Layer l) {
+    if (l.imageUuid != null) return imageData[l.imageUuid];
+    if (l.generationUuids != null && l.generationUuids!.isNotEmpty) {
+      final g = generations[l.generationUuids![0]]!;
+      if (g.imageUuids.isNotEmpty) {
+        return imageData[g.imageUuids[0]];
+      }
+    }
+    return null;
+  }
+
+  double? generationPercentage(Generation g) {
+    if (g.imageUuids.isNotEmpty) return 1;
+    return g.percentage;
+  }
+
+  double? layerPercentage(Layer l) {
+    if (l.generationUuids != null && l.generationUuids!.isNotEmpty) {
+      final g = generations[l.generationUuids![0]]!;
+      return generationPercentage(g);
+    }
+    return 1;
+  }
 
   // Board states
   GlobalKey boardKey = GlobalKey();
   final defaultHeight = 200.0;
   String? selectedLayerUUID;
+  Layer? get selectedLayer => layers[selectedLayerUUID];
+  Iterable<Generation> get selectedLayerGenerations =>
+      selectedLayer == null || selectedLayer!.generationUuids == null
+          ? []
+          : selectedLayer!.generationUuids!.map((e) => generations[e]!);
 
   Future<void> load() async {
     notifyListeners();
@@ -68,14 +96,25 @@ class ProjectProvider extends ChangeNotifier {
               .expand<String>((e) => e.generationUuids ?? [])
               .toList()))
           .map((e) => MapEntry(e.uuid, e)));
-      imageData = await projectStore.fetchImages(layers.values
+      imageData.addAll(await projectStore.fetchImages(layers.values
           .expand<String>((e) => e.imageUuid == null ? [] : [e.imageUuid])
-          .toList());
+          .toList()));
       imageData.addAll(await generateStore.fetchImages(
           generations.values.expand((e) => e.imageUuids).toList()));
       notifyListeners();
     }();
     return loadFuture;
+  }
+
+  void watchGenerationStream(StreamController<Generation> sc) {
+    sc.stream.listen((Generation newG) async {
+      if (!generations.containsKey(newG.uuid) ||
+          generations[newG.uuid]!.imageUuids.isEmpty) {
+        imageData.addAll(await generateStore.fetchImages(newG.imageUuids));
+      }
+      generations[newG.uuid] = newG;
+      notifyListeners();
+    });
   }
 
   Future updateProject({bool modfied = true}) async {
@@ -161,7 +200,7 @@ class ProjectProvider extends ChangeNotifier {
     double? rotation,
     String? imageUuid,
     List<String>? generationUuids,
-    update = false,
+    update = true,
   }) async {
     final l = layers[layerUuid];
     if (l == null) return;
@@ -196,6 +235,7 @@ class ProjectProvider extends ChangeNotifier {
       width: width,
       height: height,
       rotation: rotation,
+      update: false,
     );
   }
 
@@ -244,8 +284,9 @@ class ProjectProvider extends ChangeNotifier {
       );
       return addLayer(newLayer);
     } else {
-      final generationUuids = layers[selectedLayerUUID!]!.generationUuids ?? [];
-      generationUuids.add(g.uuid);
+      List<String> generationUuids =
+          layers[selectedLayerUUID!]!.generationUuids ?? [];
+      generationUuids = [g.uuid, ...generationUuids];
       return setLayer(
         layerUuid: selectedLayerUUID!,
         generationUuids: generationUuids,

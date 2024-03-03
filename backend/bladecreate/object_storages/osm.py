@@ -71,6 +71,26 @@ class ObjectStorageManager:
     def upload_object_from_bytes(self, file_key, bytes):
         pass
 
+    def upload_objects_from_bytes(self, file_key_to_bytes):
+        logger.debug(f"Uploading bytes of {len(file_key_to_bytes)} files")
+
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            future_to_key = {}
+            for key in file_key_to_bytes:
+                future_to_key[
+                    executor.submit(
+                        self.upload_object_from_bytes,
+                        key,
+                        file_key_to_bytes[key],
+                    )
+                ] = key
+
+            for future in futures.as_completed(future_to_key):
+                exception = future.exception()
+
+                if exception:
+                    raise exception
+
     def upload_object_from_text(self, file_key, text: str):
         pass
 
@@ -119,4 +139,7 @@ class ObjectStorageManager:
                     raise exception
 
     def load_object_to_str(self, key) -> str:
+        pass
+
+    def load_object_to_bytes(self, key) -> str:
         pass

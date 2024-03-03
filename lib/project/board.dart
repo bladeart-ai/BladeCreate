@@ -1,12 +1,10 @@
-import 'dart:typed_data';
 import 'package:bladecreate/project/layer/transform_box_provider.dart';
+import 'package:bladecreate/project/project_image.dart';
 import 'package:bladecreate/project/project_provider.dart';
 import 'package:bladecreate/style.dart';
 import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
 import 'package:flutter/material.dart';
-
 import 'package:provider/provider.dart';
-
 import 'layer/transform_box.dart';
 
 class Board extends StatelessWidget {
@@ -57,22 +55,6 @@ class Board extends StatelessWidget {
   }
 
   Widget _buildLayer(ProjectProvider p, TransformBoxProvider tp, Layer l) {
-    Image image = Image.asset(
-      "assets/loading.gif",
-      height: l.height,
-      width: l.width,
-      fit: BoxFit.fill,
-    );
-    if (l.imageUuid != null) {
-      final bytes = p.imageOf(l.imageUuid);
-      image = Image.memory(
-        bytes ?? Uint8List(0),
-        height: l.height,
-        width: l.width,
-        fit: BoxFit.fill,
-      );
-    }
-
     return Positioned(
       top: l.y,
       left: l.x,
@@ -85,7 +67,12 @@ class Board extends StatelessWidget {
             p.select(l.uuid);
             tp.selectLayer(l);
           },
-          child: image,
+          child: ProjectImage(
+            bytes: p.layerImage(l),
+            h: l.height,
+            w: l.width,
+            percentage: p.layerPercentage(l),
+          ),
         ),
       ),
     );

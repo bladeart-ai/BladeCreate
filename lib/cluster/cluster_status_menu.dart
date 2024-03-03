@@ -8,13 +8,14 @@ class ClusterStatusMenu extends StatelessWidget {
   const ClusterStatusMenu({super.key});
 
   Widget _buildStatusIcon(ClusterStatus status, Function onTap) {
+    // TODO: fix continueAnimation does not work
     if (status == ClusterStatus.busy) {
       return AnimateIcon(
         height: 30,
         width: 30,
         onTap: onTap,
         iconType: IconType.continueAnimation,
-        color: Colors.green,
+        color: Colors.yellow,
         animateIcon: AnimateIcons.walk,
       );
     } else if (status == ClusterStatus.idle) {
@@ -57,11 +58,7 @@ class ClusterStatusMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(create: (context) {
-      final cr = ClusterProvider();
-      cr.connect();
-      return cr;
-    }, child: Consumer<ClusterProvider>(builder: (_, cr, child) {
+    return Consumer<ClusterProvider>(builder: (context, cr, child) {
       return MenuAnchor(
         builder:
             (BuildContext context, MenuController controller, Widget? child) {
@@ -81,6 +78,6 @@ class ClusterStatusMenu extends StatelessWidget {
           ...cr.tasks.map((t) => _buildTaskItem(t)),
         ],
       );
-    }));
+    });
   }
 }

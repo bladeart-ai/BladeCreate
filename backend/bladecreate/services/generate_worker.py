@@ -112,7 +112,7 @@ class GenerateWorkerRunner(WorkerRunner):
 
         # Step 4: upload results
         logger.debug(f"Uploading results {g.uuid}: {g.image_uuids}")
-        osm.upload_object_from_bytes(
+        osm.upload_objects_from_bytes(
             {
                 settings.storage_paths.images.format(
                     user_id=g.user_id,

@@ -2,6 +2,7 @@ import os
 import shutil
 from typing import Set
 
+from backend.bladecreate.data_utils import image_bytes_to_inline_str
 from bladecreate.logging import Logger
 from bladecreate.object_storages.osm import ObjectStorageManager
 from bladecreate.settings import settings
@@ -87,8 +88,8 @@ class FileObjectStorageManager(ObjectStorageManager):
         logger.debug(f"Uploading bytes to {file_key}")
         dst_path = self.key_to_storage_path(file_key)
         self._create_dirs_if_not_exists(dst_path)
-        with open(dst_path, "xb") as f:
-            f.write(bytes)
+        with open(dst_path, "x") as f:
+            f.write(image_bytes_to_inline_str(bytes))
 
     def upload_object_from_text(self, file_key, text: str):
         logger.debug(f"Uploading text to {file_key}")
@@ -109,4 +110,11 @@ class FileObjectStorageManager(ObjectStorageManager):
         if not os.path.isfile(path):
             return ""
         with open(path, "r") as f:
+            return f.read()
+
+    def load_object_to_bytes(self, key):
+        path = self.key_to_storage_path(key)
+        if not os.path.isfile(path):
+            return ""
+        with open(path, "rb") as f:
             return f.read()
