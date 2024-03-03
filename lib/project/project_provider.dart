@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
-import 'package:bladecreate/data/remote_data.dart';
+import 'package:bladecreate/store/generate_remote_store.dart';
+import 'package:bladecreate/store/project_remote_store.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:async';
 import 'package:flutter/rendering.dart' as rendering;
@@ -21,14 +22,15 @@ class ProjectProvider extends ChangeNotifier {
   @override
   void dispose() {
     timer.cancel();
-    remote.updateProject(
+    projectStore.updateProject(
       projectUUID,
       ProjectUpdate(data: projectData),
     );
     super.dispose();
   }
 
-  final remote = RemoteDataStore();
+  final projectStore = ProjectRemoteAPI();
+  final generateStore = GenerateRemoteAPI();
 
   final String projectUUID;
   late Future<void> loadFuture;
@@ -43,7 +45,7 @@ class ProjectProvider extends ChangeNotifier {
   late Project project;
   List<String> layersOrder = [];
   Map<String, Layer> layers = {};
-  List<Generation> generations = [];
+  Map<String, Generation> generations = {};
   Map<String, Uint8List> imageData = {};
   ProjectData get projectData =>
       ProjectData(layersOrder: layersOrder, layers: layers);
@@ -58,18 +60,19 @@ class ProjectProvider extends ChangeNotifier {
   Future<void> load() async {
     notifyListeners();
     loadFuture = () async {
-      project = await remote.fetchProject(projectUUID);
+      project = await projectStore.fetchProject(projectUUID);
       layersOrder = project.data.layersOrder!;
       layers = project.data.layers!
           .map((k, v) => MapEntry<String, Layer>(k, Layer.fromJson(v)));
-      generations = await remote.fetchGenerations(layers.values
-          .expand<String>((e) => e.generationUuids ?? [])
+      generations.addEntries((await generateStore.fetchGenerations(layers.values
+              .expand<String>((e) => e.generationUuids ?? [])
+              .toList()))
+          .map((e) => MapEntry(e.uuid, e)));
+      imageData = await projectStore.fetchImages(layers.values
+          .expand<String>((e) => e.imageUuid == null ? [] : [e.imageUuid])
           .toList());
-      imageData = await remote.fetchImages([
-        ...layers.values
-            .expand<String>((e) => e.imageUuid == null ? [] : [e.imageUuid]),
-        ...generations.expand((e) => e.imageUuids)
-      ]);
+      imageData.addAll(await generateStore.fetchImages(
+          generations.values.expand((e) => e.imageUuids).toList()));
       notifyListeners();
     }();
     return loadFuture;
@@ -84,7 +87,7 @@ class ProjectProvider extends ChangeNotifier {
       lastSaved = now;
       updatesAfterSaved = 0;
       notifyListeners();
-      return remote.updateProject(
+      return projectStore.updateProject(
         projectUUID,
         ProjectUpdate(data: projectData),
       );
@@ -108,7 +111,7 @@ class ProjectProvider extends ChangeNotifier {
     final layerUuid = uuid.v4();
     imageData[layerUuid] = bytes;
 
-    await remote.uploadImageData({layerUuid: bytes});
+    await projectStore.uploadImageData({layerUuid: bytes});
     ui.decodeImageFromList(
       bytes,
       (res) async {
@@ -150,25 +153,28 @@ class ProjectProvider extends ChangeNotifier {
 
   Future setLayer({
     required String layerUuid,
+    String? name,
     double? x,
     double? y,
     double? width,
     double? height,
     double? rotation,
+    String? imageUuid,
+    List<String>? generationUuids,
     update = false,
   }) async {
     final l = layers[layerUuid];
     if (l == null) return;
     layers[layerUuid] = Layer(
-      name: l.name,
       uuid: l.uuid,
+      name: name ?? l.name,
       x: x ?? l.x,
       y: y ?? l.y,
       rotation: rotation ?? l.rotation,
       width: width ?? l.width,
       height: height ?? l.height,
-      imageUuid: l.imageUuid,
-      generationUuids: l.generationUuids,
+      imageUuid: imageUuid ?? l.imageUuid,
+      generationUuids: generationUuids ?? l.generationUuids,
     );
 
     notifyListeners();
@@ -220,5 +226,30 @@ class ProjectProvider extends ChangeNotifier {
         await image.toByteData(format: ui.ImageByteFormat.png);
     final Uint8List pngBytes = byteData!.buffer.asUint8List();
     return pngBytes;
+  }
+
+  Future generate(GenerationParams params) async {
+    final g = await generateStore.createGeneration(params);
+    generations[g.uuid] = g;
+    if (selectedLayerUUID == null) {
+      final newLayer = Layer(
+        uuid: uuid.v4(),
+        name: "New Generation Layer",
+        x: 0,
+        y: 0,
+        width: params.width.toDouble(),
+        height: params.height.toDouble(),
+        rotation: 0,
+        generationUuids: [g.uuid],
+      );
+      return addLayer(newLayer);
+    } else {
+      final generationUuids = layers[selectedLayerUUID!]!.generationUuids ?? [];
+      generationUuids.add(g.uuid);
+      return setLayer(
+        layerUuid: selectedLayerUUID!,
+        generationUuids: generationUuids,
+      );
+    }
   }
 }

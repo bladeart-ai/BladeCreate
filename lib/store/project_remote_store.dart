@@ -13,7 +13,7 @@ import 'package:http/http.dart' as http;
 
 var uuid = const Uuid();
 
-class RemoteDataStore {
+class ProjectRemoteAPI {
   final api = Openapi.create(baseUrl: Uri.parse(Settings.apiURL));
 
   final userId = Settings.guestUserId;
@@ -55,15 +55,6 @@ class RemoteDataStore {
     return callAPI(api.projectsUserIdProjectUuidGet(
       userId: userId,
       projectUuid: projectUUID,
-    ));
-  }
-
-  Future<List<Generation>> fetchGenerations(
-      List<String> generationUuids) async {
-    if (generationUuids.isEmpty) return [];
-    return callAPI(api.generationsUserIdGet(
-      userId: userId,
-      generationUuids: generationUuids,
     ));
   }
 

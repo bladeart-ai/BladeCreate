@@ -16,7 +16,7 @@ class TopToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ProjectProvider>(
       builder: (context, p, child) => Container(
-        decoration: BoxDecoration(color: AppStyle.background.withOpacity(0.7)),
+        decoration: BoxDecoration(color: AppStyle.backgroundWithOpacity),
         child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.center,

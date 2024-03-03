@@ -100,14 +100,16 @@ class _ProjectMenuState extends State<ProjectMenu> {
       builder:
           (BuildContext context, MenuController controller, Widget? child) {
         return IconButton(
-          onPressed: () {
+          onPressed: () => setState(() {
             if (controller.isOpen) {
               controller.close();
             } else {
               controller.open();
             }
-          },
-          icon: const Icon(Icons.menu, color: AppStyle.highlight),
+          }),
+          icon: controller.isOpen
+              ? const Icon(Icons.menu_open_rounded, color: AppStyle.highlight)
+              : const Icon(Icons.menu_rounded, color: AppStyle.highlight),
         );
       },
       menuChildren: [

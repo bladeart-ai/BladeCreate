@@ -7,7 +7,6 @@ from typing import Optional
 import httpx
 
 import bladecreate.db.sqlalchemy as sql
-from bladecreate.data_utils import image_bytes_to_inline_data
 from bladecreate.logging import Logger
 from bladecreate.models.sd import SDXL
 from bladecreate.object_storages.osm import ObjectStorageManager
@@ -113,24 +112,20 @@ class GenerateWorkerRunner(WorkerRunner):
 
         # Step 4: upload results
         logger.debug(f"Uploading results {g.uuid}: {g.image_uuids}")
-        image_uuid_to_data = {
-            k: image_bytes_to_inline_data(image_uuid_to_bytes[k], "png")
-            for k in image_uuid_to_bytes
-        }
-        osm.upload_objects_from_text(
+        osm.upload_object_from_bytes(
             {
                 settings.storage_paths.images.format(
                     user_id=g.user_id,
                     image_uuid=k,
-                ): image_uuid_to_data[k]
-                for k in image_uuid_to_data
+                ): image_uuid_to_bytes[k]
+                for k in image_uuid_to_bytes
             }
         )
 
         # Step 5: update generation
         logger.debug(f"Task {g.uuid} is succeeded")
         g.status = "SUCCEEDED"
-        g.image_uuids = image_uuid_to_data.keys()
+        g.image_uuids = image_uuid_to_bytes.keys()
         elapsed_time = datetime.utcnow() - start_time
         g.elapsedSecs = elapsed_time.total_seconds()
         g.percentage = 1
