@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:animated_icon/animated_icon.dart';
 import 'package:provider/provider.dart';
 
-class ClusterStatusDropdown extends StatelessWidget {
-  const ClusterStatusDropdown({super.key});
+class ClusterStatusMenu extends StatelessWidget {
+  const ClusterStatusMenu({super.key});
 
   Widget _buildStatusIcon(ClusterStatus status, Function onTap) {
     if (status == ClusterStatus.busy) {

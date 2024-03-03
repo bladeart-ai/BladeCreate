@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:bladecreate/project/project_provider.dart';
-import 'package:bladecreate/cluster/cluster_status_dropdown.dart';
+import 'package:bladecreate/cluster/cluster_status_menu.dart';
 import 'package:bladecreate/style.dart';
 import 'package:bladecreate/widgets/error_widgets.dart';
 import 'package:file_picker/file_picker.dart';
@@ -65,7 +65,7 @@ class TopToolbar extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  const ClusterStatusDropdown(),
+                  const ClusterStatusMenu(),
                   IconButton(
                     onPressed: () {},
                     icon: const Icon(Icons.manage_accounts),

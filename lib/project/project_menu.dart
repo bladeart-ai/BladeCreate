@@ -3,8 +3,8 @@ import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
 import 'package:bladecreate/widgets/error_widgets.dart';
 import 'package:flutter/material.dart';
 
-class ProjectDropDownMenu extends StatefulWidget {
-  const ProjectDropDownMenu({
+class ProjectMenu extends StatefulWidget {
+  const ProjectMenu({
     super.key,
     required this.project,
     required this.renameFunc,
@@ -16,10 +16,10 @@ class ProjectDropDownMenu extends StatefulWidget {
   final Function deleteFunc;
 
   @override
-  State<ProjectDropDownMenu> createState() => _ProjectDropDownMenuState();
+  State<ProjectMenu> createState() => _ProjectMenuState();
 }
 
-class _ProjectDropDownMenuState extends State<ProjectDropDownMenu> {
+class _ProjectMenuState extends State<ProjectMenu> {
   final TextEditingController _pNameController = TextEditingController();
 
   @override

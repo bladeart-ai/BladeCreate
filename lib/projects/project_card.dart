@@ -1,4 +1,4 @@
-import 'package:bladecreate/project/project_dropdown_menu.dart';
+import 'package:bladecreate/project/project_menu.dart';
 import 'package:bladecreate/project/project_page.dart';
 import 'package:bladecreate/style.dart';
 import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
@@ -54,7 +54,7 @@ class ProjectCard extends StatelessWidget {
                     style: AppStyle.backgroundedText,
                   )),
               const Spacer(flex: 1),
-              ProjectDropDownMenu(
+              ProjectMenu(
                 project: project,
                 renameFunc: renameFunc,
                 deleteFunc: deleteFunc,

@@ -1,4 +1,4 @@
-import 'package:bladecreate/cluster/cluster_status_dropdown.dart';
+import 'package:bladecreate/cluster/cluster_status_menu.dart';
 import 'package:bladecreate/projects/project_card_list.dart';
 import 'package:flutter/material.dart';
 import 'package:bladecreate/style.dart';
@@ -13,7 +13,7 @@ class ProjectsPage extends StatelessWidget {
           leading: const Image(
               image: AssetImage("assets/logo.png"), fit: BoxFit.contain),
           leadingWidth: 120,
-          actions: const [ClusterStatusDropdown()],
+          actions: const [ClusterStatusMenu()],
         ),
         body: const SafeArea(
             child: SingleChildScrollView(
