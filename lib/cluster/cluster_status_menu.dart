@@ -4,9 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:animated_icon/animated_icon.dart';
 import 'package:provider/provider.dart';
 
-class ClusterStatusMenu extends StatelessWidget {
+class ClusterStatusMenu extends StatefulWidget {
   const ClusterStatusMenu({super.key});
 
+  @override
+  State<ClusterStatusMenu> createState() => _ClusterStatusMenuState();
+}
+
+class _ClusterStatusMenuState extends State<ClusterStatusMenu> {
   Widget _buildStatusIcon(ClusterStatus status, Function onTap) {
     // TODO: fix continueAnimation does not work
     if (status == ClusterStatus.busy) {

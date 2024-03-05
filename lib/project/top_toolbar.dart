@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:bladecreate/project/layer_list_menu.dart';
 import 'package:bladecreate/project/project_provider.dart';
 import 'package:bladecreate/cluster/cluster_status_menu.dart';
 import 'package:bladecreate/style.dart';
@@ -52,10 +53,7 @@ class TopToolbar extends StatelessWidget {
             Expanded(
                 child:
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.layers),
-              ),
+              const LayerListMenu(),
               IconButton(
                 onPressed: () => addLayer(context, p),
                 icon: const Icon(Icons.image_outlined),

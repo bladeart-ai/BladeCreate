@@ -3,6 +3,7 @@ import 'package:bladecreate/project/project_provider.dart';
 import 'package:bladecreate/style.dart';
 import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 class LayerHistoryCardList extends StatelessWidget {
@@ -21,24 +22,23 @@ class LayerHistoryCardList extends StatelessWidget {
     return Consumer<ProjectProvider>(
         builder: (context, p, child) =>
             LayoutBuilder(builder: (context, constraints) {
-              return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: width,
-                      height: constraints.maxHeight - verticalMargin * 2,
-                      child: ListView(
-                        shrinkWrap: true,
-                        children: p.selectedLayerGenerations.isEmpty
-                            ? []
-                            : p.selectedLayerGenerations
-                                .map((g) => buildGenerationImageGroup(
-                                    p, p.selectedLayer!, g))
-                                .toList(),
-                      ),
-                    )
-                  ]);
+              return Align(
+                  alignment: Alignment.centerRight,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: width,
+                      maxHeight: constraints.maxHeight - verticalMargin * 2,
+                    ),
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: p.selectedLayerGenerations.isEmpty
+                          ? []
+                          : p.selectedLayerGenerations
+                              .map((g) => buildGenerationImageGroup(
+                                  p, p.selectedLayer!, g))
+                              .toList(),
+                    ),
+                  ));
             }));
   }
 

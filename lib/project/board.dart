@@ -30,7 +30,7 @@ class Board extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     Container(color: AppStyle.background),
-                    ...p.orderedLayers
+                    ...p.orderedLayersForRendering
                         .map((layer) => _buildLayer(p, tp, layer)),
                   ],
                 ),

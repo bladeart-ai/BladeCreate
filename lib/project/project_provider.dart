@@ -50,6 +50,8 @@ class ProjectProvider extends ChangeNotifier {
   ProjectData get projectData =>
       ProjectData(layersOrder: layersOrder, layers: layers);
   Iterable<Layer> get orderedLayers => layersOrder.map((e) => layers[e]!);
+  Iterable<Layer> get orderedLayersForRendering =>
+      layersOrder.reversed.map((e) => layers[e]!);
   Uint8List? imageOf(String imageUuid) => imageData[imageUuid];
   Uint8List? layerImage(Layer l) {
     if (l.imageUuid != null) return imageData[l.imageUuid];
@@ -184,7 +186,18 @@ class ProjectProvider extends ChangeNotifier {
     final ix = layersOrder.indexWhere((String e) => e == uuid);
     if (ix == -1) return;
     final removed = layersOrder.removeAt(ix);
-    layersOrder.add(removed);
+    layersOrder.insert(0, removed);
+
+    notifyListeners();
+    return updateProject();
+  }
+
+  Future reorderLayer(int oldIndex, int newIndex) async {
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final item = layersOrder.removeAt(oldIndex);
+    layersOrder.insert(newIndex, item);
 
     notifyListeners();
     return updateProject();
