@@ -1,7 +1,8 @@
-import 'package:bladecreate/cluster/cluster_provider.dart';
-import 'package:bladecreate/project/board.dart';
+import 'package:bladecreate/canvas/canvas_provider.dart';
+import 'package:bladecreate/generate_backend/generate_backend_provider.dart';
+import 'package:bladecreate/canvas/canvas_board.dart';
 import 'package:bladecreate/project/layer_history_card_list.dart';
-import 'package:bladecreate/project/layer/transform_box_provider.dart';
+import 'package:bladecreate/canvas/transform_box_provider.dart';
 import 'package:bladecreate/project/project_provider.dart';
 import 'package:bladecreate/project/generate_toolbar.dart';
 import 'package:bladecreate/project/top_toolbar.dart';
@@ -30,26 +31,31 @@ class ProjectPage extends StatelessWidget {
                 builder: (BuildContext context, BoxConstraints constraints) {
               return MultiProvider(
                   providers: [
-                    ChangeNotifierProvider(create: (context) {
-                      final cp = ClusterProvider();
-                      cp.connect();
-                      return cp;
-                    }),
-                    ChangeNotifierProvider(create: (context) {
-                      final cp =
-                          Provider.of<ClusterProvider>(context, listen: false);
-                      final p = ProjectProvider(projectUUID: args.projectUUID);
-                      p.load();
-                      p.watchGenerationStream(cp.generationStreamCtr);
-                      return p;
-                    }),
+                    ChangeNotifierProvider(
+                        create: (_) => GenerateBackendProvider()),
+                    ChangeNotifierProvider(
+                        create: (_) =>
+                            ProjectProvider(projectUUID: args.projectUUID)),
                     ChangeNotifierProvider(
                       create: (_) => TransformBoxProvider(),
                     ),
+                    ChangeNotifierProvider(
+                      create: (context) {
+                        final cp = CanvasProvider(
+                          Provider.of<ProjectProvider>(context, listen: false),
+                          Provider.of<GenerateBackendProvider>(context,
+                              listen: false),
+                          Provider.of<TransformBoxProvider>(context,
+                              listen: false),
+                        );
+                        cp.load();
+                        return cp;
+                      },
+                    )
                   ],
-                  child: Consumer<ProjectProvider>(builder: (_, pp, child) {
+                  child: Consumer<CanvasProvider>(builder: (_, cp, child) {
                     return FutureBuilder(
-                        future: pp.loadFuture,
+                        future: cp.loadFuture,
                         builder: (BuildContext context,
                             AsyncSnapshot<void> snapshot) {
                           if (snapshot.connectionState !=
@@ -57,7 +63,7 @@ class ProjectPage extends StatelessWidget {
                             return const CircularProgressIndicator();
                           } else if (snapshot.hasError) {
                             return FutureErrorDialog(
-                              f: pp.load,
+                              f: cp.load,
                               error: snapshot.error!,
                               stackTrace: snapshot.stackTrace!,
                               returnable: true,
@@ -68,7 +74,7 @@ class ProjectPage extends StatelessWidget {
                             Positioned(
                               width: constraints.maxWidth,
                               height: constraints.maxHeight,
-                              child: const Board(),
+                              child: const CanvasBoard(),
                             ),
                             Positioned(
                               height: constraints.maxHeight,

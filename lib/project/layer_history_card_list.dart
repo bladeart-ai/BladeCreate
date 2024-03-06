@@ -1,5 +1,6 @@
+import 'package:bladecreate/canvas/canvas_provider.dart';
+import 'package:bladecreate/generate_backend/generate_backend_provider.dart';
 import 'package:bladecreate/project/project_image.dart';
-import 'package:bladecreate/project/project_provider.dart';
 import 'package:bladecreate/style.dart';
 import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ class LayerHistoryCardList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ProjectProvider>(
+    return Consumer<CanvasProvider>(
         builder: (context, p, child) =>
             LayoutBuilder(builder: (context, constraints) {
               return Align(
@@ -35,14 +36,15 @@ class LayerHistoryCardList extends StatelessWidget {
                           ? []
                           : p.selectedLayerGenerations
                               .map((g) => buildGenerationImageGroup(
-                                  p, p.selectedLayer!, g))
+                                  context, p.selectedLayer!, g))
                               .toList(),
                     ),
                   ));
             }));
   }
 
-  Widget buildGenerationImageGroup(ProjectProvider p, Layer l, Generation g) {
+  Widget buildGenerationImageGroup(
+      BuildContext context, Layer l, Generation g) {
     final size = initSize(l.width, l.height);
     return Container(
       alignment: Alignment.center,
@@ -71,22 +73,24 @@ class LayerHistoryCardList extends StatelessWidget {
               ]
             : g.imageUuids
                 .map(
-                  (e) => buildSelectableImage(p, l, g, size, e),
+                  (e) => buildSelectableImage(context, l, g, size, e),
                 )
                 .toList(),
       ),
     );
   }
 
-  Widget buildSelectableImage(
-      ProjectProvider p, Layer l, Generation g, Size size, String imageUuid) {
+  Widget buildSelectableImage(BuildContext context, Layer l, Generation g,
+      Size size, String imageUuid) {
+    final p = Provider.of<CanvasProvider>(context);
+    final gbp = Provider.of<GenerateBackendProvider>(context);
     return GestureDetector(
-        onTap: () => p.setLayer(layerUuid: l.uuid, imageUuid: imageUuid),
+        onTap: () => p.setLayerImageFromGeneration(l, imageUuid),
         child: ProjectImage(
-          bytes: p.imageOf(imageUuid),
+          bytes: gbp.imageOf(imageUuid),
           w: size.width,
           h: size.height,
-          percentage: p.generationPercentage(g),
+          percentage: gbp.generationPercentage(g),
         ));
   }
 }

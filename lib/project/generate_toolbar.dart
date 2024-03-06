@@ -1,4 +1,4 @@
-import 'package:bladecreate/project/project_provider.dart';
+import 'package:bladecreate/canvas/canvas_provider.dart';
 import 'package:bladecreate/style.dart';
 import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +25,7 @@ class _GenerateToolbarState extends State<GenerateToolbar> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ProjectProvider>(
+    return Consumer<CanvasProvider>(
       builder: (context, p, child) => Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -149,8 +149,8 @@ class _GenerateToolbarState extends State<GenerateToolbar> {
             }
           }),
           icon: controller.isOpen
-              ? const Icon(Icons.menu_open_rounded)
-              : const Icon(Icons.menu_rounded),
+              ? const Icon(Icons.menu_open_outlined)
+              : const Icon(Icons.menu_outlined),
         );
       },
       menuChildren: [

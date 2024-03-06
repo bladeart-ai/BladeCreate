@@ -10,8 +10,11 @@ import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
 import 'package:retry/retry.dart';
 import 'package:uuid/uuid.dart';
 import 'package:http/http.dart' as http;
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 var uuid = const Uuid();
+
+enum WSStatus { connected, disconnected }
 
 class GenerateRemoteAPI {
   final api = Openapi.create(baseUrl: Uri.parse(Settings.apiURL));
@@ -80,5 +83,56 @@ class GenerateRemoteAPI {
   Future<Generation> createGeneration(GenerationParams params) async {
     return callAPI(api.generationsUserIdPost(
         userId: userId, body: GenerationCreate(params: params)));
+  }
+
+  WebSocketChannel connect(
+    Function(WSStatus) onConnectionUpdate,
+    Function(ClusterSnapshot) onScreenshot,
+    Function(Worker) onWorkerUpdate,
+    Function(Generation) onGenerationUpdate,
+  ) {
+    void reconnect() async {
+      onConnectionUpdate(WSStatus.disconnected);
+
+      await Future.delayed(
+        Duration(seconds: Settings.reconnectDelaySecs),
+        () => connect(
+          onConnectionUpdate,
+          onScreenshot,
+          onWorkerUpdate,
+          onGenerationUpdate,
+        ),
+      );
+    }
+
+    void onMessage(dynamic msg) {
+      final e = ClusterEvent.fromJson(json.decode(msg));
+      if (e.screenshot != null) {
+        final screenshot = ClusterSnapshot.fromJson(e.screenshot);
+        onScreenshot(screenshot);
+      }
+      if (e.workerUpdate != null) {
+        final newW = Worker.fromJson(e.workerUpdate);
+        onWorkerUpdate(newW);
+      }
+      if (e.generationUpdate != null) {
+        final newG = Generation.fromJson(e.generationUpdate);
+        onGenerationUpdate(newG);
+      }
+    }
+
+    final ws = WebSocketChannel.connect(
+      Uri.parse(Settings.apiWSURL),
+    );
+    onConnectionUpdate(WSStatus.connected);
+
+    ws.stream.listen(
+      (msg) => onMessage(msg),
+      onError: (e) => reconnect(),
+      onDone: () => reconnect(),
+      cancelOnError: true,
+    );
+
+    return ws;
   }
 }

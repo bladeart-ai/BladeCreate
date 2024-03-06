@@ -88,14 +88,14 @@ class FileObjectStorageManager(ObjectStorageManager):
         logger.debug(f"Uploading bytes to {file_key}")
         dst_path = self.key_to_storage_path(file_key)
         self._create_dirs_if_not_exists(dst_path)
-        with open(dst_path, "x") as f:
+        with open(dst_path, "wb") as f:
             f.write(image_bytes_to_inline_str(bytes))
 
     def upload_object_from_text(self, file_key, text: str):
         logger.debug(f"Uploading text to {file_key}")
         dst_path = self.key_to_storage_path(file_key)
         self._create_dirs_if_not_exists(dst_path)
-        with open(dst_path, "x") as f:
+        with open(dst_path, "w") as f:
             f.write(text)
 
     def upload_object_from_file(self, local_path, key):

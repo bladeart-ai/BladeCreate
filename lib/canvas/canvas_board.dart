@@ -1,51 +1,48 @@
-import 'package:bladecreate/project/layer/transform_box_provider.dart';
+import 'package:bladecreate/canvas/canvas_provider.dart';
 import 'package:bladecreate/project/project_image.dart';
 import 'package:bladecreate/project/project_provider.dart';
 import 'package:bladecreate/style.dart';
 import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'layer/transform_box.dart';
+import 'transform_box.dart';
 
-class Board extends StatelessWidget {
-  const Board({
+class CanvasBoard extends StatelessWidget {
+  const CanvasBoard({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<ProjectProvider, TransformBoxProvider>(
-      builder: (context, p, tp, child) {
+    return Consumer2<CanvasProvider, ProjectProvider>(
+      builder: (context, cp, pp, child) {
         return GestureDetector(
-          onTap: () {
-            p.unSelect();
-            tp.unselectLayer();
-          },
+          onTap: () => cp.unSelect(),
           child: Stack(
             fit: StackFit.expand,
             children: [
               RepaintBoundary(
-                key: p.boardKey,
+                key: cp.boardKey,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
                     Container(color: AppStyle.background),
-                    ...p.orderedLayersForRendering
-                        .map((layer) => _buildLayer(p, tp, layer)),
+                    ...pp.orderedLayersForRendering
+                        .map((layer) => _buildLayer(cp, layer)),
                   ],
                 ),
               ),
               TransformBox(
-                onMove: (x, y) => p.setSelectedLayer(x: x, y: y),
-                onRotate: (angle) => p.setSelectedLayer(rotation: angle),
-                onScale: (x, y, width, height) => p.setSelectedLayer(
+                onMove: (x, y) => cp.setSelectedLayer(x: x, y: y),
+                onRotate: (angle) => cp.setSelectedLayer(rotation: angle),
+                onScale: (x, y, width, height) => cp.setSelectedLayer(
                   x: x,
                   y: y,
                   width: width,
                   height: height,
                 ),
-                onDelete: () => p.removeSelectedLayer(),
-                onChangeDone: () => p.updateProject(),
+                onDelete: () => cp.removeSelectedLayer(),
+                onChangeDone: () => pp.updateProject(),
               ),
             ],
           ),
@@ -54,7 +51,7 @@ class Board extends StatelessWidget {
     );
   }
 
-  Widget _buildLayer(ProjectProvider p, TransformBoxProvider tp, Layer l) {
+  Widget _buildLayer(CanvasProvider cp, Layer l) {
     return Positioned(
       top: l.y,
       left: l.x,
@@ -63,15 +60,12 @@ class Board extends StatelessWidget {
       child: Transform.rotate(
         angle: l.rotation,
         child: GestureDetector(
-          onTap: () {
-            p.select(l.uuid);
-            tp.selectLayer(l);
-          },
+          onTap: () => cp.select(l),
           child: ProjectImage(
-            bytes: p.layerImage(l),
+            bytes: cp.layerImage(l),
             h: l.height,
             w: l.width,
-            percentage: p.layerPercentage(l),
+            percentage: cp.layerPercentage(l),
           ),
         ),
       ),

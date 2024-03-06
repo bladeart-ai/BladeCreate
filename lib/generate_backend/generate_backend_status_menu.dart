@@ -1,4 +1,5 @@
-import 'package:bladecreate/cluster/cluster_provider.dart';
+import 'package:bladecreate/generate_backend/generate_backend_provider.dart';
+import 'package:bladecreate/store/generate_remote_store.dart';
 import 'package:bladecreate/swagger_generated_code/openapi.swagger.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_icon/animated_icon.dart';
@@ -12,9 +13,9 @@ class ClusterStatusMenu extends StatefulWidget {
 }
 
 class _ClusterStatusMenuState extends State<ClusterStatusMenu> {
-  Widget _buildStatusIcon(ClusterStatus status, Function onTap) {
+  Widget _buildStatusIcon(GenerateBackendStatus status, Function onTap) {
     // TODO: fix continueAnimation does not work
-    if (status == ClusterStatus.busy) {
+    if (status == GenerateBackendStatus.busy) {
       return AnimateIcon(
         height: 30,
         width: 30,
@@ -23,7 +24,7 @@ class _ClusterStatusMenuState extends State<ClusterStatusMenu> {
         color: Colors.yellow,
         animateIcon: AnimateIcons.walk,
       );
-    } else if (status == ClusterStatus.idle) {
+    } else if (status == GenerateBackendStatus.idle) {
       return AnimateIcon(
         height: 30,
         width: 30,
@@ -63,7 +64,7 @@ class _ClusterStatusMenuState extends State<ClusterStatusMenu> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ClusterProvider>(builder: (context, cr, child) {
+    return Consumer<GenerateBackendProvider>(builder: (context, cr, child) {
       return MenuAnchor(
         builder:
             (BuildContext context, MenuController controller, Widget? child) {
@@ -80,7 +81,7 @@ class _ClusterStatusMenuState extends State<ClusterStatusMenu> {
           Text("Workers: ${cr.activeWorkers.length}"),
           ...cr.workers.map((w) => _buildWorkerItem(w)),
           Text("Active Tasks: ${cr.activeTasks.length}"),
-          ...cr.tasks.map((t) => _buildTaskItem(t)),
+          ...cr.activeTasks.map((t) => _buildTaskItem(t)),
         ],
       );
     });

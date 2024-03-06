@@ -108,8 +108,8 @@ class _ProjectMenuState extends State<ProjectMenu> {
             }
           }),
           icon: controller.isOpen
-              ? const Icon(Icons.menu_open_rounded, color: AppStyle.highlight)
-              : const Icon(Icons.menu_rounded, color: AppStyle.highlight),
+              ? const Icon(Icons.menu_open_outlined, color: AppStyle.highlight)
+              : const Icon(Icons.menu_outlined, color: AppStyle.highlight),
         );
       },
       menuChildren: [

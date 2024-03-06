@@ -1,5 +1,5 @@
-import 'package:bladecreate/cluster/cluster_provider.dart';
-import 'package:bladecreate/cluster/cluster_status_menu.dart';
+import 'package:bladecreate/generate_backend/generate_backend_provider.dart';
+import 'package:bladecreate/generate_backend/generate_backend_status_menu.dart';
 import 'package:bladecreate/projects/project_card_list.dart';
 import 'package:flutter/material.dart';
 import 'package:bladecreate/style.dart';
@@ -18,7 +18,7 @@ class ProjectsPage extends StatelessWidget {
           actions: [
             ChangeNotifierProvider(
                 create: (context) {
-                  final cp = ClusterProvider();
+                  final cp = GenerateBackendProvider();
                   cp.connect();
                   return cp;
                 },

@@ -1,7 +1,6 @@
 import 'dart:ui';
 
-import 'package:bladecreate/project/layer/transform_box_provider.dart';
-import 'package:bladecreate/project/project_provider.dart';
+import 'package:bladecreate/canvas/canvas_provider.dart';
 import 'package:bladecreate/style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -35,8 +34,8 @@ class _GenerateToolbarState extends State<LayerListMenu> {
       );
     }
 
-    return Consumer2<ProjectProvider, TransformBoxProvider>(
-      builder: (context, p, tp, child) => MenuAnchor(
+    return Consumer<CanvasProvider>(
+      builder: (context, p, child) => MenuAnchor(
         builder: (context, controller, child) {
           return IconButton(
             onPressed: () => setState(() {
@@ -46,7 +45,7 @@ class _GenerateToolbarState extends State<LayerListMenu> {
                 controller.open();
               }
             }),
-            icon: const Icon(Icons.layers_rounded),
+            icon: const Icon(Icons.layers_outlined),
           );
         },
         menuChildren: [
@@ -57,7 +56,7 @@ class _GenerateToolbarState extends State<LayerListMenu> {
               buildDefaultDragHandles: false,
               shrinkWrap: true,
               proxyDecorator: proxyDecorator,
-              children: p.orderedLayers.toList().indexed.map<Widget>((e) {
+              children: p.pp.orderedLayers.toList().indexed.map<Widget>((e) {
                 final ix = e.$1;
                 final l = e.$2;
                 return ReorderableDragStartListener(
@@ -73,14 +72,11 @@ class _GenerateToolbarState extends State<LayerListMenu> {
                       tileColor: p.selectedLayerUUID == l.uuid
                           ? AppStyle.primaryLighter
                           : AppStyle.backgroundWithOpacity,
-                      onTap: () {
-                        p.select(l.uuid);
-                        tp.selectLayer(l);
-                      },
+                      onTap: () => p.select(l),
                     ));
               }).toList(),
               onReorder: (int oldIndex, int newIndex) =>
-                  p.reorderLayer(oldIndex, newIndex),
+                  p.pp.reorderLayer(oldIndex, newIndex),
             ),
           ),
         ],

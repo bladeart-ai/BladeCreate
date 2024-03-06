@@ -1,4 +1,4 @@
-import 'package:bladecreate/project/layer/transform_box_provider.dart';
+import 'package:bladecreate/canvas/transform_box_provider.dart';
 import 'package:bladecreate/style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

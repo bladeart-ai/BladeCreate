@@ -1,8 +1,9 @@
 import 'dart:io';
 
+import 'package:bladecreate/canvas/canvas_provider.dart';
 import 'package:bladecreate/project/layer_list_menu.dart';
 import 'package:bladecreate/project/project_provider.dart';
-import 'package:bladecreate/cluster/cluster_status_menu.dart';
+import 'package:bladecreate/generate_backend/generate_backend_status_menu.dart';
 import 'package:bladecreate/style.dart';
 import 'package:bladecreate/widgets/error_widgets.dart';
 import 'package:file_picker/file_picker.dart';
@@ -15,7 +16,7 @@ class TopToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ProjectProvider>(
+    return Consumer<CanvasProvider>(
       builder: (context, p, child) => Container(
         decoration: BoxDecoration(color: AppStyle.backgroundWithOpacity),
         child: Row(
@@ -30,9 +31,9 @@ class TopToolbar extends StatelessWidget {
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close),
                   ),
-                  Text(p.project.name),
+                  Text(p.pp.project.name),
                   const SizedBox(width: 20),
-                  p.unSaved
+                  p.pp.unSaved
                       ? const Icon(
                           Icons.save,
                           size: AppStyle.smallIconSize,
@@ -55,9 +56,14 @@ class TopToolbar extends StatelessWidget {
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               const LayerListMenu(),
               IconButton(
-                onPressed: () => addLayer(context, p),
+                onPressed: () => uploadImageAsLayer(context, p.pp),
                 icon: const Icon(Icons.image_outlined),
               ),
+              IconButton(
+                  onPressed: () {}, icon: const Icon(Icons.touch_app_outlined)),
+              IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.picture_in_picture_alt_outlined)),
             ])),
             Expanded(
               child: Row(
@@ -77,7 +83,7 @@ class TopToolbar extends StatelessWidget {
     );
   }
 
-  addLayer(BuildContext context, ProjectProvider p) async {
+  uploadImageAsLayer(BuildContext context, ProjectProvider p) async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
@@ -90,15 +96,15 @@ class TopToolbar extends StatelessWidget {
     }
   }
 
-  takeScreenShot(ProjectProvider p) async {
+  takeScreenShot(CanvasProvider cp) async {
     // Picking file saving path
     String? outputFile = await FilePicker.platform.saveFile(
       dialogTitle: 'Please select an output file:',
-      fileName: '${p.project.name}.png',
+      fileName: '${cp.pp.project.name}.png',
     );
 
     if (outputFile != null) {
-      final bytes = await p.takeScreenShotAsPNG();
+      final bytes = await cp.takeScreenShotAsPNG();
       final file = File(outputFile);
       file.writeAsBytesSync(bytes);
     }
