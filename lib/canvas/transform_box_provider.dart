@@ -10,7 +10,9 @@ class TransformBoxProvider extends ChangeNotifier {
       this.pos = Offset.zero,
       this.rotation = 0});
 
-  bool display = false;
+  bool enable = true;
+  bool attachedToLayer = false;
+  bool get display => enable && attachedToLayer;
 
   Size size;
 
@@ -30,6 +32,12 @@ class TransformBoxProvider extends ChangeNotifier {
     return Offset(cosa * d.dx - sina * d.dy, sina * d.dx + cosa * d.dy);
   }
 
+  void setEnable(bool newVal) {
+    if (enable == newVal) return;
+    enable = newVal;
+    notifyListeners();
+  }
+
   Offset calRotatedPos(Offset pos) {
     return center - rotateClockwise(center - pos, rotation);
   }
@@ -43,7 +51,7 @@ class TransformBoxProvider extends ChangeNotifier {
   List<Offset> get sizersPos => [];
 
   void selectLayer(Layer l) {
-    display = true;
+    attachedToLayer = true;
     size = Size(l.width, l.height);
     pos = Offset(l.x, l.y);
     rotation = l.rotation;
@@ -51,8 +59,8 @@ class TransformBoxProvider extends ChangeNotifier {
   }
 
   void unselectLayer() {
-    if (display) {
-      display = false;
+    if (attachedToLayer) {
+      attachedToLayer = false;
       size = const Size(0.0, 0.0);
       pos = const Offset(0.0, 0.0);
       notifyListeners();

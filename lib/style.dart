@@ -4,6 +4,8 @@ final class AppStyle {
   // Colors
   static const primary = Color(0xFFEC407A);
   static const primaryLighter = Color(0xFFF48FB1); // pink 200
+  static const primaryLightest = Color(0xFFF8BBD0); // pink 200
+  static final primaryWithOpacity = primary.withOpacity(0.5);
   static const highlight = Colors.white;
   static const background = Colors.white;
   static final backgroundWithOpacity = Colors.white.withOpacity(0.7);

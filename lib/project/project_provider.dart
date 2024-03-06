@@ -21,10 +21,7 @@ class ProjectProvider extends ChangeNotifier {
   @override
   void dispose() {
     timer.cancel();
-    projectStore.updateProject(
-      projectUUID,
-      ProjectUpdate(data: projectData),
-    );
+    saveProject();
     super.dispose();
   }
 
@@ -64,12 +61,19 @@ class ProjectProvider extends ChangeNotifier {
   }
 
   Future updateProject({bool modfied = true}) async {
+    bool oriUnsaved = unSaved;
     final now = DateTime.now();
     if (modfied) updatesAfterSaved++;
-    notifyListeners();
+    if (oriUnsaved != unSaved) notifyListeners();
     if (unSaved &&
         (now.difference(lastSaved).inSeconds > 30 || updatesAfterSaved >= 5)) {
-      lastSaved = now;
+      return saveProject();
+    }
+  }
+
+  Future saveProject() async {
+    if (unSaved) {
+      lastSaved = DateTime.now();
       updatesAfterSaved = 0;
       notifyListeners();
       return projectStore.updateProject(

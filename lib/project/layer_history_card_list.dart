@@ -1,4 +1,4 @@
-import 'package:bladecreate/canvas/canvas_provider.dart';
+import 'package:bladecreate/canvas/canvas_stack_provider.dart';
 import 'package:bladecreate/generate_backend/generate_backend_provider.dart';
 import 'package:bladecreate/project/project_image.dart';
 import 'package:bladecreate/style.dart';
@@ -20,9 +20,12 @@ class LayerHistoryCardList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CanvasProvider>(
+    return Consumer<CanvasStackProvider>(
         builder: (context, p, child) =>
             LayoutBuilder(builder: (context, constraints) {
+              if (p.opMode != CanvasOpMode.layerSelecting) {
+                return const SizedBox.shrink();
+              }
               return Align(
                   alignment: Alignment.centerRight,
                   child: ConstrainedBox(
@@ -82,7 +85,7 @@ class LayerHistoryCardList extends StatelessWidget {
 
   Widget buildSelectableImage(BuildContext context, Layer l, Generation g,
       Size size, String imageUuid) {
-    final p = Provider.of<CanvasProvider>(context);
+    final p = Provider.of<CanvasStackProvider>(context);
     final gbp = Provider.of<GenerateBackendProvider>(context);
     return GestureDetector(
         onTap: () => p.setLayerImageFromGeneration(l, imageUuid),

@@ -1,6 +1,7 @@
 import 'dart:ui';
 
-import 'package:bladecreate/canvas/canvas_provider.dart';
+import 'package:bladecreate/canvas/canvas_stack_provider.dart';
+import 'package:bladecreate/project/project_provider.dart';
 import 'package:bladecreate/style.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -34,8 +35,8 @@ class _GenerateToolbarState extends State<LayerListMenu> {
       );
     }
 
-    return Consumer<CanvasProvider>(
-      builder: (context, p, child) => MenuAnchor(
+    return Consumer2<CanvasStackProvider, ProjectProvider>(
+      builder: (context, p, pp, child) => MenuAnchor(
         builder: (context, controller, child) {
           return IconButton(
             onPressed: () => setState(() {
@@ -45,6 +46,11 @@ class _GenerateToolbarState extends State<LayerListMenu> {
                 controller.open();
               }
             }),
+            style: controller.isOpen
+                ? const ButtonStyle(
+                    backgroundColor: MaterialStatePropertyAll<Color>(
+                        AppStyle.primaryLightest))
+                : null,
             icon: const Icon(Icons.layers_outlined),
           );
         },
@@ -56,7 +62,7 @@ class _GenerateToolbarState extends State<LayerListMenu> {
               buildDefaultDragHandles: false,
               shrinkWrap: true,
               proxyDecorator: proxyDecorator,
-              children: p.pp.orderedLayers.toList().indexed.map<Widget>((e) {
+              children: pp.orderedLayers.toList().indexed.map<Widget>((e) {
                 final ix = e.$1;
                 final l = e.$2;
                 return ReorderableDragStartListener(
@@ -76,7 +82,7 @@ class _GenerateToolbarState extends State<LayerListMenu> {
                     ));
               }).toList(),
               onReorder: (int oldIndex, int newIndex) =>
-                  p.pp.reorderLayer(oldIndex, newIndex),
+                  pp.reorderLayer(oldIndex, newIndex),
             ),
           ),
         ],

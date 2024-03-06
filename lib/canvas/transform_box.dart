@@ -24,14 +24,16 @@ class TransformBox extends StatelessWidget {
     return Consumer<TransformBoxProvider>(builder: (context, p, c) {
       if (!p.display) return const SizedBox.shrink();
 
-      return Stack(children: [
-        _border(p),
-        _deleteButton(p),
-        _rotateButton(p),
-        _scaleButton(p),
-        ...p.sizersPos.map((e) => _sizerButton(p, e)),
-        ...p.marks.map((e) => _sizerButton(p, e)),
-      ]);
+      return RepaintBoundary(
+        child: Stack(children: [
+          _border(p),
+          _deleteButton(p),
+          _rotateButton(p),
+          _scaleButton(p),
+          ...p.sizersPos.map((e) => _sizerButton(p, e)),
+          ...p.marks.map((e) => _sizerButton(p, e)),
+        ]),
+      );
     });
   }
 
